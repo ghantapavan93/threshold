@@ -6,12 +6,12 @@ import { useTheme } from "@/app/providers";
 import {
   ClipReveal,
   MaskText,
-  Parallax,
   Reveal,
   StaggerGroup,
 } from "@/components/builder/anim";
 import { BuilderHero } from "@/components/builder/BuilderHero";
-import { DoTimeline } from "@/components/builder/DoTimeline";
+import { Scenes } from "@/components/builder/Scenes";
+import { Seams } from "@/components/builder/Seams";
 
 /* ────────────────────────────────────────────────────────────────────────────
    /builder — "How I'd Own the Rokt Builder Role".
@@ -138,7 +138,7 @@ const WHO: { label: string; proof: string }[] = [
   {
     label: "AI-enthusiast & quick learner",
     proof:
-      "Learned Rokt's public platform deeply and built in the domain, using cutting-edge agentic workflows.",
+      "Learned Rokt's public platform deeply and built in the domain in days, with cutting-edge agentic workflows. I read arXiv weekly.",
   },
   {
     label: "Problem solver, first principles",
@@ -146,18 +146,18 @@ const WHO: { label: string; proof: string }[] = [
       "Isolated the missing-attribute trap with a counterfactual — revert just the operator, watch the offer disappear — not a heuristic.",
   },
   {
-    label: "Entrepreneurial ownership in ambiguity",
-    proof: "No one asked me to build this. I found the seam and shipped it end-to-end.",
+    label: "Entrepreneurial ownership",
+    proof: "No one asked me to build Threshold. I found the seam and shipped it end-to-end.",
   },
   {
     label: "Collaborative by design",
     proof:
-      "Honest limits, interview prep, and a “correct me” framing — made to be torn apart and improved.",
+      "Honest limits, interview prep, and a “correct me” framing — designed to be improved by a team.",
   },
   {
     label: "Driven & results-oriented",
     proof:
-      "33 tests, deterministic verdicts, a tamper-evident audit, and an explicit list of what I didn't build.",
+      "38 tests, deterministic verdicts, a tamper-evident audit, and an explicit list of what I didn't build.",
   },
 ];
 
@@ -186,99 +186,6 @@ function WhoIAm() {
               <h3 className="text-sm font-semibold text-text">{w.label}</h3>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted">{w.proof}</p>
-          </div>
-        ))}
-      </StaggerGroup>
-    </section>
-  );
-}
-
-// ── More opportunities I see — labeled hypotheses ────────────────────────────
-const OPPS: { title: string; body: string; approach: string }[] = [
-  {
-    title: "Loyalty-safe changes (Shopper Rewards)",
-    body:
-      "As Rokt expands into loyalty and rewards, the same “silent policy change” risk now touches loyalty economics, not just offer eligibility.",
-    approach:
-      "Extend the pre-flight to reason about reward-eligibility changes before they ship — the same counterfactual, applied to reward rules.",
-  },
-  {
-    title: "Data-quality guardrails for decisioning",
-    body:
-      "An AI agent is only as good as its data. Schema drift, missing-signal spikes, and stale identity quietly degrade decisions.",
-    approach:
-      "Deterministic input-quality checks that gate a change the way Threshold gates policy — pre-flight and explainable, not a dashboard you notice too late.",
-  },
-  {
-    title: "Agentic-commerce safety",
-    body:
-      "As commerce goes agent-driven, agent-initiated transactions need the same discipline a human-reviewed change gets today.",
-    approach:
-      "Apply the fail-closed + tamper-evident-evidence pattern to agent actions, with a human kept on the irreversible steps.",
-  },
-  {
-    title: "Developer experience for the SDK upgrade",
-    body:
-      "Partner integration safety is a product surface. Good tooling turns a risky upgrade into a boring one.",
-    approach:
-      "The runnable, contract-tested, honest-limitations tooling I built here — aimed at making partner SDK integrations safe by default.",
-  },
-];
-
-function Opportunities() {
-  return (
-    <section
-      aria-labelledby="opps-title"
-      className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6"
-    >
-      {/* Parallax section-background depth — restrained, decorative. */}
-      <Parallax
-        speed={16}
-        className="pointer-events-none absolute -right-24 top-10 -z-10 hidden h-80 w-80 rounded-full opacity-50 blur-3xl lg:block"
-      >
-        <div
-          className="h-full w-full"
-          aria-hidden
-          style={{
-            background:
-              "radial-gradient(circle at 50% 40%, rgba(91,140,255,0.22), transparent 62%)",
-          }}
-        />
-      </Parallax>
-
-      <Reveal>
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
-          More opportunities I see · senior-engineer lens
-        </p>
-      </Reveal>
-      <MaskText
-        as="h2"
-        id="opps-title"
-        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        segments={[
-          { text: "Adjacent bets — " },
-          { text: "hypotheses, not claims.", className: "gradient-text" },
-        ]}
-      />
-      <Reveal delay={0.05}>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
-          Drawn from Rokt&apos;s public 2025-26 direction and framed as things I&apos;d want to
-          explore — never as gaps Rokt hasn&apos;t already considered. Each is a starting
-          hypothesis I&apos;d validate with a Rokt engineer before building.
-        </p>
-      </Reveal>
-      <StaggerGroup className="mt-10 grid gap-4 md:grid-cols-2">
-        {OPPS.map((o) => (
-          <div key={o.title} className="holo-card h-full rounded-2xl p-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber/40 bg-amber/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber">
-              <span aria-hidden>◇</span> Hypothesis
-            </span>
-            <h3 className="mt-3 text-base font-semibold text-text">{o.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{o.body}</p>
-            <p className="mt-3 border-l-2 border-teal/50 pl-3 text-sm leading-relaxed text-text">
-              <span className="font-semibold text-teal">How I&apos;d approach it: </span>
-              {o.approach}
-            </p>
           </div>
         ))}
       </StaggerGroup>
@@ -460,9 +367,9 @@ export function BuilderPage() {
         <main id="main">
           <BuilderHero />
           <RoleReading />
-          <DoTimeline />
+          <Scenes />
           <WhoIAm />
-          <Opportunities />
+          <Seams />
           <OwnEndToEnd />
           <ClosingAsk />
         </main>

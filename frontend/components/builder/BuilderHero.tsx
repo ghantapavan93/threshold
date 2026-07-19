@@ -120,7 +120,7 @@ export function BuilderHero() {
         <div ref={ctaRef} className="mt-9 flex flex-wrap items-center gap-3">
           <a
             href="#what-ill-do"
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="press inline-flex min-h-[44px] items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:min-h-0"
             style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
           >
             See how I&apos;d own it <span aria-hidden>→</span>

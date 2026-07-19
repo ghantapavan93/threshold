@@ -716,6 +716,14 @@ function Compounds() {
               </div>
             ))}
           </div>
+          <p className="mt-8 border-t border-border/60 pt-6 text-base leading-relaxed text-muted">
+            The reframe underneath it all:{" "}
+            <span className="text-text">
+              incrementality is a systems-integrity problem before it&apos;s a statistics problem.
+            </span>{" "}
+            A holdout only measures truth if no silent leak corrupts it — which is exactly what a
+            deterministic, tamper-evident pre-flight protects.
+          </p>
         </div>
       </Reveal>
     </section>
