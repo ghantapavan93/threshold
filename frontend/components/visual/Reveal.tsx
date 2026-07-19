@@ -26,7 +26,15 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Never gate content on motion: reduced-motion OR a hidden/background tab
+    // renders fully visible with no hide (impeccable: a reveal that never fires
+    // must not ship the section blank).
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.visibilityState === "hidden"
+    ) {
+      return;
+    }
 
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
@@ -36,9 +44,9 @@ export function Reveal({
         {
           autoAlpha: 1,
           y: 0,
-          duration: 0.8,
+          duration: 0.7,
           delay,
-          ease: "power3.out",
+          ease: "power3.out", // strong ease-out; entrances feel responsive
           scrollTrigger: { trigger: el, start: "top 90%", once: true },
         },
       );

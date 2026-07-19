@@ -208,7 +208,7 @@ function Hero() {
         <div data-hero-fade className="mt-9 flex flex-wrap items-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
           >
             Enter the working console <span aria-hidden>→</span>
@@ -881,7 +881,7 @@ function ClosingCta() {
           <div className="mt-8">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
               style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
             >
               <span aria-hidden>▶</span> Enter the console

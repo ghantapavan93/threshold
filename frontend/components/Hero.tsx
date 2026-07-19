@@ -180,7 +180,7 @@ export function Hero() {
             type="button"
             onClick={playStory}
             disabled={busy}
-            className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:translate-y-0 disabled:opacity-60"
+            className="press inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-60"
             style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
           >
             <span aria-hidden>▶</span> {busy ? "Playing…" : "Play the story"}
@@ -190,7 +190,7 @@ export function Hero() {
             <button
               type="button"
               onClick={playFix}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+              className="press inline-flex items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-text hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
               Now watch the fix <span aria-hidden>→</span>
             </button>

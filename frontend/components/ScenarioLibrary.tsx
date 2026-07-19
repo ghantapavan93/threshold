@@ -65,7 +65,7 @@ function ScenarioCard({
       disabled={disabled}
       onClick={() => onRun(scenario)}
       className={
-        "holo-card flex h-full flex-col rounded-2xl p-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:cursor-not-allowed disabled:opacity-60 " +
+        "holo-card flex h-full flex-col rounded-2xl p-5 text-left active:scale-[0.985] disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:cursor-not-allowed disabled:opacity-60 " +
         (selected ? "border-teal " : "")
       }
       style={selected ? { borderColor: "var(--c-teal)" } : undefined}

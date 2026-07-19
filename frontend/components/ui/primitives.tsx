@@ -35,7 +35,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-md border font-medium transition-colors",
+        "inline-flex items-center justify-center gap-2 rounded-md border font-medium",
+        "transition-[background-color,border-color,transform] duration-150 ease-out",
+        "active:scale-[0.97] disabled:active:scale-100",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-base",
         "disabled:cursor-not-allowed",
         size === "sm" ? "px-2.5 py-1 text-xs" : "px-3.5 py-2 text-sm",
