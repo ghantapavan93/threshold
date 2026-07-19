@@ -1,0 +1,429 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Threshold theme tokens (frozen palette from docs/DESIGN_BRIEF.md).
+ *
+ * Two forms per color:
+ *   --c-x    full color (hex)              -> used by inline styles / color-mix
+ *   --c-x-c  RGB channels "r g b"          -> used by Tailwind for alpha modifiers
+ *            (Tailwind colors are rgb(var(--c-x-c) / <alpha-value>))
+ *
+ * Dark-first: :root defaults to dark. prefers-color-scheme flips to light
+ * unless a manual data-theme attribute is set on <html>, which always wins.
+ */
+:root,
+:root[data-theme="dark"] {
+  --c-base: #0b0f19;
+  --c-base-c: 11 15 25;
+  --c-surface: #121720;
+  --c-surface-c: 18 23 32;
+  --c-surface-2: #171d29;
+  --c-surface-2-c: 23 29 41;
+  --c-border: #222f48;
+  --c-border-c: 34 47 72;
+  --c-border-strong: #33456a;
+  --c-border-strong-c: 51 69 106;
+  --c-text: #e6eaf2;
+  --c-text-c: 230 234 242;
+  --c-muted: #9aa7bf;
+  --c-muted-c: 154 167 191;
+  --c-teal: #22e6c8;
+  --c-teal-c: 34 230 200;
+  --c-amber: #f5b84b;
+  --c-amber-c: 245 184 75;
+  --c-crimson: #ff4d6a;
+  --c-crimson-c: 255 77 106;
+  --c-offer-blue: #5b8cff;
+  --c-offer-blue-c: 91 140 255;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --c-base: #f5f7fb;
+  --c-base-c: 245 247 251;
+  --c-surface: #ffffff;
+  --c-surface-c: 255 255 255;
+  --c-surface-2: #eef2f8;
+  --c-surface-2-c: 238 242 248;
+  --c-border: #d3dbe8;
+  --c-border-c: 211 219 232;
+  --c-border-strong: #aab8d0;
+  --c-border-strong-c: 170 184 208;
+  --c-text: #15202e;
+  --c-text-c: 21 32 46;
+  --c-muted: #566079;
+  --c-muted-c: 86 96 121;
+  --c-teal: #067f6d;
+  --c-teal-c: 6 127 109;
+  --c-amber: #9a6a00;
+  --c-amber-c: 154 106 0;
+  --c-crimson: #c81e40;
+  --c-crimson-c: 200 30 64;
+  --c-offer-blue: #2f5fd0;
+  --c-offer-blue-c: 47 95 208;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --c-base: #f5f7fb;
+    --c-base-c: 245 247 251;
+    --c-surface: #ffffff;
+    --c-surface-c: 255 255 255;
+    --c-surface-2: #eef2f8;
+    --c-surface-2-c: 238 242 248;
+    --c-border: #d3dbe8;
+    --c-border-c: 211 219 232;
+    --c-border-strong: #aab8d0;
+    --c-border-strong-c: 170 184 208;
+    --c-text: #15202e;
+    --c-text-c: 21 32 46;
+    --c-muted: #566079;
+    --c-muted-c: 86 96 121;
+    --c-teal: #067f6d;
+    --c-teal-c: 6 127 109;
+    --c-amber: #9a6a00;
+    --c-amber-c: 154 106 0;
+    --c-crimson: #c81e40;
+    --c-crimson-c: 200 30 64;
+    --c-offer-blue: #2f5fd0;
+    --c-offer-blue-c: 47 95 208;
+    color-scheme: light;
+  }
+}
+
+html,
+body {
+  background-color: var(--c-base);
+  color: var(--c-text);
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: theme("fontFamily.sans");
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Editorial display type for headings — bold, tight, confident. Applies across
+   the app without touching every component. Utilities can still override. */
+h1,
+h2,
+h3 {
+  font-family: theme("fontFamily.display");
+  letter-spacing: -0.02em;
+}
+h1 {
+  letter-spacing: -0.03em;
+}
+
+/* Consistent type-scale helpers (display / eyebrow) shared by all pages. */
+.type-display {
+  font-family: theme("fontFamily.display");
+  font-weight: 700;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+.type-eyebrow {
+  font-family: theme("fontFamily.mono");
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+/* Visible focus rings everywhere for keyboard nav. */
+:focus-visible {
+  outline: 2px solid var(--c-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Thin, unobtrusive scrollbars for the dense console feel. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--c-border-strong);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Utility: reserved for wide tables that must scroll in their own container. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THRESHOLD FUTURIST — cinematic design layer (disciplined, teal-forward)
+   Signature gradient: teal → offer-blue → faint crimson. Accent, not wallpaper.
+   Every animation below is frozen in the prefers-reduced-motion block at the
+   very bottom of this file — that block is non-negotiable.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root,
+:root[data-theme="dark"] {
+  /* teal-forward iridescence */
+  --thr-iris: linear-gradient(115deg, #22e6c8 0%, #5b8cff 52%, #7b6bff 100%);
+  --thr-iris-soft: linear-gradient(
+    115deg,
+    rgba(34, 230, 200, 0.9),
+    rgba(91, 140, 255, 0.85),
+    rgba(255, 77, 106, 0.5)
+  );
+  /* frosted glass surfaces (dark) */
+  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.014));
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-hover-border: rgba(34, 230, 200, 0.5);
+  --glass-shadow: 0 26px 74px -34px rgba(0, 0, 0, 0.72);
+  --glass-sheen: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] {
+  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5));
+  --glass-border: rgba(16, 24, 40, 0.1);
+  --glass-hover-border: rgba(6, 127, 109, 0.5);
+  --glass-shadow: 0 24px 60px -36px rgba(16, 24, 40, 0.34);
+  --glass-sheen: rgba(16, 24, 40, 0.05);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.5));
+    --glass-border: rgba(16, 24, 40, 0.1);
+    --glass-hover-border: rgba(6, 127, 109, 0.5);
+    --glass-shadow: 0 24px 60px -36px rgba(16, 24, 40, 0.34);
+    --glass-sheen: rgba(16, 24, 40, 0.05);
+  }
+}
+
+@property --thr-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Fixed, pointer-transparent aurora backdrop — teal → deep-blue → faint crimson,
+   drifting slowly. Render once per page behind all content. */
+.aurora-threshold {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48% 40% at 82% 4%, rgba(34, 230, 200, 0.16), transparent 60%),
+    radial-gradient(44% 38% at 8% 14%, rgba(91, 140, 255, 0.15), transparent 58%),
+    radial-gradient(60% 55% at 50% 116%, rgba(255, 77, 106, 0.08), transparent 60%);
+  background-size: 140% 140%;
+  animation: thr-aurora-drift 30s ease-in-out infinite alternate;
+}
+:root[data-theme="light"] .aurora-threshold {
+  opacity: 0.55;
+}
+@keyframes thr-aurora-drift {
+  0% { background-position: 0% 0%, 0% 0%, 50% 100%; }
+  100% { background-position: 12% 8%, 8% 6%, 44% 90%; }
+}
+
+/* Teal-forward gradient text with a slow shimmer.
+   CRITICAL: a solid, high-contrast color is set FIRST as the fallback, so the
+   text is always visible even where background-clip:text is unsupported. The
+   gradient (with color:transparent) is only applied inside @supports. Every
+   gradient stop is a light, high-contrast hue on the dark base (and a dark,
+   high-contrast hue on the light base) — so the clipped text also passes AA. */
+.gradient-text {
+  color: var(--c-teal);
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .gradient-text {
+    background: linear-gradient(115deg, #3af0d6, #7ba6ff, #b6f0e6, #3af0d6);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: thr-iris-shift 10s linear infinite;
+  }
+  :root[data-theme="light"] .gradient-text {
+    background: linear-gradient(115deg, #05655a, #26509f, #0a8f7c, #05655a);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .gradient-text {
+      background: linear-gradient(115deg, #05655a, #26509f, #0a8f7c, #05655a);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+}
+@keyframes thr-iris-shift {
+  to { background-position: 220% center; }
+}
+
+/* 1px iridescent gradient edge via mask — sits on any rounded element. */
+.thr-edge {
+  position: relative;
+}
+.thr-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--thr-iris-soft);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Rotating conic ring — for ONE hero element per page. */
+.thr-ring {
+  position: relative;
+}
+.thr-ring::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--thr-angle), #22e6c8, #5b8cff, #7b6bff, #ff4d6a, #22e6c8);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: thr-ring-rotate 8s linear infinite;
+  pointer-events: none;
+}
+@keyframes thr-ring-rotate {
+  to { --thr-angle: 360deg; }
+}
+
+/* Frosted glass surface — the console's default panel. */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Holographic card — frosted, gradient edge, hover lift + sheen sweep. */
+.holo-card {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+.holo-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--glass-hover-border);
+  box-shadow: var(--glass-shadow), 0 0 32px -16px rgba(34, 230, 200, 0.5);
+}
+/* sheen sweep on hover */
+.holo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(110deg, transparent 32%, var(--glass-sheen) 50%, transparent 68%);
+  transform: translateX(-130%);
+  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.holo-card:hover::after {
+  transform: translateX(130%);
+}
+/* keep interactive content above the sheen layer */
+.holo-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* State glows — pair with color+icon, never color-alone. */
+.glow-teal {
+  box-shadow: 0 0 0 1px rgba(34, 230, 200, 0.28), 0 26px 64px -30px rgba(34, 230, 200, 0.5),
+    0 0 42px -18px rgba(34, 230, 200, 0.55);
+}
+.glow-crimson {
+  box-shadow: 0 0 0 1px rgba(255, 77, 106, 0.32), 0 26px 64px -30px rgba(255, 77, 106, 0.5),
+    0 0 42px -16px rgba(255, 77, 106, 0.6);
+}
+.glow-amber {
+  box-shadow: 0 0 0 1px rgba(245, 184, 75, 0.3), 0 26px 64px -30px rgba(245, 184, 75, 0.45),
+    0 0 42px -18px rgba(245, 184, 75, 0.5);
+}
+.glow-teal-pulse {
+  animation: thr-glow-teal 3.4s ease-in-out infinite;
+}
+.glow-crimson-pulse {
+  animation: thr-glow-crimson 3s ease-in-out infinite;
+}
+@keyframes thr-glow-teal {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(34, 230, 200, 0.28), 0 0 30px -18px rgba(34, 230, 200, 0.5); }
+  50% { box-shadow: 0 0 0 1px rgba(34, 230, 200, 0.4), 0 0 52px -12px rgba(34, 230, 200, 0.7); }
+}
+@keyframes thr-glow-crimson {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 77, 106, 0.3), 0 0 30px -18px rgba(255, 77, 106, 0.5); }
+  50% { box-shadow: 0 0 0 1px rgba(255, 77, 106, 0.46), 0 0 56px -10px rgba(255, 77, 106, 0.78); }
+}
+
+/* Soft entrance used by keynote/landing sections. */
+.thr-rise {
+  animation: thr-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes thr-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Refined scrollbar accent on hover. */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-teal);
+}
+
+/* ── Non-negotiable: freeze ALL cinematic motion under reduced-motion ──────── */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-threshold,
+  .gradient-text,
+  .thr-ring::before,
+  .holo-card,
+  .holo-card::after,
+  .glow-teal-pulse,
+  .glow-crimson-pulse,
+  .thr-rise {
+    animation: none !important;
+    transition: none !important;
+  }
+  /* App-wide safety net: collapse every animation/transition to one instant
+     frame — covers Tailwind loops (pulse/ping/spin/shimmer) and framer-motion. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

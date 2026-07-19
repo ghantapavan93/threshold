@@ -1,0 +1,21 @@
+{
+  "policy_version": "V17",
+  "merchant_id": "aurora-tickets",
+  "name": "Post-purchase parking upsell",
+  "latency_budget_ms": 200,
+  "fallback_action": "no_offer",
+  "requires_holdout": true,
+  "disclaimers": "Standard parking terms apply.",
+  "objective": "acquisition",
+  "country": "US",
+  "language": "en",
+  "timezone": "America/New_York",
+  "frequency_cap": { "max_impressions": 1, "per_days": 30 },
+  "offer": { "id": "parking-pass", "category": "parking" },
+  "eligibility_rules": [
+    { "id": "r1", "attribute": "purchase.seat_type", "op": "equals", "value": "premium", "sensitive": false, "consent_required": false },
+    { "id": "r2", "attribute": "customer.age", "op": "gte", "value": 25, "sensitive": false, "consent_required": false },
+    { "id": "r3", "attribute": "customer.loyalty_segment", "op": "not_equals", "value": "VIP", "sensitive": false, "consent_required": false },
+    { "id": "r4", "attribute": "customer.cc_bin", "op": "include_is_not_in", "value": ["411111", "511111"], "sensitive": false, "consent_required": false }
+  ]
+}
