@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useConsole } from "./console-context";
 import {
@@ -124,6 +125,17 @@ export function ConstraintHeatmap() {
           ))}
         </div>
       )}
+
+      {/* Cross-link to the domain model behind the missing-attribute behaviour. */}
+      <p className="mt-3 text-sm text-muted">
+        Why does this rule behave differently when an attribute is missing?{" "}
+        <Link
+          href="/moment-forge"
+          className="font-medium text-teal underline decoration-teal/40 underline-offset-4 transition-colors hover:decoration-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+        >
+          Open the Semantic Change Compiler →
+        </Link>
+      </p>
     </Section>
   );
 }

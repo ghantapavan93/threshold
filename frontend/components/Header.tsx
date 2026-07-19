@@ -163,7 +163,7 @@ export function Header() {
         {/* Primary nav — full-width, evenly split, big tap targets on mobile. */}
         <nav
           aria-label="Primary"
-          className="grid grid-cols-3 gap-1.5 sm:flex sm:w-auto sm:gap-1"
+          className="grid grid-cols-2 gap-1.5 sm:flex sm:w-auto sm:gap-1"
         >
           <span
             aria-current="page"
@@ -182,6 +182,12 @@ export function Header() {
             className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
           >
             Builder
+          </Link>
+          <Link
+            href="/moment-forge"
+            className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
+          >
+            Moment Forge
           </Link>
         </nav>
 

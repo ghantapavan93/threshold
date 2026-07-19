@@ -79,8 +79,8 @@ function VisionNav() {
             <p className="text-xs text-muted">The mechanism, scaled</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <nav aria-label="Primary" className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <nav aria-label="Primary" className="flex flex-wrap items-center justify-end gap-1">
             <Link
               href="/"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
@@ -98,6 +98,12 @@ function VisionNav() {
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
               Builder
+            </Link>
+            <Link
+              href="/moment-forge"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
+            >
+              Moment Forge
             </Link>
           </nav>
           <ThemeToggle />

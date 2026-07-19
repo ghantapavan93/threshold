@@ -55,8 +55,8 @@ export function MomentNav() {
             <p className="truncate text-xs text-muted">A domain monograph for the Transaction Moment</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <nav aria-label="Primary" className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <nav aria-label="Primary" className="flex flex-wrap items-center justify-end gap-1">
             <Link href="/" className={NAV_LINK}>Console</Link>
             <Link href="/vision" className={NAV_LINK}>Vision</Link>
             <Link href="/builder" className={NAV_LINK}>Builder</Link>
@@ -64,7 +64,7 @@ export function MomentNav() {
               aria-current="page"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-teal/40 bg-teal/10 px-3 py-1 text-xs font-semibold text-teal sm:min-h-0"
             >
-              Moment
+              Moment Forge
             </span>
           </nav>
           <ThemeToggle />

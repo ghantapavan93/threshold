@@ -12,6 +12,7 @@ import {
 import { BuilderHero } from "@/components/builder/BuilderHero";
 import { Scenes } from "@/components/builder/Scenes";
 import { Seams } from "@/components/builder/Seams";
+import { MomentForgeTeaser } from "@/components/builder/MomentForgeTeaser";
 
 /* ────────────────────────────────────────────────────────────────────────────
    /builder — "How I'd Own the Rokt Builder Role".
@@ -57,8 +58,8 @@ function BuilderNav() {
             <p className="text-xs text-muted">How I&apos;d own the work</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <nav aria-label="Primary" className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <nav aria-label="Primary" className="flex flex-wrap items-center justify-end gap-1">
             <Link
               href="/"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
@@ -77,6 +78,12 @@ function BuilderNav() {
             >
               Builder
             </span>
+            <Link
+              href="/moment-forge"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
+            >
+              Moment Forge
+            </Link>
           </nav>
           <ThemeToggle />
         </div>
@@ -371,6 +378,7 @@ export function BuilderPage() {
           <WhoIAm />
           <Seams />
           <OwnEndToEnd />
+          <MomentForgeTeaser />
           <ClosingAsk />
         </main>
         <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
