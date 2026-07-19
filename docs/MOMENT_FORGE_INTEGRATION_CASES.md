@@ -241,10 +241,15 @@ with behaviour (`is_offer()`), and the counterfactual is rigorous. The gaps are 
   (Red Book, *Use Eventual Consistency Outside the Boundary*). The model *names* these
   invariants (doc 27 §6) but has **no process manager / saga** consuming the outbox to
   enforce or *test* them. The transactional outbox exists (`[REPO outbox.py]`) but nothing
-  reads it back to close a multi-step invariant. **Fix:** introduce a **Reconciliation
-  Process** (a process manager, Red Book ch. 12) that consumes outbox events and *proves*
-  the cross-aggregate invariant by replay; on the page, draw it as an explicit lane. This is
-  the tactical construct that makes Cases A/B/D *modelable* rather than merely asserted.
+  reads it back to close a multi-step invariant. **Fix — BUILT (2026-07-19):** the
+  **Reconciliation Process** (`[REPO reconciliation.py]`, a process manager, Red Book
+  ch. 12) consumes the lifecycle event stream and *proves* `earned ⇒ exactly-one issued ∨
+  visible dead-letter` by replay — the same seeded fault world under dual-write vs the
+  transactional outbox, reconciled side by side (`POST /reconciliation-audit`), plus the
+  same move over the REAL replay-job fan-out rows (`GET /reconciliation`,
+  `[REPO test_reconciliation.py]`, incl. the 20-seed property that outbox divergence is
+  never silent). On the page it is an explicit lane (Fig. 03c). This is the tactical
+  construct that makes Cases A/B/D *modelable* rather than merely asserted.
 
 ### 2.2 Whole-value / value objects — the root cause of the whole disease class
 
@@ -401,17 +406,21 @@ and then proved it with a bug that never leaves one function."*
 real deterministic code. This is the single change that makes the page's central claim true
 in the artifact, not just in the prose.
 
-### W2. Cross-aggregate invariants are asserted but structurally unenforceable and untested.
+### W2. Cross-aggregate invariants are asserted but structurally unenforceable and untested. — CLOSED (2026-07-19)
 `earned⇒issued⇒redeemable`, `recorded≠incremental`, and `WHS-exclusion-is-global` all span
 aggregates. Vernon is explicit these must be **eventually consistent via domain events + a
 separate transaction** (Red Book, *Use Eventual Consistency Outside the Boundary*), yet the
-model lists them as invariants (doc 27 §6) with **no process manager / saga** to enforce or
-test them. The transactional outbox exists and is tested (`[REPO outbox.py]`) but nothing
-consumes it to close a multi-step invariant.
-**Highest-leverage fix:** add a **Reconciliation Process** (process manager) that consumes
-outbox events and *proves* a cross-aggregate invariant (start with Case B's earn→issue) by
-replay; mark WHS/reward invariants `[HYPOTHESIS]` until it exists. Bonus: this makes the
-already-shipped outbox *do domain work*, not just fan out.
+model listed them as invariants (doc 27 §6) with **no process manager / saga** to enforce or
+test them. The transactional outbox existed and was tested (`[REPO outbox.py]`) but nothing
+consumed it to close a multi-step invariant.
+**The fix, now built:** the **Reconciliation Process** (`[REPO reconciliation.py]` +
+`[REPO test_reconciliation.py]`) — a process manager that consumes lifecycle events and
+proves Case B's `earned ⇒ exactly-one issued ∨ visible dead-letter` by replay, under
+dual-write vs the transactional outbox over the same seeded fault world, AND over the real
+replay-job fan-out rows (read-only). The reward *application* stays `[HYPOTHESIS]`; the
+mechanism and the proof are `[REPO]`. This is exactly the "make the already-shipped outbox
+do domain work" bonus: `GET /reconciliation` reads the rows the engine actually wrote.
+WHS-exclusion-is-global remains `[HYPOTHESIS]` — one invariant proven, not all three claimed.
 
 ### W3. Polysemic terms are primitives, not whole-values — the silent root cause.
 *conversion* is an `int`, *reward* a `str`, *impression* nonexistent, so a cross-context
@@ -436,7 +445,9 @@ lever pulled at two altitudes.
   Vernon/Evans/Cunningham/Fowler pattern definitions (cited, re-verified 2026-07-19).
 - **`[REPO]`:** the single-context evaluator, diff, counterfactual constraint, verdict,
   ope, contexts rollup, and the tested transactional outbox with `VERDICT_ISSUED` fan-out
-  to billing/analytics/partner.
+  to billing/analytics/partner; the Translation Map (`translation.py`, `/translation-audit`)
+  and the Reconciliation Process (`reconciliation.py`, `/reconciliation-audit`,
+  `/reconciliation`) with their test suites.
 - **`[INFERENCE]`/`[HYPOTHESIS]` (mine, not Rokt's):** the seven bounded-context names; every
   context-map pattern assignment; the four integration cases as *modelling claims*; the
   `translation.py` module and its synthetic baseline; the reward/WHS/impression extensions.

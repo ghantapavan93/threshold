@@ -4,11 +4,14 @@ import compileFatfinger from "@/lib/fixtures/momentforge/compile.fatfinger.json"
 import compileConsent from "@/lib/fixtures/momentforge/compile.consent.json";
 import compileImmutable from "@/lib/fixtures/momentforge/compile.immutable.json";
 import translationAuditFixture from "@/lib/fixtures/momentforge/translation-audit.json";
+import reconciliationAuditFixture from "@/lib/fixtures/momentforge/reconciliation-audit.json";
 import { ApiError } from "@/lib/api";
 import {
+  ReconciliationAuditSchema,
   SemanticDeltaSchema,
   SimulationResultSchema,
   TranslationAuditSchema,
+  type ReconciliationAudit,
   type SemanticDelta,
   type SimulationResult,
   type TranslationAudit,
@@ -88,6 +91,17 @@ export function translationFixture(): TranslationAudit {
     throw new ApiError({
       kind: "validation",
       message: "Recorded translation-audit fixture did not match the API contract",
+    });
+  }
+  return parsed.data;
+}
+
+export function reconciliationFixture(): ReconciliationAudit {
+  const parsed = ReconciliationAuditSchema.safeParse(reconciliationAuditFixture);
+  if (!parsed.success) {
+    throw new ApiError({
+      kind: "validation",
+      message: "Recorded reconciliation-audit fixture did not match the API contract",
     });
   }
   return parsed.data;

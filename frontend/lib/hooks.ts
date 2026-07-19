@@ -10,6 +10,7 @@ import {
   api,
   ApiError,
   MERCHANT_ID,
+  type ReconciliationAuditInput,
   type SemanticCompileInput,
   type SimulationInput,
   type TranslationAuditInput,
@@ -25,6 +26,8 @@ import type {
   OutboxEvent,
   PolicyDocument,
   PolicyListItem,
+  ReconciliationAudit,
+  ReconciliationProof,
   ReplayJob,
   Scenario,
   SemanticDelta,
@@ -162,6 +165,29 @@ export function useTranslationAudit(
   return useMutation<TranslationAudit, ApiError, TranslationAuditInput>({
     mutationKey: ["translation-audit", merchantId],
     mutationFn: (input) => api.translationAudit(merchantId, input),
+    retry: retryPolicy,
+  });
+}
+
+/** Moment Forge — Reconciliation Process mutation (real backend). */
+export function useReconciliationAudit(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<ReconciliationAudit, ApiError, ReconciliationAuditInput> {
+  return useMutation<ReconciliationAudit, ApiError, ReconciliationAuditInput>({
+    mutationKey: ["reconciliation-audit", merchantId],
+    mutationFn: (input) => api.reconciliationAudit(merchantId, input),
+    retry: retryPolicy,
+  });
+}
+
+/** Moment Forge — Reconciliation proof over the real fan-out rows. On-demand
+ *  (button-triggered), so a mutation shape despite being a GET. */
+export function useReconciliationProof(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<ReconciliationProof, ApiError, void> {
+  return useMutation<ReconciliationProof, ApiError, void>({
+    mutationKey: ["reconciliation-proof", merchantId],
+    mutationFn: () => api.reconciliationProof(merchantId),
     retry: retryPolicy,
   });
 }

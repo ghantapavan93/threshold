@@ -17,6 +17,7 @@ import {
 import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
 import { TranslationMap } from "./TranslationMap";
+import { ReconciliationLane } from "./ReconciliationLane";
 import { CompilerConsole } from "./CompilerConsole";
 import { FractureScene } from "./FractureScene";
 import { LawGallery, EvidenceIndex } from "./laws-future";
@@ -159,6 +160,28 @@ export function MomentForge() {
               caption="LIVE · POST /translation-audit. The Conformist (identity) path over-counts lift; the ACL path excludes non-incremental conversions. The one synthetic baseline is labelled; every number is computed live, never asserted."
             >
               <TranslationMap offline={offline} />
+            </Plate>
+          </Section>
+
+          {/* ── 3c · Reconciliation Lane [LIVE] — the cross-aggregate invariant closed ── */}
+          <Section id="sec-reconciliation" label="Reconciliation Lane — the cross-aggregate invariant closed">
+            <Reveal>
+              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
+                The second honest gap: <span className="text-text">earned ⇒ issued</span> spans two aggregates
+                that cannot share a transaction, so no single object can enforce it — Vernon&apos;s rule is
+                eventual consistency plus a <span className="text-text">process manager</span> that closes the
+                loop. This lane runs the same seeded faults through a naive dual-write and through the repo&apos;s
+                real transactional-outbox pattern, then reconciles both. The difference isn&apos;t fewer failures —
+                it&apos;s that <em>none of them are silent</em>.
+              </p>
+            </Reveal>
+            <Plate
+              figure="03c"
+              title="The Reconciliation Lane"
+              tone="crimson"
+              caption="LIVE · POST /reconciliation-audit + GET /reconciliation. Dual-write orphans and double-issues leave no trace; the outbox turns every failure into a visible dead-letter — and the reconciler proves it, on synthetic faults and on the real fan-out rows."
+            >
+              <ReconciliationLane offline={offline} />
             </Plate>
           </Section>
 

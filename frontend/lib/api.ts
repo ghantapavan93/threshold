@@ -12,6 +12,8 @@ import {
   PolicyListSchema,
   ReplayJobSchema,
   ScenarioListSchema,
+  ReconciliationAuditSchema,
+  ReconciliationProofSchema,
   SemanticDeltaSchema,
   SimulationResultSchema,
   TranslationAuditSchema,
@@ -27,12 +29,23 @@ import type {
   PolicyDiff,
   PolicyDocument,
   PolicyListItem,
+  ReconciliationAudit,
+  ReconciliationProof,
   ReplayJob,
   Scenario,
   SemanticDelta,
   SimulationResult,
   TranslationAudit,
 } from "./schemas";
+
+/** Moment Forge — Reconciliation Process request (all fields have server defaults). */
+export type ReconciliationAuditInput = {
+  seed?: number;
+  count?: number;
+  crash_fraction?: number;
+  ambiguous_timeout_fraction?: number;
+  hard_failure_fraction?: number;
+};
 
 /** Moment Forge — Translation Map request. */
 export type TranslationAuditInput = {
@@ -366,6 +379,30 @@ export const api = {
     return requestData(`${base(merchantId)}/translation-audit`, TranslationAuditSchema, {
       method: "POST",
       body,
+      signal,
+    });
+  },
+
+  /** Moment Forge — Reconciliation Process: dual-write vs outbox over the same
+   *  seeded fault world, reconciled side by side (read-only, pure). */
+  reconciliationAudit(
+    merchantId: string,
+    body: ReconciliationAuditInput,
+    signal?: AbortSignal,
+  ): Promise<ReconciliationAudit> {
+    return requestData(`${base(merchantId)}/reconciliation-audit`, ReconciliationAuditSchema, {
+      method: "POST",
+      body,
+      signal,
+    });
+  },
+
+  /** Moment Forge — Reconciliation proof over the REAL replay-job fan-out rows. */
+  reconciliationProof(
+    merchantId: string,
+    signal?: AbortSignal,
+  ): Promise<ReconciliationProof> {
+    return requestData(`${base(merchantId)}/reconciliation`, ReconciliationProofSchema, {
       signal,
     });
   },

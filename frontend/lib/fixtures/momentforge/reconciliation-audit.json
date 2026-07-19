@@ -1,0 +1,131 @@
+{
+  "invariant": "every earned reward is issued exactly once, or its failure is VISIBLE",
+  "pattern": "Process Manager over a Transactional Outbox",
+  "boundary": "BC-4 Loyalty \u27f7 Fulfilment/Ledger",
+  "seed": 42,
+  "count": 200,
+  "fault_census": {
+    "none": 167,
+    "crash_after_earn": 17,
+    "ambiguous_timeout": 13,
+    "downstream_hard_failure": 3
+  },
+  "strategies": {
+    "dual_write": {
+      "total_earns": 200,
+      "classes": {
+        "consistent": 167,
+        "orphaned_earn": 20,
+        "double_issue": 13,
+        "visible_dead_letter": 0,
+        "issue_without_earn": 0
+      },
+      "examples": {
+        "consistent": [
+          "earn-0000",
+          "earn-0002",
+          "earn-0003",
+          "earn-0004",
+          "earn-0005",
+          "earn-0006",
+          "earn-0008",
+          "earn-0010",
+          "earn-0011",
+          "earn-0013",
+          "earn-0014",
+          "earn-0015"
+        ],
+        "orphaned_earn": [
+          "earn-0001",
+          "earn-0009",
+          "earn-0012",
+          "earn-0019",
+          "earn-0023",
+          "earn-0041",
+          "earn-0044",
+          "earn-0058",
+          "earn-0067",
+          "earn-0089",
+          "earn-0094",
+          "earn-0100"
+        ],
+        "double_issue": [
+          "earn-0007",
+          "earn-0026",
+          "earn-0027",
+          "earn-0046",
+          "earn-0088",
+          "earn-0090",
+          "earn-0106",
+          "earn-0134",
+          "earn-0139",
+          "earn-0154",
+          "earn-0169",
+          "earn-0176"
+        ]
+      },
+      "silent_divergence": 33,
+      "visible_divergence": 0,
+      "invariant_holds": false
+    },
+    "outbox": {
+      "total_earns": 200,
+      "classes": {
+        "consistent": 197,
+        "orphaned_earn": 0,
+        "double_issue": 0,
+        "visible_dead_letter": 3,
+        "issue_without_earn": 0
+      },
+      "examples": {
+        "consistent": [
+          "earn-0000",
+          "earn-0001",
+          "earn-0002",
+          "earn-0003",
+          "earn-0004",
+          "earn-0005",
+          "earn-0006",
+          "earn-0007",
+          "earn-0008",
+          "earn-0009",
+          "earn-0010",
+          "earn-0011"
+        ],
+        "visible_dead_letter": [
+          "earn-0023",
+          "earn-0058",
+          "earn-0119"
+        ]
+      },
+      "silent_divergence": 0,
+      "visible_divergence": 3,
+      "invariant_holds": true
+    }
+  },
+  "delta": {
+    "silent_divergence_dual_write": 33,
+    "silent_divergence_outbox": 0,
+    "caught_by_reconciliation": 33,
+    "made_visible_by_outbox": 3
+  },
+  "synthetic_inputs": [
+    {
+      "name": "crash_fraction",
+      "value": 0.08,
+      "label": "[SYNTHETIC] per-earn fault probability. Real incident rates are unobservable from outside; these exist only so the mechanism is bit-for-bit replayable \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    },
+    {
+      "name": "ambiguous_timeout_fraction",
+      "value": 0.06,
+      "label": "[SYNTHETIC] per-earn fault probability. Real incident rates are unobservable from outside; these exist only so the mechanism is bit-for-bit replayable \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    },
+    {
+      "name": "hard_failure_fraction",
+      "value": 0.03,
+      "label": "[SYNTHETIC] per-earn fault probability. Real incident rates are unobservable from outside; these exist only so the mechanism is bit-for-bit replayable \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    }
+  ],
+  "grounding": "The transactional outbox and its PENDING \u2192 PUBLISHED \u2192 DEAD_LETTER lifecycle are built and tested here (outbox.py). Applying it to reward issuance is [HYPOTHESIS] \u2014 the mechanism is real, the reward ledger is not claimed to be Rokt's. The idempotent consumer mirrors the real conversion dedup (conversions.py).",
+  "note": "Same 200 earns, same seeded faults, two integration patterns. Dual-write leaves 33 earns silently diverged (20 orphaned, 13 double-issued); the transactional outbox leaves 0 \u2014 its 3 failures are dead-letters a human can see. The outbox mechanism is [REPO]; the reward application is [HYPOTHESIS]; the fault fractions are [SYNTHETIC] and labelled. Computed live, not asserted."
+}

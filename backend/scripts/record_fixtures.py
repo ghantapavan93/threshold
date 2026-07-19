@@ -83,6 +83,15 @@ def main() -> None:
         translation_resp.raise_for_status()
         _write("translation-audit.json", translation_resp.content)
 
+        # Reconciliation Process (W2): dual-write vs transactional outbox over the
+        # same seeded fault world, reconciled side by side — REAL engine output.
+        reconciliation_resp = client.post(
+            f"{BASE}/reconciliation-audit",
+            json={"seed": SEED, "count": COUNT},
+        )
+        reconciliation_resp.raise_for_status()
+        _write("reconciliation-audit.json", reconciliation_resp.content)
+
 
 if __name__ == "__main__":
     main()

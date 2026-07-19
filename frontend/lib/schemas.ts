@@ -440,3 +440,68 @@ export const TranslationAuditSchema = z.object({
   note: z.string().optional(),
 });
 export type TranslationAudit = z.infer<typeof TranslationAuditSchema>;
+
+// ---- Moment Forge: Reconciliation Process (Case B, earned ⇒ issued) ----------
+// Mirrors POST /reconciliation-audit and GET /reconciliation exactly. Core fields
+// required; enrichment optional. A mismatch → validation error, never a silent
+// fallback.
+export const ReconStrategyReportSchema = z.object({
+  total_earns: z.number(),
+  classes: z.record(z.string(), z.number()),
+  examples: z.record(z.string(), z.array(z.string())).optional(),
+  silent_divergence: z.number(),
+  visible_divergence: z.number(),
+  invariant_holds: z.boolean(),
+});
+export type ReconStrategyReport = z.infer<typeof ReconStrategyReportSchema>;
+
+export const ReconciliationAuditSchema = z.object({
+  invariant: z.string(),
+  pattern: z.string(),
+  boundary: z.string(),
+  seed: z.number(),
+  count: z.number(),
+  fault_census: z.record(z.string(), z.number()),
+  strategies: z.object({
+    dual_write: ReconStrategyReportSchema,
+    outbox: ReconStrategyReportSchema,
+  }),
+  delta: z.object({
+    silent_divergence_dual_write: z.number(),
+    silent_divergence_outbox: z.number(),
+    caught_by_reconciliation: z.number(),
+    made_visible_by_outbox: z.number(),
+  }),
+  synthetic_inputs: z.array(
+    z.object({
+      name: z.string(),
+      value: z.union([z.number(), z.string()]),
+      label: z.string().optional(),
+      note: z.string().optional(),
+    }),
+  ),
+  grounding: z.string(),
+  note: z.string().optional(),
+});
+export type ReconciliationAudit = z.infer<typeof ReconciliationAuditSchema>;
+
+export const ReconciliationProofSchema = z.object({
+  merchant_id: z.string().optional(),
+  invariant: z.string(),
+  pattern: z.string(),
+  total_jobs: z.number(),
+  classes: z.record(z.string(), z.number()),
+  jobs: z.array(
+    z.object({
+      job_id: z.string(),
+      verdict: z.string().nullable().optional(),
+      class: z.string(),
+      missing: z.array(z.string()),
+      event_statuses: z.array(z.string()),
+    }),
+  ),
+  silent_divergence: z.number(),
+  invariant_holds: z.boolean(),
+  grounding: z.string(),
+});
+export type ReconciliationProof = z.infer<typeof ReconciliationProofSchema>;

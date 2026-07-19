@@ -9,6 +9,10 @@ PolicyVersionRow / ReplayJobRow / OutboxEventRow / ConversionRow):
   inline / edited proposed policy or muted contexts.  §2.2
 - POST /translation-audit — runs the pure Translation Map over a seeded conversion
   corpus and returns the Conformist-vs-ACL upward-bias leak.  §3
+- POST /reconciliation-audit — runs the pure Reconciliation Process over a seeded
+  fault world: dual-write vs transactional outbox, reconciled side by side (W2).
+- GET  /reconciliation — the same process-manager move over the REAL replay-job
+  fan-out rows (read-only): proves the outbox invariant on actual data.
 
 Zero new decision logic (ADR-002): everything on the compute path is one of the
 existing pure domain functions (`diff_policies`, `run_replay`, `Policy`) plus the
@@ -22,6 +26,7 @@ import time
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..config import settings
@@ -31,7 +36,15 @@ from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_att
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
 from ..domain.replay import run_replay
+from ..domain.reconciliation import (
+    DEFAULT_AMBIGUOUS_TIMEOUT_FRACTION,
+    DEFAULT_CRASH_FRACTION,
+    DEFAULT_HARD_FAILURE_FRACTION,
+    audit_reconciliation,
+    reconcile_fanout,
+)
 from ..domain.translation import DEFAULT_INCREMENTAL_FRACTION, audit_translation
+from ..models import OutboxEventRow, ReplayJobRow
 from ..observability import get_meter, get_tracer
 from .common import load_policy
 
@@ -50,6 +63,10 @@ _simulate_sessions = _meter.create_histogram("momentforge_simulate_sessions")
 _translation_audit_total = _meter.create_counter("momentforge_translation_audit_total")
 _translation_audit_duration = _meter.create_histogram("momentforge_translation_audit_duration_ms")
 _translation_leak = _meter.create_histogram("momentforge_translation_leak")
+_reconciliation_audit_total = _meter.create_counter("momentforge_reconciliation_audit_total")
+_reconciliation_audit_duration = _meter.create_histogram("momentforge_reconciliation_audit_duration_ms")
+_reconciliation_silent = _meter.create_histogram("momentforge_reconciliation_silent_divergence")
+_reconciliation_proof_total = _meter.create_counter("momentforge_reconciliation_proof_total")
 
 router = APIRouter(prefix="/api/v1/merchants/{merchant_id}")
 
@@ -78,6 +95,18 @@ class SimulationRequest(BaseModel):
     session_count: int = Field(default=200, ge=1, le=5000)
     injections: list[str] = Field(
         default_factory=lambda: ["timeout", "invalid_output", "stale_identity"])
+
+
+class ReconciliationAuditRequest(BaseModel):
+    # Fault fractions are the labelled synthetic world; bounded and mutually
+    # exclusive (their sum must stay ≤ 1.0 — checked in the handler, 422).
+    seed: int = 42
+    count: int = Field(default=200, ge=1, le=5000)  # bounded like the sim
+    crash_fraction: float = Field(default=DEFAULT_CRASH_FRACTION, ge=0.0, le=1.0)
+    ambiguous_timeout_fraction: float = Field(
+        default=DEFAULT_AMBIGUOUS_TIMEOUT_FRACTION, ge=0.0, le=1.0)
+    hard_failure_fraction: float = Field(
+        default=DEFAULT_HARD_FAILURE_FRACTION, ge=0.0, le=1.0)
 
 
 class TranslationAuditRequest(BaseModel):
@@ -354,3 +383,93 @@ def translation_audit(
     )
 
     return result
+
+
+# --------------------------------------------------------------------------- #
+# D. Reconciliation Process — the cross-aggregate invariant closed (W2)
+# --------------------------------------------------------------------------- #
+@router.post("/reconciliation-audit")
+def reconciliation_audit(
+    merchant_id: str,
+    req: ReconciliationAuditRequest,
+    request: Request,
+) -> dict:
+    """Thin, READ-ONLY, NON-persisting: runs the pure Reconciliation Process over a
+    seeded fault world — the SAME faults under dual-write vs the transactional
+    outbox — and returns both reconciled reports. No DB, no writes; deterministic
+    (same body → identical bytes). ADR-002 intact: the compute path is one pure
+    function."""
+    t0 = time.perf_counter()
+
+    fraction_sum = (req.crash_fraction + req.ambiguous_timeout_fraction
+                    + req.hard_failure_fraction)
+    if fraction_sum > 1.0:
+        raise _reject("fault_fractions_sum",
+                      f"fault fractions must sum to at most 1.0 (got {fraction_sum:.3f})")
+
+    with tracer.start_as_current_span("momentforge.reconciliation_audit") as span:
+        result = audit_reconciliation(
+            req.seed, req.count, req.crash_fraction,
+            req.ambiguous_timeout_fraction, req.hard_failure_fraction)
+        silent_dual = result["delta"]["silent_divergence_dual_write"]
+        silent_outbox = result["delta"]["silent_divergence_outbox"]
+        span.set_attribute("threshold.seed", req.seed)
+        span.set_attribute("threshold.count", req.count)
+        span.set_attribute("momentforge.silent_divergence_dual_write", silent_dual)
+        span.set_attribute("momentforge.silent_divergence_outbox", silent_outbox)
+
+    duration_ms = (time.perf_counter() - t0) * 1000.0
+    _reconciliation_audit_total.add(1, {"result": "ok"})
+    _reconciliation_audit_duration.record(duration_ms)
+    _reconciliation_silent.record(silent_dual, {"strategy": "dual_write"})
+    _reconciliation_silent.record(silent_outbox, {"strategy": "outbox"})
+    log.info(
+        '{"route":"reconciliation-audit","merchant_id":"%s","request_id":"%s",'
+        '"seed":%d,"count":%d,"silent_dual_write":%d,"silent_outbox":%d,'
+        '"duration_ms":%.2f}',
+        merchant_id, _rid(request), req.seed, req.count,
+        silent_dual, silent_outbox, duration_ms,
+    )
+
+    return result
+
+
+@router.get("/reconciliation")
+def reconciliation_proof(
+    merchant_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    """The same process-manager move over REAL rows, read-only: for every replay job
+    this merchant actually ran, prove the outbox fan-out is complete and every row is
+    in a legal, VISIBLE state. No synthetic input on this lane at all."""
+    t0 = time.perf_counter()
+
+    job_rows = db.execute(
+        select(ReplayJobRow).where(ReplayJobRow.merchant_id == merchant_id)
+    ).scalars().all()
+    event_rows = db.execute(
+        select(OutboxEventRow).where(OutboxEventRow.merchant_id == merchant_id)
+    ).scalars().all()
+
+    with tracer.start_as_current_span("momentforge.reconciliation_proof") as span:
+        result = reconcile_fanout(
+            [{"id": j.id, "verdict": j.verdict} for j in job_rows],
+            [{"job_id": e.job_id, "event_type": e.event_type,
+              "target": e.target, "status": e.status} for e in event_rows],
+        )
+        span.set_attribute("momentforge.total_jobs", result["total_jobs"])
+        span.set_attribute("momentforge.invariant_holds", result["invariant_holds"])
+
+    duration_ms = (time.perf_counter() - t0) * 1000.0
+    _reconciliation_proof_total.add(1, {"holds": str(result["invariant_holds"]).lower()})
+    log.info(
+        '{"route":"reconciliation","merchant_id":"%s","request_id":"%s",'
+        '"total_jobs":%d,"silent_divergence":%d,"invariant_holds":%s,'
+        '"duration_ms":%.2f}',
+        merchant_id, _rid(request), result["total_jobs"],
+        result["silent_divergence"], str(result["invariant_holds"]).lower(),
+        duration_ms,
+    )
+
+    return {"merchant_id": merchant_id, **result}
