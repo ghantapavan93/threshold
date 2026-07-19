@@ -55,7 +55,10 @@ export function EvidenceDrawer() {
           <dl className="rounded-lg border border-border bg-surface-2 p-3 font-mono text-xs">
             <KeyVal k="seq" v={evidence.record.seq} />
             <KeyVal k="event_type" v={evidence.record.event_type} />
-            <KeyVal k="created_at" v={formatDateTime(evidence.record.created_at)} />
+            <KeyVal
+              k="created_at"
+              v={evidence.record.created_at ? formatDateTime(evidence.record.created_at) : "—"}
+            />
             <KeyVal
               k="content_hmac"
               v={

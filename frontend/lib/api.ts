@@ -12,6 +12,8 @@ import {
   PolicyListSchema,
   ReplayJobSchema,
   ScenarioListSchema,
+  SemanticDeltaSchema,
+  SimulationResultSchema,
 } from "./schemas";
 import type {
   AuditRecord,
@@ -26,7 +28,31 @@ import type {
   PolicyListItem,
   ReplayJob,
   Scenario,
+  SemanticDelta,
+  SimulationResult,
 } from "./schemas";
+
+/** Moment Forge — Semantic Change Compiler request. */
+export type SemanticCompileInput = {
+  base_version: string;
+  proposed_version?: string;
+  proposed_document?: unknown;
+  muted_contexts?: string[];
+};
+
+/** Moment Forge — Domain Evolution Simulator request. */
+export type SimulationInput = {
+  base_version: string;
+  proposed: {
+    from_version?: string;
+    document?: unknown;
+    rule_overrides?: Array<{ id: string; op?: string; value?: unknown }>;
+    muted_contexts?: string[];
+  };
+  session_seed?: number;
+  session_count?: number;
+  injections?: Injection[];
+};
 
 /** Base URL of the Threshold backend. Defaults per API_CONTRACT.md. */
 export const API_BASE =
@@ -293,6 +319,32 @@ export const api = {
       CancellationResponseSchema,
       { method: "POST", body, signal },
     );
+  },
+
+  /** Moment Forge — Semantic Change Compiler (stateless, pure, no sessions). */
+  semanticCompile(
+    merchantId: string,
+    body: SemanticCompileInput,
+    signal?: AbortSignal,
+  ): Promise<SemanticDelta> {
+    return requestData(`${base(merchantId)}/semantic-compile`, SemanticDeltaSchema, {
+      method: "POST",
+      body,
+      signal,
+    });
+  },
+
+  /** Moment Forge — Domain Evolution Simulator (ephemeral, non-persisting). */
+  simulate(
+    merchantId: string,
+    body: SimulationInput,
+    signal?: AbortSignal,
+  ): Promise<SimulationResult> {
+    return requestData(`${base(merchantId)}/simulations`, SimulationResultSchema, {
+      method: "POST",
+      body,
+      signal,
+    });
   },
 
   getAudit(

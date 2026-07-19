@@ -19,7 +19,16 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .config import settings
 from .db import init_db
 from .observability import setup_tracing
-from .routers import audit, cancellations, conversions, health, policies, replay, scenarios
+from .routers import (
+    audit,
+    cancellations,
+    conversions,
+    health,
+    momentforge,
+    policies,
+    replay,
+    scenarios,
+)
 from .seed import seed_policies
 
 logging.basicConfig(level=logging.INFO, format='{"level":"%(levelname)s","msg":"%(message)s"}')
@@ -98,5 +107,5 @@ async def validation_exc_handler(request: Request, exc: RequestValidationError):
 
 
 for r in (health.router, policies.router, replay.router, conversions.router,
-          cancellations.router, audit.router, scenarios.router):
+          cancellations.router, audit.router, scenarios.router, momentforge.router):
     app.include_router(r)

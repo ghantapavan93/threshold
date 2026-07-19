@@ -50,6 +50,32 @@ def test_scalar_ops_and_missing():
     assert eval_rule(_rule("gte", 25, "a"), {}) is False  # missing -> fail
 
 
+@pytest.mark.parametrize("bad_value", ["twenty", True, False])
+def test_gte_invalid_value_fails_closed(bad_value):
+    # E8/E8b: a non-numeric/boolean value in a gte/lte rule must NOT raise out of the
+    # pure core — the rule fails closed and the decision is no_offer w/ a reason.
+    p = Policy(
+        policy_version="Vx", merchant_id="m", name="n", latency_budget_ms=200,
+        frequency_cap={"max_impressions": 1, "per_days": 30},
+        offer={"id": "o", "category": "parking"},
+        eligibility_rules=[Rule(id="r", attribute="customer.age", op="gte", value=25)],
+    )
+    d = evaluate({"customer.age": bad_value}, p)
+    assert d.decision == "no_offer"
+    assert d.failed_rule == "r"
+    assert d.fallback_reason == "invalid_comparison"
+
+
+@pytest.mark.parametrize("op", ["gte", "lte"])
+def test_eval_rule_invalid_comparison_raises_invalidcomparison(op):
+    from app.domain.evaluator import InvalidComparison
+    r = _rule(op, 25, "customer.age")
+    with pytest.raises(InvalidComparison):
+        eval_rule(r, {"customer.age": "twenty"})
+    with pytest.raises(InvalidComparison):
+        eval_rule(r, {"customer.age": True})
+
+
 def test_evaluate_short_circuits_first_failure():
     p = load("aurora_v17.json")
     d = evaluate({"purchase.seat_type": "standard"}, p)  # r1 fails first

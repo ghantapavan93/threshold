@@ -20,6 +20,7 @@ const RISK_LABEL: Record<DiffRisk, string> = {
   missing_attribute_flip: "missing-attribute risk",
   frequency_increase: "frequency increase",
   eligibility_widened: "eligibility widened",
+  eligibility_narrowed: "eligibility narrowed",
   latency_increase: "latency increase",
 };
 

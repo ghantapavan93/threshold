@@ -56,6 +56,7 @@ export const DiffRiskSchema = z.enum([
   "missing_attribute_flip",
   "frequency_increase",
   "eligibility_widened",
+  "eligibility_narrowed",
   "latency_increase",
 ]);
 export type DiffRisk = z.infer<typeof DiffRiskSchema>;
@@ -265,7 +266,9 @@ export const AuditRecordSchema = z.object({
   event_type: AuditEventTypeSchema,
   payload: z.unknown(),
   content_hmac: z.string(),
-  created_at: z.string(),
+  // Backend audit is deterministic/seq-based and emits no created_at; optional so
+  // both the /audit GET and the ephemeral simulation audit validate.
+  created_at: z.string().optional(),
 });
 export type AuditRecord = z.infer<typeof AuditRecordSchema>;
 export const AuditLogSchema = z.array(AuditRecordSchema);
@@ -286,3 +289,96 @@ export const ErrorEnvelopeSchema = z.object({
   }),
 });
 export type ErrorEnvelope = z.infer<typeof ErrorEnvelopeSchema>;
+
+// ---- Moment Forge: semantic delta + domain simulation ----------------------
+export const SeveritySchema = z.enum(["info", "warning", "critical"]);
+export type Severity = z.infer<typeof SeveritySchema>;
+
+export const BoundedContextSchema = z.object({
+  id: z.enum(["purchase", "customer", "offer", "delivery", "governance"]),
+  label: z.string(),
+  rule_ids: z.array(z.string()),
+  change_count: z.number(),
+  max_severity: SeveritySchema,
+  muted: z.boolean(),
+});
+export type BoundedContext = z.infer<typeof BoundedContextSchema>;
+
+export const ContextEdgeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  relation: z.string(),
+});
+export type ContextEdge = z.infer<typeof ContextEdgeSchema>;
+
+export const ContextMapSchema = z.object({
+  contexts: z.array(BoundedContextSchema),
+  edges: z.array(ContextEdgeSchema),
+});
+export type ContextMap = z.infer<typeof ContextMapSchema>;
+
+export const MeaningChangeSchema = z.object({
+  path: z.string(),
+  risk: DiffRiskSchema.nullable(),
+  context: z.string(),
+  severity: SeveritySchema,
+  before_semantics: z.string(),
+  after_semantics: z.string(),
+  explanation: z.string(),
+  grounding: z.string(),
+});
+export type MeaningChange = z.infer<typeof MeaningChangeSchema>;
+
+export const MissingAttrInversionSchema = z.object({
+  detected: z.boolean(),
+  rule_id: z.string(),
+  attribute: z.string(),
+  direction: z.string(),
+  effect: z.string(),
+});
+export type MissingAttrInversion = z.infer<typeof MissingAttrInversionSchema>;
+
+/** Core semantic delta (as nested inside a simulation — no version echoes). */
+const SemanticDeltaCoreSchema = z.object({
+  changes: z.array(DiffChangeSchema),
+  summary: z.object({
+    added: z.number(),
+    removed: z.number(),
+    modified: z.number(),
+  }),
+  context_map: ContextMapSchema,
+  meaning_changes: z.array(MeaningChangeSchema),
+  missing_attribute_inversion: MissingAttrInversionSchema.nullable(),
+});
+
+/** /semantic-compile response — the core delta plus the version echoes. */
+export const SemanticDeltaSchema = SemanticDeltaCoreSchema.extend({
+  base_version: z.string(),
+  proposed_version: z.string(),
+});
+export type SemanticDelta = z.infer<typeof SemanticDeltaSchema>;
+
+export const OpePrescreenSchema = z.object({
+  ess: z.number(),
+  coverage: z.number(),
+  support: z.enum(["NONE", "THIN", "SUFFICIENT"]),
+  refuses_estimate: z.boolean(),
+  min_ess: z.number(),
+  note: z.string(),
+});
+export type OpePrescreen = z.infer<typeof OpePrescreenSchema>;
+
+/** /simulations response — a ReplayJob minus persistence fields, plus the
+ *  semantic delta, OPE pre-screen, applied context toggles, and inline audit. */
+export const SimulationResultSchema = ReplayJobSchema.omit({
+  id: true,
+  merchant_id: true,
+  status: true,
+  created_at: true,
+}).extend({
+  semantic_delta: SemanticDeltaCoreSchema,
+  ope_prescreen: OpePrescreenSchema,
+  context_toggles_applied: z.array(z.string()),
+  audit: AuditLogSchema,
+});
+export type SimulationResult = z.infer<typeof SimulationResultSchema>;

@@ -1,0 +1,6759 @@
+{
+  "base_version": "V17",
+  "proposed_version": "V18",
+  "session_count": 200,
+  "semantic_delta": {
+    "changes": [
+      {
+        "path": "frequency_cap.max_impressions",
+        "kind": "modified",
+        "before": 1,
+        "after": 3,
+        "risk": "frequency_increase"
+      },
+      {
+        "path": "eligibility_rules.r2.value",
+        "kind": "modified",
+        "before": 25,
+        "after": 18,
+        "risk": "eligibility_widened"
+      },
+      {
+        "path": "eligibility_rules.r4.op",
+        "kind": "modified",
+        "before": "include_is_not_in",
+        "after": "exclude_is_in",
+        "risk": "missing_attribute_flip"
+      }
+    ],
+    "summary": {
+      "added": 0,
+      "removed": 0,
+      "modified": 3
+    },
+    "context_map": {
+      "contexts": [
+        {
+          "id": "purchase",
+          "label": "Purchase",
+          "rule_ids": [
+            "r1"
+          ],
+          "change_count": 0,
+          "max_severity": "info",
+          "muted": false
+        },
+        {
+          "id": "customer",
+          "label": "Customer",
+          "rule_ids": [
+            "r2",
+            "r3",
+            "r4"
+          ],
+          "change_count": 2,
+          "max_severity": "critical",
+          "muted": false
+        },
+        {
+          "id": "offer",
+          "label": "Offer",
+          "rule_ids": [],
+          "change_count": 0,
+          "max_severity": "info",
+          "muted": false
+        },
+        {
+          "id": "delivery",
+          "label": "Delivery",
+          "rule_ids": [],
+          "change_count": 1,
+          "max_severity": "warning",
+          "muted": false
+        },
+        {
+          "id": "governance",
+          "label": "Governance",
+          "rule_ids": [],
+          "change_count": 0,
+          "max_severity": "info",
+          "muted": false
+        }
+      ],
+      "edges": [
+        {
+          "from": "customer",
+          "to": "offer",
+          "relation": "eligibility_gate"
+        },
+        {
+          "from": "purchase",
+          "to": "offer",
+          "relation": "eligibility_gate"
+        },
+        {
+          "from": "delivery",
+          "to": "offer",
+          "relation": "serving_guard"
+        },
+        {
+          "from": "governance",
+          "to": "*",
+          "relation": "policy_gate"
+        }
+      ]
+    },
+    "meaning_changes": [
+      {
+        "path": "frequency_cap.max_impressions",
+        "risk": "frequency_increase",
+        "context": "delivery",
+        "severity": "warning",
+        "before_semantics": "1",
+        "after_semantics": "3",
+        "explanation": "Impression cap raised \u2014 the same customer can be shown the offer more often.",
+        "grounding": "Rokt frequency management: raising impression caps increases exposure/fatigue."
+      },
+      {
+        "path": "eligibility_rules.r2.value",
+        "risk": "eligibility_widened",
+        "context": "customer",
+        "severity": "warning",
+        "before_semantics": "25",
+        "after_semantics": "18",
+        "explanation": "Threshold loosened / rule removed \u2014 more sessions become eligible.",
+        "grounding": "Loosening a numeric gate or removing a rule widens the eligible audience."
+      },
+      {
+        "path": "eligibility_rules.r4.op",
+        "risk": "missing_attribute_flip",
+        "context": "customer",
+        "severity": "critical",
+        "before_semantics": "MISSING \u2192 EXCLUDED",
+        "after_semantics": "MISSING \u2192 INCLUDED",
+        "explanation": "Every session with no cc_bin flips from excluded to eligible.",
+        "grounding": "Rokt Audience targeting: 'Include (is not in)' vs 'Exclude (is in)' differ only on MISSING values."
+      }
+    ],
+    "missing_attribute_inversion": {
+      "detected": true,
+      "rule_id": "r4",
+      "attribute": "customer.cc_bin",
+      "direction": "include_is_not_in\u2192exclude_is_in",
+      "effect": "missing values silently become eligible"
+    }
+  },
+  "diff": {
+    "changes": [
+      {
+        "path": "frequency_cap.max_impressions",
+        "kind": "modified",
+        "before": 1,
+        "after": 3,
+        "risk": "frequency_increase"
+      },
+      {
+        "path": "eligibility_rules.r2.value",
+        "kind": "modified",
+        "before": 25,
+        "after": 18,
+        "risk": "eligibility_widened"
+      },
+      {
+        "path": "eligibility_rules.r4.op",
+        "kind": "modified",
+        "before": "include_is_not_in",
+        "after": "exclude_is_in",
+        "risk": "missing_attribute_flip"
+      }
+    ],
+    "summary": {
+      "added": 0,
+      "removed": 0,
+      "modified": 3
+    }
+  },
+  "constraint_results": [
+    {
+      "key": "latency_budget",
+      "result": "PASS",
+      "detail": "Latency budget 200ms within current 200ms.",
+      "grounding": "Rokt publishes \"sub-200ms latency\"; <rokt-thank-you fallback-timeout> defaults to 5000ms."
+    },
+    {
+      "key": "fallback_explicit",
+      "result": "PASS",
+      "detail": "Fallback is No Offer Rendered.",
+      "grounding": "Rokt: \"If no offer is eligible, the wrapped content renders normally.\" Fallback must be No Offer Rendered."
+    },
+    {
+      "key": "consent",
+      "result": "PASS",
+      "detail": "No sensitive attribute used without consent.",
+      "grounding": "Rokt exposes noFunctional/noTargeting consent flags; sensitive PII must be consent-gated."
+    },
+    {
+      "key": "brand_safety",
+      "result": "PASS",
+      "detail": "Offer category 'parking' compliant.",
+      "grounding": "Rokt Ads policies prohibit categories (gambling/alcohol/tobacco) without age gating."
+    },
+    {
+      "key": "frequency_cap",
+      "result": "WARN",
+      "detail": "Impression cap raised 1 -> 3 per 30d.",
+      "grounding": "Frequency management: raising impression caps increases exposure/fatigue risk."
+    },
+    {
+      "key": "holdout_required",
+      "result": "PASS",
+      "detail": "Mandatory holdout retained.",
+      "grounding": "Rokt One Platform Page Holdout: a recommended 5% control before rollout."
+    },
+    {
+      "key": "requires_reapproval",
+      "result": "WARN",
+      "detail": "Material change to disclaimers \u2014 this change re-enters Rokt's manual approval queue.",
+      "grounding": "Rokt: \"Material changes to a campaign's privacy policy, disclaimers, or terms and conditions trigger the approval process.\""
+    },
+    {
+      "key": "immutable_field_guard",
+      "result": "PASS",
+      "detail": "No immutable field changed.",
+      "grounding": "Rokt Manage-a-campaign: objective/country/language/timezone cannot be edited \u2014 \"you need to create a new campaign\"."
+    },
+    {
+      "key": "plausibility",
+      "result": "PASS",
+      "detail": "Policy values within plausible ranges.",
+      "grounding": "Operational guard (not a Rokt-doc rule): catch data-entry errors before subtler checks \u2014 inspired by ShelfTrace's execution-gate plausibility guard."
+    },
+    {
+      "key": "missing_attribute_semantics",
+      "result": "FAIL",
+      "detail": "Rule op change flips missing-'customer.cc_bin' sessions from EXCLUDED to ELIGIBLE: 21 sessions silently widened.",
+      "grounding": "Rokt Audience targeting: \"Include (is not in)\" vs \"Exclude (is in)\" differ only on MISSING values."
+    }
+  ],
+  "replay_summary": {
+    "unchanged": 170,
+    "nothing_to_offer": 9,
+    "offer_to_nothing": 0,
+    "constraint_violation": 21,
+    "base_offers": 42,
+    "proposed_offers": 72,
+    "changed": 30
+  },
+  "evaluations": [
+    {
+      "session_id": "s-0000",
+      "event_time": "2026-05-12T14:00:00+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 17,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0001",
+      "event_time": "2026-05-12T14:00:07+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 59,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0002",
+      "event_time": "2026-05-12T14:00:14+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 17,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0003",
+      "event_time": "2026-05-12T14:00:21+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 28,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0004",
+      "event_time": "2026-05-12T14:00:28+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 53,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0005",
+      "event_time": "2026-05-12T14:00:35+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 37,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0006",
+      "event_time": "2026-05-12T14:00:42+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 40,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0007",
+      "event_time": "2026-05-12T14:00:49+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 18,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0008",
+      "event_time": "2026-05-12T14:00:56+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 34,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0009",
+      "event_time": "2026-05-12T14:01:03+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 61,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0010",
+      "event_time": "2026-05-12T14:01:10+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0011",
+      "event_time": "2026-05-12T14:01:17+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 56,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0012",
+      "event_time": "2026-05-12T14:01:24+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 58,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0013",
+      "event_time": "2026-05-12T14:01:31+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 26,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0014",
+      "event_time": "2026-05-12T14:01:38+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 56,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0015",
+      "event_time": "2026-05-12T14:01:45+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 65,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0016",
+      "event_time": "2026-05-12T14:01:52+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 20,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0017",
+      "event_time": "2026-05-12T14:01:59+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 47,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0018",
+      "event_time": "2026-05-12T14:02:06+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 24,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0019",
+      "event_time": "2026-05-12T14:02:13+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 43,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0020",
+      "event_time": "2026-05-12T14:02:20+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 24,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0021",
+      "event_time": "2026-05-12T14:02:27+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 23,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0022",
+      "event_time": "2026-05-12T14:02:34+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 54,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0023",
+      "event_time": "2026-05-12T14:02:41+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 51,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0024",
+      "event_time": "2026-05-12T14:02:48+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 59,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0025",
+      "event_time": "2026-05-12T14:02:55+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 43,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0026",
+      "event_time": "2026-05-12T14:03:02+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 62,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0027",
+      "event_time": "2026-05-12T14:03:09+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 22,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0028",
+      "event_time": "2026-05-12T14:03:16+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 25,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0029",
+      "event_time": "2026-05-12T14:03:23+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 49,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0030",
+      "event_time": "2026-05-12T14:03:30+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 39,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0031",
+      "event_time": "2026-05-12T14:03:37+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 31,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0032",
+      "event_time": "2026-05-12T14:03:44+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 68,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0033",
+      "event_time": "2026-05-12T14:03:51+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 46,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0034",
+      "event_time": "2026-05-12T14:03:58+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 54,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0035",
+      "event_time": "2026-05-12T14:04:05+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 60,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0036",
+      "event_time": "2026-05-12T14:04:12+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 49,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0037",
+      "event_time": "2026-05-12T14:04:19+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 53,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0038",
+      "event_time": "2026-05-12T14:04:26+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 56,
+        "customer.loyalty_segment": "VIP"
+      }
+    },
+    {
+      "session_id": "s-0039",
+      "event_time": "2026-05-12T14:04:33+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 37,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0040",
+      "event_time": "2026-05-12T14:04:40+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 24,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0041",
+      "event_time": "2026-05-12T14:04:47+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0042",
+      "event_time": "2026-05-12T14:04:54+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 43,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0043",
+      "event_time": "2026-05-12T14:05:01+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 57,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0044",
+      "event_time": "2026-05-12T14:05:08+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 22,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0045",
+      "event_time": "2026-05-12T14:05:15+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 27,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0046",
+      "event_time": "2026-05-12T14:05:22+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 70,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0047",
+      "event_time": "2026-05-12T14:05:29+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 69,
+        "customer.loyalty_segment": "VIP"
+      }
+    },
+    {
+      "session_id": "s-0048",
+      "event_time": "2026-05-12T14:05:36+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 31,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0049",
+      "event_time": "2026-05-12T14:05:43+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 19,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0050",
+      "event_time": "2026-05-12T14:05:50+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0051",
+      "event_time": "2026-05-12T14:05:57+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 47,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0052",
+      "event_time": "2026-05-12T14:06:04+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 50,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0053",
+      "event_time": "2026-05-12T14:06:11+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 48,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0054",
+      "event_time": "2026-05-12T14:06:18+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 21,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0055",
+      "event_time": "2026-05-12T14:06:25+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 31,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0056",
+      "event_time": "2026-05-12T14:06:32+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2"
+        ],
+        "failed_rule": "r3",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 54,
+        "customer.loyalty_segment": "VIP"
+      }
+    },
+    {
+      "session_id": "s-0057",
+      "event_time": "2026-05-12T14:06:39+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 52,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0058",
+      "event_time": "2026-05-12T14:06:46+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 36,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0059",
+      "event_time": "2026-05-12T14:06:53+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 64,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0060",
+      "event_time": "2026-05-12T14:07:00+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 52,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0061",
+      "event_time": "2026-05-12T14:07:07+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 32,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0062",
+      "event_time": "2026-05-12T14:07:14+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 39,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0063",
+      "event_time": "2026-05-12T14:07:21+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 55,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0064",
+      "event_time": "2026-05-12T14:07:28+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 68,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0065",
+      "event_time": "2026-05-12T14:07:35+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 24,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0066",
+      "event_time": "2026-05-12T14:07:42+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 34,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0067",
+      "event_time": "2026-05-12T14:07:49+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0068",
+      "event_time": "2026-05-12T14:07:56+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 43,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0069",
+      "event_time": "2026-05-12T14:08:03+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 24,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0070",
+      "event_time": "2026-05-12T14:08:10+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 43,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0071",
+      "event_time": "2026-05-12T14:08:17+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 60,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0072",
+      "event_time": "2026-05-12T14:08:24+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 25,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0073",
+      "event_time": "2026-05-12T14:08:31+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0074",
+      "event_time": "2026-05-12T14:08:38+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 59,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0075",
+      "event_time": "2026-05-12T14:08:45+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 42,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0076",
+      "event_time": "2026-05-12T14:08:52+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 67,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0077",
+      "event_time": "2026-05-12T14:08:59+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 37,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0078",
+      "event_time": "2026-05-12T14:09:06+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0079",
+      "event_time": "2026-05-12T14:09:13+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 30,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0080",
+      "event_time": "2026-05-12T14:09:20+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0081",
+      "event_time": "2026-05-12T14:09:27+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 33,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0082",
+      "event_time": "2026-05-12T14:09:34+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 48,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0083",
+      "event_time": "2026-05-12T14:09:41+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 17,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0084",
+      "event_time": "2026-05-12T14:09:48+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 32,
+        "customer.loyalty_segment": "VIP",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0085",
+      "event_time": "2026-05-12T14:09:55+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 36,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0086",
+      "event_time": "2026-05-12T14:10:02+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 52,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0087",
+      "event_time": "2026-05-12T14:10:09+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 49,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0088",
+      "event_time": "2026-05-12T14:10:16+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 20,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0089",
+      "event_time": "2026-05-12T14:10:23+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0090",
+      "event_time": "2026-05-12T14:10:30+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 42,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0091",
+      "event_time": "2026-05-12T14:10:37+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 42,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0092",
+      "event_time": "2026-05-12T14:10:44+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 35,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0093",
+      "event_time": "2026-05-12T14:10:51+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 43,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0094",
+      "event_time": "2026-05-12T14:10:58+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 44,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0095",
+      "event_time": "2026-05-12T14:11:05+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 34,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0096",
+      "event_time": "2026-05-12T14:11:12+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 64,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0097",
+      "event_time": "2026-05-12T14:11:19+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 18,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0098",
+      "event_time": "2026-05-12T14:11:26+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 56,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0099",
+      "event_time": "2026-05-12T14:11:33+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 31,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0100",
+      "event_time": "2026-05-12T14:11:40+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 30,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0101",
+      "event_time": "2026-05-12T14:11:47+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 51,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0102",
+      "event_time": "2026-05-12T14:11:54+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 45,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0103",
+      "event_time": "2026-05-12T14:12:01+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 64,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0104",
+      "event_time": "2026-05-12T14:12:08+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 51,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0105",
+      "event_time": "2026-05-12T14:12:15+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 44,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0106",
+      "event_time": "2026-05-12T14:12:22+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 49,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0107",
+      "event_time": "2026-05-12T14:12:29+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 34,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0108",
+      "event_time": "2026-05-12T14:12:36+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 25,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0109",
+      "event_time": "2026-05-12T14:12:43+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 42,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0110",
+      "event_time": "2026-05-12T14:12:50+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 42,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0111",
+      "event_time": "2026-05-12T14:12:57+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 64,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0112",
+      "event_time": "2026-05-12T14:13:04+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 40,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0113",
+      "event_time": "2026-05-12T14:13:11+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 63,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0114",
+      "event_time": "2026-05-12T14:13:18+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 33,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0115",
+      "event_time": "2026-05-12T14:13:25+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 59,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0116",
+      "event_time": "2026-05-12T14:13:32+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 55,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0117",
+      "event_time": "2026-05-12T14:13:39+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 17,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0118",
+      "event_time": "2026-05-12T14:13:46+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 32,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0119",
+      "event_time": "2026-05-12T14:13:53+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 40,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0120",
+      "event_time": "2026-05-12T14:14:00+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 21,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0121",
+      "event_time": "2026-05-12T14:14:07+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 38,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0122",
+      "event_time": "2026-05-12T14:14:14+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 18,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0123",
+      "event_time": "2026-05-12T14:14:21+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 55,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0124",
+      "event_time": "2026-05-12T14:14:28+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 52,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0125",
+      "event_time": "2026-05-12T14:14:35+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 26,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0126",
+      "event_time": "2026-05-12T14:14:42+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 26,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0127",
+      "event_time": "2026-05-12T14:14:49+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 35,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0128",
+      "event_time": "2026-05-12T14:14:56+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 61,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0129",
+      "event_time": "2026-05-12T14:15:03+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 65,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0130",
+      "event_time": "2026-05-12T14:15:10+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 52,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0131",
+      "event_time": "2026-05-12T14:15:17+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 20,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0132",
+      "event_time": "2026-05-12T14:15:24+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 22,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0133",
+      "event_time": "2026-05-12T14:15:31+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 43,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0134",
+      "event_time": "2026-05-12T14:15:38+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 50,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0135",
+      "event_time": "2026-05-12T14:15:45+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0136",
+      "event_time": "2026-05-12T14:15:52+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 31,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0137",
+      "event_time": "2026-05-12T14:15:59+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 47,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0138",
+      "event_time": "2026-05-12T14:16:06+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 32,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0139",
+      "event_time": "2026-05-12T14:16:13+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 49,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0140",
+      "event_time": "2026-05-12T14:16:20+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 47,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0141",
+      "event_time": "2026-05-12T14:16:27+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 47,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0142",
+      "event_time": "2026-05-12T14:16:34+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 41,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0143",
+      "event_time": "2026-05-12T14:16:41+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 51,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0144",
+      "event_time": "2026-05-12T14:16:48+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 60,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0145",
+      "event_time": "2026-05-12T14:16:55+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 28,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0146",
+      "event_time": "2026-05-12T14:17:02+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 63,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0147",
+      "event_time": "2026-05-12T14:17:09+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 22,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0148",
+      "event_time": "2026-05-12T14:17:16+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 16,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0149",
+      "event_time": "2026-05-12T14:17:23+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 19,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0150",
+      "event_time": "2026-05-12T14:17:30+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 64,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0151",
+      "event_time": "2026-05-12T14:17:37+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 46,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0152",
+      "event_time": "2026-05-12T14:17:44+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 46,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0153",
+      "event_time": "2026-05-12T14:17:51+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 52,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0154",
+      "event_time": "2026-05-12T14:17:58+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 52,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0155",
+      "event_time": "2026-05-12T14:18:05+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 51,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0156",
+      "event_time": "2026-05-12T14:18:12+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 49,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0157",
+      "event_time": "2026-05-12T14:18:19+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 43,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0158",
+      "event_time": "2026-05-12T14:18:26+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 22,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0159",
+      "event_time": "2026-05-12T14:18:33+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 21,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0160",
+      "event_time": "2026-05-12T14:18:40+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 16,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0161",
+      "event_time": "2026-05-12T14:18:47+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 30,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0162",
+      "event_time": "2026-05-12T14:18:54+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 30,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0163",
+      "event_time": "2026-05-12T14:19:01+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 28,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0164",
+      "event_time": "2026-05-12T14:19:08+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 68,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0165",
+      "event_time": "2026-05-12T14:19:15+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 54,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0166",
+      "event_time": "2026-05-12T14:19:22+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 45,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0167",
+      "event_time": "2026-05-12T14:19:29+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 47,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0168",
+      "event_time": "2026-05-12T14:19:36+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 54,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0169",
+      "event_time": "2026-05-12T14:19:43+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 69,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0170",
+      "event_time": "2026-05-12T14:19:50+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 59,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0171",
+      "event_time": "2026-05-12T14:19:57+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 57,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0172",
+      "event_time": "2026-05-12T14:20:04+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 68,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0173",
+      "event_time": "2026-05-12T14:20:11+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 37,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0174",
+      "event_time": "2026-05-12T14:20:18+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 42,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0175",
+      "event_time": "2026-05-12T14:20:25+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 51,
+        "customer.loyalty_segment": "VIP"
+      }
+    },
+    {
+      "session_id": "s-0176",
+      "event_time": "2026-05-12T14:20:32+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 23,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0177",
+      "event_time": "2026-05-12T14:20:39+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 16,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0178",
+      "event_time": "2026-05-12T14:20:46+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 49,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0179",
+      "event_time": "2026-05-12T14:20:53+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 29,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0180",
+      "event_time": "2026-05-12T14:21:00+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 60,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0181",
+      "event_time": "2026-05-12T14:21:07+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 67,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0182",
+      "event_time": "2026-05-12T14:21:14+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 51,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0183",
+      "event_time": "2026-05-12T14:21:21+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "constraint_violation",
+      "violation": {
+        "key": "missing_attribute_semantics",
+        "attribute": "customer.cc_bin"
+      },
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 23,
+        "customer.loyalty_segment": "guest"
+      }
+    },
+    {
+      "session_id": "s-0184",
+      "event_time": "2026-05-12T14:21:28+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 34,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0185",
+      "event_time": "2026-05-12T14:21:35+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 31,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0186",
+      "event_time": "2026-05-12T14:21:42+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 54,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "411111"
+      }
+    },
+    {
+      "session_id": "s-0187",
+      "event_time": "2026-05-12T14:21:49+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0188",
+      "event_time": "2026-05-12T14:21:56+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 16,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0189",
+      "event_time": "2026-05-12T14:22:03+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 58,
+        "customer.loyalty_segment": "member"
+      }
+    },
+    {
+      "session_id": "s-0190",
+      "event_time": "2026-05-12T14:22:10+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 38,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0191",
+      "event_time": "2026-05-12T14:22:17+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 36,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0192",
+      "event_time": "2026-05-12T14:22:24+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 30,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0193",
+      "event_time": "2026-05-12T14:22:31+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 61,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0194",
+      "event_time": "2026-05-12T14:22:38+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1"
+        ],
+        "failed_rule": "r2",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": true,
+      "change_kind": "nothing_to_offer",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 18,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "601100"
+      }
+    },
+    {
+      "session_id": "s-0195",
+      "event_time": "2026-05-12T14:22:45+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0196",
+      "event_time": "2026-05-12T14:22:52+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3"
+        ],
+        "failed_rule": "r4",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 25,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "511111"
+      }
+    },
+    {
+      "session_id": "s-0197",
+      "event_time": "2026-05-12T14:22:59+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 66,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    },
+    {
+      "session_id": "s-0198",
+      "event_time": "2026-05-12T14:23:06+00:00",
+      "base": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "no_offer",
+        "matched_rules": [],
+        "failed_rule": "r1",
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "standard",
+        "customer.age": 70,
+        "customer.loyalty_segment": "member",
+        "customer.cc_bin": "377712"
+      }
+    },
+    {
+      "session_id": "s-0199",
+      "event_time": "2026-05-12T14:23:13+00:00",
+      "base": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "proposed": {
+        "decision": "offer",
+        "matched_rules": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "failed_rule": null,
+        "fallback_reason": null
+      },
+      "changed": false,
+      "change_kind": "unchanged",
+      "violation": null,
+      "attributes_snapshot": {
+        "purchase.seat_type": "premium",
+        "customer.age": 36,
+        "customer.loyalty_segment": "guest",
+        "customer.cc_bin": "222300"
+      }
+    }
+  ],
+  "failclosed_proofs": [
+    {
+      "injection": "timeout",
+      "decision": "no_offer",
+      "fallback_reason": "decision_timeout",
+      "checkout_preserved": true,
+      "offer_state_created": false,
+      "proof_valid": true
+    },
+    {
+      "injection": "invalid_output",
+      "decision": "no_offer",
+      "fallback_reason": "invalid_output",
+      "checkout_preserved": true,
+      "offer_state_created": false,
+      "proof_valid": true
+    },
+    {
+      "injection": "stale_identity",
+      "decision": "no_offer",
+      "fallback_reason": "stale_identity",
+      "checkout_preserved": true,
+      "offer_state_created": false,
+      "proof_valid": true
+    }
+  ],
+  "ope_prescreen": {
+    "ess": 30,
+    "coverage": 0.15,
+    "support": "SUFFICIENT",
+    "refuses_estimate": false,
+    "min_ess": 30,
+    "note": "Support-guard only, not a lift estimate. Real off-policy evaluation needs logged action propensities; the online holdout remains mandatory."
+  },
+  "verdict": {
+    "value": "BLOCKED",
+    "reasons": [
+      "missing_attribute_semantics FAIL: Rule op change flips missing-'customer.cc_bin' sessions from EXCLUDED to ELIGIBLE: 21 sessions silently widened."
+    ],
+    "holdout_config": null
+  },
+  "context_toggles_applied": [],
+  "audit": [
+    {
+      "seq": 0,
+      "event_type": "REPLAY_STARTED",
+      "payload": {
+        "base_version": "V17",
+        "proposed_version": "V18",
+        "session_seed": 42,
+        "session_count": 200,
+        "injections": [
+          "timeout",
+          "invalid_output",
+          "stale_identity"
+        ]
+      },
+      "content_hmac": "0792398ff3952602600651f02d11ac1ed4a9be638df50a52a6db4bdc8f6f3e13"
+    },
+    {
+      "seq": 1,
+      "event_type": "CONSTRAINTS_EVALUATED",
+      "payload": {
+        "results": [
+          {
+            "key": "latency_budget",
+            "result": "PASS",
+            "detail": "Latency budget 200ms within current 200ms.",
+            "grounding": "Rokt publishes \"sub-200ms latency\"; <rokt-thank-you fallback-timeout> defaults to 5000ms."
+          },
+          {
+            "key": "fallback_explicit",
+            "result": "PASS",
+            "detail": "Fallback is No Offer Rendered.",
+            "grounding": "Rokt: \"If no offer is eligible, the wrapped content renders normally.\" Fallback must be No Offer Rendered."
+          },
+          {
+            "key": "consent",
+            "result": "PASS",
+            "detail": "No sensitive attribute used without consent.",
+            "grounding": "Rokt exposes noFunctional/noTargeting consent flags; sensitive PII must be consent-gated."
+          },
+          {
+            "key": "brand_safety",
+            "result": "PASS",
+            "detail": "Offer category 'parking' compliant.",
+            "grounding": "Rokt Ads policies prohibit categories (gambling/alcohol/tobacco) without age gating."
+          },
+          {
+            "key": "frequency_cap",
+            "result": "WARN",
+            "detail": "Impression cap raised 1 -> 3 per 30d.",
+            "grounding": "Frequency management: raising impression caps increases exposure/fatigue risk."
+          },
+          {
+            "key": "holdout_required",
+            "result": "PASS",
+            "detail": "Mandatory holdout retained.",
+            "grounding": "Rokt One Platform Page Holdout: a recommended 5% control before rollout."
+          },
+          {
+            "key": "requires_reapproval",
+            "result": "WARN",
+            "detail": "Material change to disclaimers \u2014 this change re-enters Rokt's manual approval queue.",
+            "grounding": "Rokt: \"Material changes to a campaign's privacy policy, disclaimers, or terms and conditions trigger the approval process.\""
+          },
+          {
+            "key": "immutable_field_guard",
+            "result": "PASS",
+            "detail": "No immutable field changed.",
+            "grounding": "Rokt Manage-a-campaign: objective/country/language/timezone cannot be edited \u2014 \"you need to create a new campaign\"."
+          },
+          {
+            "key": "plausibility",
+            "result": "PASS",
+            "detail": "Policy values within plausible ranges.",
+            "grounding": "Operational guard (not a Rokt-doc rule): catch data-entry errors before subtler checks \u2014 inspired by ShelfTrace's execution-gate plausibility guard."
+          },
+          {
+            "key": "missing_attribute_semantics",
+            "result": "FAIL",
+            "detail": "Rule op change flips missing-'customer.cc_bin' sessions from EXCLUDED to ELIGIBLE: 21 sessions silently widened.",
+            "grounding": "Rokt Audience targeting: \"Include (is not in)\" vs \"Exclude (is in)\" differ only on MISSING values."
+          }
+        ]
+      },
+      "content_hmac": "0e4ea71adb79de63d0aa35ce23b735450fc11653a0db9b9149093822d60e5ac3"
+    },
+    {
+      "seq": 2,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0007",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "61eb6c4aced0995b9d0567c5ab51de6434e6b0b7aaa8395f02c71be5257c813c"
+    },
+    {
+      "seq": 3,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0011",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "a2e97227184be16f8d4bf326f7b9392566f7e1ff21c955da8b678348a98eed02"
+    },
+    {
+      "seq": 4,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0016",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "5dbcd6d2d2d6f8e8d02c74732489db4c5c285ed0ec60b595ae28c4ea6b0ee687"
+    },
+    {
+      "seq": 5,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0018",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "8c534d58047e32e1e1a049edfaf79e0339ec727e02e5efef382ffd6017ad3a0d"
+    },
+    {
+      "seq": 6,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0021",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "e486d9fc680cfdf5d60fe0b22119f58454c97d891cf5b013caf527f5aca8333c"
+    },
+    {
+      "seq": 7,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0023",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "809b4eee3a310817bc0ddde427ba19bba3a84960b77cdd31cb26e2e0a68ac15b"
+    },
+    {
+      "seq": 8,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0025",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "c029b7aee5d1ef51a4c0f312b61fc76a9849db0851a1b0f3bf710b652c5b3094"
+    },
+    {
+      "seq": 9,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0027",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "5984b4a82b281d6dca4bcb511f16d3c1feda93b507854499b91c3803c9940ae5"
+    },
+    {
+      "seq": 10,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0033",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "812b4b971f25a233791db379d479ef097a0bb1dafceed86ff101213efc9a2489"
+    },
+    {
+      "seq": 11,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0040",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "d656d6b109bda152b6fa880b1425bd2358f6ca442e906a4aa57f241ed8d7e4a4"
+    },
+    {
+      "seq": 12,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0046",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "c9e9e35a673223f2b8d26ed2fdad4fe39c0d098477d1b90efe1bb80776b96b63"
+    },
+    {
+      "seq": 13,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0059",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "52f31cfbb0bd74740ee86999d8bc2831792248352a29b6d08647e45fcda2b51b"
+    },
+    {
+      "seq": 14,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0068",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "2b4528bc37e42b97c55bbb4f9a2086babfb12a3724a80509a11efe8c091ae2a8"
+    },
+    {
+      "seq": 15,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0069",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "73fa0edd8aa89fdba833dd1ef2359ff3151819cd7a1422c452090e0195fb33be"
+    },
+    {
+      "seq": 16,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0073",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "f0d845157265936bf47e4bab4cd448c9441758a16134987a13d4475a3d13df0f"
+    },
+    {
+      "seq": 17,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0074",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "a0309335ca2c7d9360622ed479098a66cca030e22f587ce804c7f0fc27e3a4c4"
+    },
+    {
+      "seq": 18,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0086",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "e8818ff949b3d885a5ce15e9e0fd8ab25edc9dc8eba5798d03e430730e2382d4"
+    },
+    {
+      "seq": 19,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0088",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "4b138db17c97b1b29791f5eaf59192b60cfc6076533fb4a46db81fbd1f690c68"
+    },
+    {
+      "seq": 20,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0104",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "14060f34175a9e475bacf32e80b182207851eb10171ca3a639b0f7d6f79ff171"
+    },
+    {
+      "seq": 21,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0114",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "ff06c655e7ab8c22830339d63dc135a4584b5a4b104b62653c2d68fb5bd0c74c"
+    },
+    {
+      "seq": 22,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0152",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "22bfcf3e6040a9707e03a1d5ab0c92f7361323bca86906ad52e8e1d24b630340"
+    },
+    {
+      "seq": 23,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0153",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "c29dc52797ef562f6bf181dd30cf023aa949093cc2b8bdf90ae6c732f858cc70"
+    },
+    {
+      "seq": 24,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0154",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "e6ccf5dfc132ca6da78710544a1841de3b32ce9d28e9e807fe17a2f7900bb680"
+    },
+    {
+      "seq": 25,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0159",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "9085935e72117ee2a573d335819a0f5951c50ff1e5d03001d0b2264c2dff25b5"
+    },
+    {
+      "seq": 26,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0172",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "c4e37abde5cbe7bd80e7ef764a852fb116cb9881a3f65425ed39811d5d923ae2"
+    },
+    {
+      "seq": 27,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0173",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "d91fd587c9324a9b310079bdaa3c61453ab4ed44687c6d8e56b5e3610925dd54"
+    },
+    {
+      "seq": 28,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0176",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "caf3943d5fe277fad70ecb699398427dcce2dfe39d4c5b04121f4d50eb10e510"
+    },
+    {
+      "seq": 29,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0180",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "d23d8ae99f249c82b1ed158496171930dc36e47b0079f1f48212f6b994ae455f"
+    },
+    {
+      "seq": 30,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0183",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "constraint_violation"
+      },
+      "content_hmac": "37c9c77cbcaee65e6e9b3e9922cfb01fb682981d8f27259f17dde3bc9fa22c2a"
+    },
+    {
+      "seq": 31,
+      "event_type": "DECISION_RECORDED",
+      "payload": {
+        "session_id": "s-0194",
+        "base": "no_offer",
+        "proposed": "offer",
+        "change_kind": "nothing_to_offer"
+      },
+      "content_hmac": "e47e1a690420ac085821db342f84b5c0e2ba61722e7b220cc5a98b61cf2c287d"
+    },
+    {
+      "seq": 32,
+      "event_type": "FAILCLOSED_PROVEN",
+      "payload": {
+        "proofs": [
+          {
+            "injection": "timeout",
+            "decision": "no_offer",
+            "fallback_reason": "decision_timeout",
+            "checkout_preserved": true,
+            "offer_state_created": false,
+            "proof_valid": true
+          },
+          {
+            "injection": "invalid_output",
+            "decision": "no_offer",
+            "fallback_reason": "invalid_output",
+            "checkout_preserved": true,
+            "offer_state_created": false,
+            "proof_valid": true
+          },
+          {
+            "injection": "stale_identity",
+            "decision": "no_offer",
+            "fallback_reason": "stale_identity",
+            "checkout_preserved": true,
+            "offer_state_created": false,
+            "proof_valid": true
+          }
+        ]
+      },
+      "content_hmac": "b148a3214aa171115cfef1c5cd8fd0e0cb1e62498ba908a2ef05b3be0f3cebe8"
+    },
+    {
+      "seq": 33,
+      "event_type": "VERDICT_ISSUED",
+      "payload": {
+        "verdict": {
+          "value": "BLOCKED",
+          "reasons": [
+            "missing_attribute_semantics FAIL: Rule op change flips missing-'customer.cc_bin' sessions from EXCLUDED to ELIGIBLE: 21 sessions silently widened."
+          ],
+          "holdout_config": null
+        },
+        "ope_prescreen": {
+          "ess": 30,
+          "coverage": 0.15,
+          "support": "SUFFICIENT",
+          "refuses_estimate": false,
+          "min_ess": 30,
+          "note": "Support-guard only, not a lift estimate. Real off-policy evaluation needs logged action propensities; the online holdout remains mandatory."
+        }
+      },
+      "content_hmac": "5d371ebacd4dd855995507d24eee2e4637dcd8a5994a33ece7492fa1cbacf30b"
+    }
+  ]
+}

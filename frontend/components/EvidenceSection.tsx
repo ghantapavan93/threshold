@@ -139,7 +139,7 @@ export function EvidenceSection() {
                           </span>
                         </td>
                         <td className="px-3 py-1.5 text-muted">
-                          {formatTime(rec.created_at)}
+                          {rec.created_at ? formatTime(rec.created_at) : "—"}
                         </td>
                         <td
                           className="px-3 py-1.5 text-muted"

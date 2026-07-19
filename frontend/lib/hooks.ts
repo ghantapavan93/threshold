@@ -6,7 +6,13 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
-import { api, ApiError, MERCHANT_ID } from "./api";
+import {
+  api,
+  ApiError,
+  MERCHANT_ID,
+  type SemanticCompileInput,
+  type SimulationInput,
+} from "./api";
 import { uuid } from "./utils";
 import type {
   AuditVerify,
@@ -20,6 +26,8 @@ import type {
   PolicyListItem,
   ReplayJob,
   Scenario,
+  SemanticDelta,
+  SimulationResult,
 } from "./schemas";
 
 /** Do not retry contract-validation or 4xx errors; they will not self-heal. */
@@ -122,6 +130,28 @@ export type ConversionInput = {
   currency: string;
   idempotencyKey?: string;
 };
+
+/** Moment Forge — Semantic Change Compiler mutation (real backend). */
+export function useSemanticCompile(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<SemanticDelta, ApiError, SemanticCompileInput> {
+  return useMutation<SemanticDelta, ApiError, SemanticCompileInput>({
+    mutationKey: ["semantic-compile", merchantId],
+    mutationFn: (input) => api.semanticCompile(merchantId, input),
+    retry: retryPolicy,
+  });
+}
+
+/** Moment Forge — Domain Evolution Simulator mutation (real backend). */
+export function useSimulation(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<SimulationResult, ApiError, SimulationInput> {
+  return useMutation<SimulationResult, ApiError, SimulationInput>({
+    mutationKey: ["simulation", merchantId],
+    mutationFn: (input) => api.simulate(merchantId, input),
+    retry: retryPolicy,
+  });
+}
 
 export function useConversion(
   merchantId: string = MERCHANT_ID,

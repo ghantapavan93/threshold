@@ -1,0 +1,143 @@
+{
+  "base_version": "V17",
+  "proposed_version": "V18",
+  "changes": [
+    {
+      "path": "frequency_cap.max_impressions",
+      "kind": "modified",
+      "before": 1,
+      "after": 3,
+      "risk": "frequency_increase"
+    },
+    {
+      "path": "eligibility_rules.r2.value",
+      "kind": "modified",
+      "before": 25,
+      "after": 18,
+      "risk": "eligibility_widened"
+    },
+    {
+      "path": "eligibility_rules.r4.op",
+      "kind": "modified",
+      "before": "include_is_not_in",
+      "after": "exclude_is_in",
+      "risk": "missing_attribute_flip"
+    }
+  ],
+  "summary": {
+    "added": 0,
+    "removed": 0,
+    "modified": 3
+  },
+  "context_map": {
+    "contexts": [
+      {
+        "id": "purchase",
+        "label": "Purchase",
+        "rule_ids": [
+          "r1"
+        ],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      },
+      {
+        "id": "customer",
+        "label": "Customer",
+        "rule_ids": [
+          "r2",
+          "r3",
+          "r4"
+        ],
+        "change_count": 2,
+        "max_severity": "critical",
+        "muted": false
+      },
+      {
+        "id": "offer",
+        "label": "Offer",
+        "rule_ids": [],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      },
+      {
+        "id": "delivery",
+        "label": "Delivery",
+        "rule_ids": [],
+        "change_count": 1,
+        "max_severity": "warning",
+        "muted": false
+      },
+      {
+        "id": "governance",
+        "label": "Governance",
+        "rule_ids": [],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "customer",
+        "to": "offer",
+        "relation": "eligibility_gate"
+      },
+      {
+        "from": "purchase",
+        "to": "offer",
+        "relation": "eligibility_gate"
+      },
+      {
+        "from": "delivery",
+        "to": "offer",
+        "relation": "serving_guard"
+      },
+      {
+        "from": "governance",
+        "to": "*",
+        "relation": "policy_gate"
+      }
+    ]
+  },
+  "meaning_changes": [
+    {
+      "path": "frequency_cap.max_impressions",
+      "risk": "frequency_increase",
+      "context": "delivery",
+      "severity": "warning",
+      "before_semantics": "1",
+      "after_semantics": "3",
+      "explanation": "Impression cap raised \u2014 the same customer can be shown the offer more often.",
+      "grounding": "Rokt frequency management: raising impression caps increases exposure/fatigue."
+    },
+    {
+      "path": "eligibility_rules.r2.value",
+      "risk": "eligibility_widened",
+      "context": "customer",
+      "severity": "warning",
+      "before_semantics": "25",
+      "after_semantics": "18",
+      "explanation": "Threshold loosened / rule removed \u2014 more sessions become eligible.",
+      "grounding": "Loosening a numeric gate or removing a rule widens the eligible audience."
+    },
+    {
+      "path": "eligibility_rules.r4.op",
+      "risk": "missing_attribute_flip",
+      "context": "customer",
+      "severity": "critical",
+      "before_semantics": "MISSING \u2192 EXCLUDED",
+      "after_semantics": "MISSING \u2192 INCLUDED",
+      "explanation": "Every session with no cc_bin flips from excluded to eligible.",
+      "grounding": "Rokt Audience targeting: 'Include (is not in)' vs 'Exclude (is in)' differ only on MISSING values."
+    }
+  ],
+  "missing_attribute_inversion": {
+    "detected": true,
+    "rule_id": "r4",
+    "attribute": "customer.cc_bin",
+    "direction": "include_is_not_in\u2192exclude_is_in",
+    "effect": "missing values silently become eligible"
+  }
+}
