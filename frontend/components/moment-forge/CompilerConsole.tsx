@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useSemanticCompile } from "@/lib/hooks";
 import type { SemanticDelta, Severity } from "@/lib/schemas";
-import { compileFixture, type ForgeScenario } from "./fixtures";
+import { compileFixture, SCENARIOS, scenarioVersion, type ForgeScenario } from "./fixtures";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Semantic Change Compiler (Fig. 04) — a LIVE console in the essay.
@@ -40,7 +40,7 @@ export function CompilerConsole({ offline }: { offline: boolean }) {
   const run = async () => {
     setStatus("loading");
     setErr(null);
-    const proposed = scenario === "trap" ? "V18" : "V18-safe";
+    const proposed = scenarioVersion(scenario);
     if (offline) {
       try {
         loadFixture(scenario);
@@ -81,18 +81,19 @@ export function CompilerConsole({ offline }: { offline: boolean }) {
         <span className="text-teal">forge$</span>
         <span>semantic-compile</span>
         <span className="text-text">V17 →</span>
-        {(["trap", "safe"] as ForgeScenario[]).map((s) => (
+        {SCENARIOS.map((s) => (
           <button
-            key={s}
+            key={s.id}
             type="button"
-            aria-pressed={scenario === s}
-            onClick={() => setScenario(s)}
+            aria-pressed={scenario === s.id}
+            onClick={() => setScenario(s.id)}
+            title={s.label}
             className={
               "inline-flex min-h-[36px] items-center rounded-md border px-2.5 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0 " +
-              (scenario === s ? "border-teal/50 bg-teal/10 text-teal" : "border-border text-muted hover:text-text")
+              (scenario === s.id ? "border-teal/50 bg-teal/10 text-teal" : "border-border text-muted hover:text-text")
             }
           >
-            {s === "trap" ? "V18 (trap)" : "V18-safe"}
+            {s.version}
           </button>
         ))}
         <label className={"ml-1 inline-flex items-center gap-1.5 " + (offline ? "opacity-50" : "")}>
@@ -117,7 +118,7 @@ export function CompilerConsole({ offline }: { offline: boolean }) {
 
       {offline ? (
         <p className="mt-3 rounded-md border border-amber/40 bg-amber/10 px-3 py-2 font-mono text-[11px] text-amber">
-          ◷ Offline — showing recorded engine output (seed 42, V17→{scenario === "trap" ? "V18" : "V18-safe"}).
+          ◷ Offline — showing recorded engine output (seed 42, V17→{scenarioVersion(scenario)}).
           Editing and context toggles are inactive on recorded data; free-form editing needs the live backend.
         </p>
       ) : null}

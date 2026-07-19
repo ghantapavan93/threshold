@@ -17,6 +17,11 @@ _REASONS = {
     "stale_identity": "stale_identity",       # identity unresolved
 }
 
+# The only injection kinds the fail-closed prover models. An unknown kind must be
+# rejected at the API boundary (422) — never silently treated as "no injection",
+# which would let `prove` report a spurious PASS/FAIL depending on the sample session.
+VALID_INJECTIONS = frozenset(_REASONS)
+
 
 def _guarded_decide(kind: str, attrs: dict, policy: Policy) -> Decision:
     try:

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CONTEXTS, EDGES, PATTERNS, type BC, type Edge } from "./content";
+import { CONTEXTS, EDGES, PATTERNS, TACTICAL, type BC, type Edge } from "./content";
 
 /* ────────────────────────────────────────────────────────────────────────────
    The Living Bounded-Context Map (Fig. 02) — the page's signature interaction.
@@ -118,6 +118,63 @@ function DetailPanel({
           ))}
         </div>
       </div>
+
+      {/* Tactical detail — aggregate, invariants, domain events, live guards. */}
+      {(() => {
+        const t = TACTICAL[ctx.id];
+        if (!t) return null;
+        return (
+          <div className="mt-4 space-y-3 border-t border-border/60 pt-3">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">Aggregate</p>
+              <p className="mt-1 font-mono text-[11px] leading-relaxed text-text">{t.aggregate}</p>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">Invariants it protects</p>
+              <ul className="mt-1 space-y-1">
+                {t.invariants.map((iv, i) => (
+                  <li key={i} className="flex gap-1.5 text-[11px] leading-relaxed text-muted">
+                    <span aria-hidden className="text-teal">✓</span>
+                    <span>{iv}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">Domain events</p>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {t.events.map((ev) => (
+                  <span key={ev} className="rounded border border-border/70 bg-surface-2/50 px-1.5 py-0.5 font-mono text-[10px] text-muted">
+                    {ev}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {t.constraints.length ? (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">Live engine guards</p>
+                <div className="mt-1 space-y-1">
+                  {t.constraints.map((c) => (
+                    <div key={c.key} className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      <span className="rounded border border-teal/40 bg-teal/[0.06] px-1.5 py-0.5 font-mono text-teal">{c.key}</span>
+                      {c.live ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-teal/40 px-1.5 py-0.5 font-mono text-[9px] uppercase text-teal">
+                          <span aria-hidden>●</span> live
+                        </span>
+                      ) : null}
+                      <span className="text-muted">{c.note}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <p className="font-mono text-[10px] leading-relaxed text-muted">
+              Cited: research/rokt/27 §2/§5/§6 · docs/MOMENT_FORGE_ALGORITHMS.md
+            </p>
+          </div>
+        );
+      })()}
+
       <div className="mt-4 min-h-0 flex-1">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
           Relationships ({rels.length})

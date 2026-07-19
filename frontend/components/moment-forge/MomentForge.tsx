@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useHealth } from "@/lib/hooks";
+import { scrollToId } from "@/lib/scroll";
 import { MaskText, Reveal } from "@/components/builder/anim";
 import { TransactionMomentMotif } from "@/components/visual/illustrations";
 import {
@@ -14,10 +16,13 @@ import {
 } from "./chassis";
 import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
+import { TranslationMap } from "./TranslationMap";
 import { CompilerConsole } from "./CompilerConsole";
 import { FractureScene } from "./FractureScene";
-import { LawGallery, FutureGallery, EvidenceIndex } from "./laws-future";
+import { LawGallery, EvidenceIndex } from "./laws-future";
 import { RippleSim } from "./RippleSim";
+import { Horizon } from "./horizon/Horizon";
+import type { ForgeScenario } from "./fixtures";
 
 /* ────────────────────────────────────────────────────────────────────────────
    /moment-forge — an architectural monograph for Rokt's Transaction Moment.
@@ -46,6 +51,13 @@ function Section({
 export function MomentForge() {
   const health = useHealth();
   const offline = health.isError ? health.error.isUnreachable : false;
+
+  // Executable-laws bridge: a law card asks the Simulator to run its scenario.
+  const [simTrigger, setSimTrigger] = useState<{ scenario: ForgeScenario; nonce: number } | null>(null);
+  const runLaw = (scenario: ForgeScenario) => {
+    setSimTrigger({ scenario, nonce: Date.now() });
+    scrollToId("sec-sim");
+  };
 
   return (
     <div className="relative min-h-screen text-text">
@@ -129,6 +141,27 @@ export function MomentForge() {
             </Plate>
           </Section>
 
+          {/* ── 3b · Translation Map [LIVE] — the honest self-critique closed ─── */}
+          <Section id="sec-translation" label="Translation Map — conversion across an anticorruption layer">
+            <Reveal>
+              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
+                An honest self-critique: the missing-attribute inversion never actually <em>crosses</em> a
+                boundary — it lives in one function. Here the word{" "}
+                <span className="text-text">&ldquo;conversion&rdquo;</span> genuinely crosses a real
+                anticorruption layer (Measurement → Incrementality) in deterministic code. Toggle the ACL off and
+                a real number inflates at the wall — the leak the ACL exists to stop.
+              </p>
+            </Reveal>
+            <Plate
+              figure="03b"
+              title="The Translation Map"
+              tone="crimson"
+              caption="LIVE · POST /translation-audit. The Conformist (identity) path over-counts lift; the ACL path excludes non-incremental conversions. The one synthetic baseline is labelled; every number is computed live, never asserted."
+            >
+              <TranslationMap offline={offline} />
+            </Plate>
+          </Section>
+
           {/* ── 4 · Semantic Change Compiler [LIVE] ─────────────────────────── */}
           <Section id="sec-compiler" label="Semantic Change Compiler">
             <Reveal>
@@ -170,7 +203,7 @@ export function MomentForge() {
               segments={[{ text: "Laws of the Moment — " }, { text: "the invariants the model must never violate.", className: "gradient-text" }]}
             />
             <div className="mt-8">
-              <LawGallery />
+              <LawGallery onRun={runLaw} />
             </div>
           </Section>
 
@@ -189,30 +222,12 @@ export function MomentForge() {
               tone="teal"
               caption="LIVE · POST /simulations — ephemeral, non-persisting. Impact is qualitative (the highlighted set + the decision diff), never a fabricated blast-radius percentage."
             >
-              <RippleSim offline={offline} />
+              <RippleSim offline={offline} trigger={simTrigger} />
             </Plate>
           </Section>
 
-          {/* ── 8 · Future bounded-context hypotheses ───────────────────────── */}
-          <Section id="sec-future" label="Future bounded-context hypotheses">
-            <Eyebrow>Fig. 08 · open questions</Eyebrow>
-            <MaskText
-              as="h2"
-              className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-              segments={[{ text: "Where the domain could evolve — " }, { text: "hypotheses, not roadmap.", className: "gradient-text" }]}
-            />
-            <Reveal delay={0.05}>
-              <p className="mt-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                Rokt is sophisticated and almost certainly has internal thinking on all of these. Each is
-                where I&apos;d push the domain next — a revenue surface wrapped around the incrementality-proven
-                Decisioning Layer, tied to a verified public signal, proven only by a holdout. Every card is a
-                labelled hypothesis.
-              </p>
-            </Reveal>
-            <div className="mt-8">
-              <FutureGallery />
-            </div>
-          </Section>
+          {/* ── 8 · The Horizon — cinematic future hypotheses (replaces the gallery) ── */}
+          <Horizon />
 
           {/* ── 9 · Implementation-evidence cross-links ─────────────────────── */}
           <Section id="sec-evidence" label="Implementation-evidence cross-links">

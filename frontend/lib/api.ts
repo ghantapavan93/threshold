@@ -14,6 +14,7 @@ import {
   ScenarioListSchema,
   SemanticDeltaSchema,
   SimulationResultSchema,
+  TranslationAuditSchema,
 } from "./schemas";
 import type {
   AuditRecord,
@@ -30,7 +31,16 @@ import type {
   Scenario,
   SemanticDelta,
   SimulationResult,
+  TranslationAudit,
 } from "./schemas";
+
+/** Moment Forge — Translation Map request. */
+export type TranslationAuditInput = {
+  term: string;
+  baseline_rate: number;
+  seed?: number;
+  count?: number;
+};
 
 /** Moment Forge — Semantic Change Compiler request. */
 export type SemanticCompileInput = {
@@ -341,6 +351,19 @@ export const api = {
     signal?: AbortSignal,
   ): Promise<SimulationResult> {
     return requestData(`${base(merchantId)}/simulations`, SimulationResultSchema, {
+      method: "POST",
+      body,
+      signal,
+    });
+  },
+
+  /** Moment Forge — Translation Map: "conversion" across an ACL (read-only, pure). */
+  translationAudit(
+    merchantId: string,
+    body: TranslationAuditInput,
+    signal?: AbortSignal,
+  ): Promise<TranslationAudit> {
+    return requestData(`${base(merchantId)}/translation-audit`, TranslationAuditSchema, {
       method: "POST",
       body,
       signal,

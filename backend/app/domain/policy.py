@@ -24,6 +24,10 @@ Operator = Literal[
 
 PROHIBITED_CATEGORIES = {"gambling", "alcohol", "tobacco"}
 
+# Operators that test list membership; their `value` MUST be a list. Enforced at the
+# boundary so a malformed policy is a clean 422 rather than a 500 deep in `evaluate`.
+_MEMBERSHIP_OPS = {"in", "include_is_not_in", "exclude_is_in"}
+
 
 class Rule(BaseModel):
     id: str
@@ -32,6 +36,18 @@ class Rule(BaseModel):
     value: Any = None
     sensitive: bool = False
     consent_required: bool = False
+
+    @field_validator("value")
+    @classmethod
+    def _membership_value_is_list(cls, v: Any, info) -> Any:
+        # `op` is validated before `value` (declared earlier), so it is in info.data
+        # unless it failed its own Literal check (then op is absent and we skip —
+        # the invalid-operator error already fires).
+        op = info.data.get("op")
+        if op in _MEMBERSHIP_OPS and not isinstance(v, list):
+            raise ValueError(
+                f"operator '{op}' requires a list value, got {type(v).__name__}")
+        return v
 
 
 class FrequencyCap(BaseModel):

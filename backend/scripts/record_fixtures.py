@@ -31,9 +31,12 @@ OUT_DIR = (pathlib.Path(__file__).resolve().parent.parent.parent
            / "frontend" / "lib" / "fixtures" / "momentforge")
 
 CASES = [
-    # (scenario, proposed_version)
-    ("trap", "V18"),
-    ("safe", "V18-safe"),
+    # (scenario, proposed_version) — one per real seeded law the engine enforces.
+    ("trap", "V18"),               # missing-attribute inversion  → BLOCKED
+    ("safe", "V18-safe"),          # the clean change             → ELIGIBLE_FOR_HOLDOUT
+    ("fatfinger", "V18-fatfinger"),# plausibility guard (age = 2) → BLOCKED
+    ("consent", "V18-consent"),    # consent guard (sensitive)    → BLOCKED
+    ("immutable", "V18-immutable"),# immutable-field guard        → BLOCKED
 ]
 
 
@@ -70,6 +73,15 @@ def main() -> None:
             )
             simulate_resp.raise_for_status()
             _write(f"simulate.{scenario}.json", simulate_resp.content)
+
+        # Translation Map (§3): the ACL seam made executable. One canonical fixture at
+        # the demo seed — REAL engine output over the seeded conversion corpus.
+        translation_resp = client.post(
+            f"{BASE}/translation-audit",
+            json={"term": "conversion", "seed": SEED, "count": COUNT},
+        )
+        translation_resp.raise_for_status()
+        _write("translation-audit.json", translation_resp.content)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,8 @@ import {
   SilentWideningDiagram,
   TransactionMomentMotif,
 } from "@/components/visual/illustrations";
-import { EVIDENCE, FUTURE_COMPACT, FUTURE_FEATURED, LAWS, type Law } from "./content";
+import { EVIDENCE, FUTURE_COMPACT, FUTURE_FEATURED, LAW_SCENARIOS, LAWS, type Law } from "./content";
+import type { ForgeScenario } from "./fixtures";
 
 function Motif({ kind }: { kind: Law["motif"] }) {
   const cls = "h-16 w-auto";
@@ -20,29 +21,46 @@ function Motif({ kind }: { kind: Law["motif"] }) {
   return <TransactionMomentMotif className={cls} />;
 }
 
-// ── Laws of the Moment — numbered codex ──────────────────────────────────────
-export function LawGallery() {
+// ── Laws of the Moment — numbered codex (executable where a scenario backs it) ─
+export function LawGallery({ onRun }: { onRun: (s: ForgeScenario) => void }) {
   return (
     <StaggerGroup as="ol" className="grid list-none gap-4 md:grid-cols-2" stagger={0.05}>
-      {LAWS.map((l) => (
-        <li key={l.n}>
-          <article className="holo-card relative h-full overflow-hidden rounded-2xl p-5">
-            <span aria-hidden className="pointer-events-none absolute -right-2 -top-3 font-mono text-6xl font-bold text-text/[0.06]">
-              {l.n}
-            </span>
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="max-w-[70%] text-base font-semibold tracking-tight text-text">
-                <span className="sr-only">Law {l.n}: </span>
-                {l.title}
-              </h3>
-              <div className="shrink-0 opacity-80">
-                <Motif kind={l.motif} />
+      {LAWS.map((l) => {
+        const scenario = LAW_SCENARIOS[l.n];
+        return (
+          <li key={l.n}>
+            <article className="holo-card relative flex h-full flex-col overflow-hidden rounded-2xl p-5">
+              <span aria-hidden className="pointer-events-none absolute -right-2 -top-3 font-mono text-6xl font-bold text-text/[0.06]">
+                {l.n}
+              </span>
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="max-w-[70%] text-base font-semibold tracking-tight text-text">
+                  <span className="sr-only">Law {l.n}: </span>
+                  {l.title}
+                </h3>
+                <div className="shrink-0 opacity-80">
+                  <Motif kind={l.motif} />
+                </div>
               </div>
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{l.body}</p>
-          </article>
-        </li>
-      ))}
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{l.body}</p>
+              {scenario ? (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => onRun(scenario)}
+                    className="press inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-teal/40 bg-teal/10 px-3 py-1.5 font-mono text-xs font-semibold text-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
+                  >
+                    ▸ Run this law <span aria-hidden>→</span>
+                  </button>
+                  <span className="ml-2 font-mono text-[10px] text-muted">runs it live in the Simulator</span>
+                </div>
+              ) : (
+                <p className="mt-3 font-mono text-[10px] text-muted">invariant · no single scenario</p>
+              )}
+            </article>
+          </li>
+        );
+      })}
     </StaggerGroup>
   );
 }
@@ -131,6 +149,19 @@ export function EvidenceIndex() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <Link
+          href="/moment-forge/system"
+          className="press inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-teal/40 bg-teal/10 px-5 py-2.5 text-sm font-semibold text-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
+        >
+          Enter Volume II · The System <span aria-hidden>→</span>
+        </Link>
+        <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-muted">
+          The domain model has a technical architecture underneath — a C4 zoom, the two live paths, and the
+          determinism boundary the build actually enforces.
+        </p>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">

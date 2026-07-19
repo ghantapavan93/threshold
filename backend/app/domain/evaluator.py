@@ -14,10 +14,13 @@ MISSING = object()
 
 
 class InvalidComparison(Exception):
-    """Raised inside `eval_rule` when a `gte`/`lte` rule is applied to a value that
-    is not comparable as a number (a bool, or a non-numeric string). It is caught
-    by `evaluate`, which fails the rule closed (no_offer) rather than letting the
-    exception escape the pure core. See E8/E8b in docs/MOMENT_FORGE_ALGORITHMS.md."""
+    """Raised inside `eval_rule` when a rule cannot be evaluated against a value:
+    a `gte`/`lte` rule applied to a non-numeric/bool value (E8/E8b), OR a membership
+    rule (`in`/`include_is_not_in`/`exclude_is_in`) whose `value` is not a list. It is
+    caught by `evaluate`, which fails the rule closed (no_offer) rather than letting the
+    exception escape the pure core, keeping `evaluate` a TOTAL function. See E8/E8b in
+    docs/MOMENT_FORGE_ALGORITHMS.md. (The Rule model also rejects a non-list membership
+    value at construction, so this guard is defense-in-depth for hand-built Rules.)"""
 
 
 @dataclass(frozen=True)
@@ -57,16 +60,23 @@ def eval_rule(rule: Rule, attrs: dict) -> bool:
         if not present:
             return False
         return _num_compare(value, rule.value, "lte")
-    if rule.op == "in":
-        return present and value in rule.value
-    if rule.op == "include_is_not_in":
-        # Rokt "Include (is not in)": eligible ONLY if present AND not in list.
-        # MISSING -> EXCLUDED.
-        return present and value not in rule.value
-    if rule.op == "exclude_is_in":
-        # Rokt "Exclude (is in)": excluded only if present AND in list.
+    if rule.op in ("in", "include_is_not_in", "exclude_is_in"):
+        values = rule.value
+        if not isinstance(values, (list, tuple)):
+            # A membership op needs a list to test against. A scalar/None value is a
+            # malformed rule: fail CLOSED rather than let `x in None` (TypeError) or a
+            # surprising substring match (`"a" in "abc"`) escape the pure core.
+            raise InvalidComparison(
+                f"operator '{rule.op}' requires a list value, got {type(values).__name__}")
+        if rule.op == "in":
+            return present and value in values
+        if rule.op == "include_is_not_in":
+            # Rokt "Include (is not in)": eligible ONLY if present AND not in list.
+            # MISSING -> EXCLUDED.
+            return present and value not in values
+        # exclude_is_in — Rokt "Exclude (is in)": excluded only if present AND in list.
         # MISSING -> INCLUDED. Present & not in list -> INCLUDED.
-        return (not present) or (value not in rule.value)
+        return (not present) or (value not in values)
     raise ValueError(f"unknown operator: {rule.op}")
 
 

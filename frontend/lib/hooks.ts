@@ -12,6 +12,7 @@ import {
   MERCHANT_ID,
   type SemanticCompileInput,
   type SimulationInput,
+  type TranslationAuditInput,
 } from "./api";
 import { uuid } from "./utils";
 import type {
@@ -28,6 +29,7 @@ import type {
   Scenario,
   SemanticDelta,
   SimulationResult,
+  TranslationAudit,
 } from "./schemas";
 
 /** Do not retry contract-validation or 4xx errors; they will not self-heal. */
@@ -149,6 +151,17 @@ export function useSimulation(
   return useMutation<SimulationResult, ApiError, SimulationInput>({
     mutationKey: ["simulation", merchantId],
     mutationFn: (input) => api.simulate(merchantId, input),
+    retry: retryPolicy,
+  });
+}
+
+/** Moment Forge — Translation Map mutation (real backend). */
+export function useTranslationAudit(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<TranslationAudit, ApiError, TranslationAuditInput> {
+  return useMutation<TranslationAudit, ApiError, TranslationAuditInput>({
+    mutationKey: ["translation-audit", merchantId],
+    mutationFn: (input) => api.translationAudit(merchantId, input),
     retry: retryPolicy,
   });
 }

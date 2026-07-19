@@ -329,7 +329,123 @@ export const LAWS: Law[] = [
   { n: "11", title: "Tenant scoping", body: "All queries scoped by merchant_id; one merchant's data is never returned for another.", motif: "shield" },
   { n: "12", title: "WHS exclusion is global and permanent", body: "Once a shopper is a Would-Have-Seen member, they are excluded from all future opportunities across all surfaces — append-only, exactly-once, fail-closed.", motif: "moment" },
   { n: "13", title: "Suppression is a decision, not an absence", body: "Every No Offer Rendered records why. A deliberate “show nothing” is a first-class, audited core output — distinct from an integration failure.", motif: "failclosed" },
+  { n: "14", title: "Plausibility guard", body: "A value that parses but is implausible (an age typed as “2”) is caught by a deterministic plausibility check before it can silently reshape eligibility — a fat-finger is not a valid policy.", motif: "widening" },
 ];
+
+/** Laws with a real seeded scenario are executable — clicking runs it live in the
+ *  Simulator. Keyed by law number. Laws not listed here stay static (no fake run). */
+export const LAW_SCENARIOS: Record<string, "trap" | "safe" | "fatfinger" | "consent" | "immutable"> = {
+  "02": "safe", // Holdout is the only causal mechanism → clean change is eligible
+  "05": "immutable", // Immutable policy versions → US→CA needs reapproval
+  "07": "consent", // Single enforcement point for hard constraints → consent guard
+  "08": "trap", // Missing-attribute safety → the inversion
+  "14": "fatfinger", // Plausibility guard → age typed as 2
+};
+
+// ── The seven real policy operators (for the inline rule editor) ─────────────
+export type OperatorInfo = { op: string; label: string; note: string };
+export const OPERATORS: OperatorInfo[] = [
+  { op: "equals", label: "equals", note: "present AND value equals exactly" },
+  { op: "not_equals", label: "not equals", note: "present AND value differs" },
+  { op: "gte", label: "≥ (at least)", note: "numeric lower bound" },
+  { op: "lte", label: "≤ (at most)", note: "numeric upper bound" },
+  { op: "in", label: "in", note: "present AND value in the list" },
+  { op: "include_is_not_in", label: "include · is not in", note: "MISSING → EXCLUDED (conservative)" },
+  { op: "exclude_is_in", label: "exclude · is in", note: "MISSING → INCLUDED (the trap)" },
+];
+
+// ── Tactical detail per bounded context (strategic ↔ tactical ↔ live) ─────────
+// Sourced from research/rokt/27_DDD_DOMAIN_MODEL.md (§2 model boundaries, §5
+// domain events, §6 invariants) and docs/MOMENT_FORGE_ALGORITHMS.md. Constraint
+// keys marked `live` are enforced by the real engine (they appear in replay output).
+export type TacticalConstraint = { key: string; note: string; live: boolean };
+export type Tactical = {
+  aggregate: string;
+  invariants: string[];
+  events: string[];
+  constraints: TacticalConstraint[];
+};
+
+export const TACTICAL: Record<string, Tactical> = {
+  decisioning: {
+    aggregate: "Candidate → NextBestAction (incl. the null “show nothing” candidate)",
+    invariants: [
+      "Deterministic evaluation: a pure function of (event-time snapshot, policy).",
+      "Suppression is a decision, not an absence — every No Offer records why.",
+    ],
+    events: ["OfferSelected", "NoOfferRendered", "PlacementFailed"],
+    constraints: [
+      { key: "evaluator", note: "the pure offer / no_offer decision function", live: true },
+    ],
+  },
+  consent: {
+    aggregate: "EligibilityRule · ConsentState (noFunctional / noTargeting)",
+    invariants: [
+      "Single enforcement point for all hard constraints; a FAIL blocks release.",
+      "A sensitive attribute without consent_required fails closed.",
+    ],
+    events: ["PlacementRequested"],
+    constraints: [
+      { key: "consent", note: "sensitive attribute requires consent", live: true },
+      { key: "brand_safety", note: "brand-safety gate", live: true },
+      { key: "frequency_cap", note: "impression cap", live: true },
+    ],
+  },
+  changesafety: {
+    aggregate: "PolicyVersion (immutable) · PolicyDiff · Verdict · AuditTrail",
+    invariants: [
+      "Immutable policy versions; every decision references exactly one.",
+      "Missing-attribute safety: the inversion is isolated by counterfactual.",
+      "Append-only, tamper-evident audit (per-record HMAC).",
+    ],
+    events: ["PolicyChangeSubmitted", "PolicyChangeBlocked", "PolicyChangeEligibleForHoldout", "RequiresReapprovalDetected"],
+    constraints: [
+      { key: "missing_attribute_semantics", note: "counterfactual inversion check", live: true },
+      { key: "immutable_field_guard", note: "protected fields (country, offer id…)", live: true },
+      { key: "requires_reapproval", note: "material-term change re-enters the queue", live: true },
+      { key: "plausibility", note: "implausible values (fat-finger) rejected", live: true },
+    ],
+  },
+  measurement: {
+    aggregate: "ConversionEvent · AttributionMatch · DedupKey (conversiontype:confirmationref)",
+    invariants: [
+      "Effectively-once financial state over at-least-once delivery.",
+      "“Conversion” here means a deduplicated recorded event — not incremental lift.",
+    ],
+    events: ["ConversionRecorded", "ConversionDeduplicated", "IntegrationDriftDetected"],
+    constraints: [],
+  },
+  incrementality: {
+    aggregate: "Experiment · HoldoutAssignment · WHSMember · LiftEstimate",
+    invariants: [
+      "The holdout is the only causal mechanism; a verdict is only eligibility for it.",
+      "WHS exclusion is global and permanent — fail-closed if the ledger can't confirm.",
+    ],
+    events: ["WHSMemberAssigned", "HeldOutMemberExcluded", "HoldoutMemberLeaked"],
+    constraints: [
+      { key: "holdout_required", note: "a holdout is mandatory", live: true },
+      { key: "support-guard (ope.py)", note: "refuses to estimate on thin support", live: true },
+    ],
+  },
+  loyalty: {
+    aggregate: "RewardLedger (EarnedReward · IssuedReward · RedeemableReward)",
+    invariants: [
+      "“earned == issued == redeemable” only if a reconciliation replay proves it.",
+      "Reward issuance is a booked liability with exactly-once semantics.",
+    ],
+    events: ["RewardEarned", "RewardIssued", "RewardRedeemed"],
+    constraints: [],
+  },
+  agent: {
+    aggregate: "AgentMandate {Intent, Cart, Payment} · AuthorizedActionEnvelope",
+    invariants: [
+      "A signed mandate bounds the offer decision; fail-closed to the consent-safe default.",
+      "Model to the stable abstraction (a signed envelope), not one wire protocol.",
+    ],
+    events: ["MandateVerified", "MandateRejected"],
+    constraints: [],
+  },
+};
 
 // ── Future bounded-context hypotheses (doc 28) ───────────────────────────────
 export type Hypothesis = {

@@ -1,0 +1,118 @@
+{
+  "base_version": "V17",
+  "proposed_version": "V18-consent",
+  "changes": [
+    {
+      "path": "eligibility_rules.r2.value",
+      "kind": "modified",
+      "before": 25,
+      "after": 18,
+      "risk": "eligibility_widened"
+    },
+    {
+      "path": "eligibility_rules.r5",
+      "kind": "added",
+      "before": null,
+      "after": {
+        "id": "r5",
+        "attribute": "customer.health_flag",
+        "op": "equals",
+        "value": true,
+        "sensitive": true,
+        "consent_required": false
+      },
+      "risk": null
+    }
+  ],
+  "summary": {
+    "added": 1,
+    "removed": 0,
+    "modified": 1
+  },
+  "context_map": {
+    "contexts": [
+      {
+        "id": "purchase",
+        "label": "Purchase",
+        "rule_ids": [
+          "r1"
+        ],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      },
+      {
+        "id": "customer",
+        "label": "Customer",
+        "rule_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ],
+        "change_count": 2,
+        "max_severity": "warning",
+        "muted": false
+      },
+      {
+        "id": "offer",
+        "label": "Offer",
+        "rule_ids": [],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      },
+      {
+        "id": "delivery",
+        "label": "Delivery",
+        "rule_ids": [],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      },
+      {
+        "id": "governance",
+        "label": "Governance",
+        "rule_ids": [],
+        "change_count": 0,
+        "max_severity": "info",
+        "muted": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "customer",
+        "to": "offer",
+        "relation": "eligibility_gate"
+      },
+      {
+        "from": "purchase",
+        "to": "offer",
+        "relation": "eligibility_gate"
+      },
+      {
+        "from": "delivery",
+        "to": "offer",
+        "relation": "serving_guard"
+      },
+      {
+        "from": "governance",
+        "to": "*",
+        "relation": "policy_gate"
+      }
+    ]
+  },
+  "meaning_changes": [
+    {
+      "path": "eligibility_rules.r2.value",
+      "risk": "eligibility_widened",
+      "context": "customer",
+      "severity": "warning",
+      "before_semantics": "25",
+      "after_semantics": "18",
+      "explanation": "Threshold loosened / rule removed \u2014 more sessions become eligible.",
+      "grounding": "Loosening a numeric gate or removing a rule widens the eligible audience."
+    }
+  ],
+  "missing_attribute_inversion": null
+}

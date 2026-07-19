@@ -1,0 +1,40 @@
+{
+  "term": "conversion",
+  "seam": "BC-5 Measurement \u2192 BC-3 Incrementality",
+  "upstream_meaning": "deduplicated recorded event (identity conversiontype:confirmationref)",
+  "downstream_meaning": "causally-incremental outcome (treatment minus would-have-converted-anyway)",
+  "pattern": "Anticorruption Layer",
+  "seed": 42,
+  "count": 200,
+  "conformist_result": {
+    "kind": "incremental",
+    "count": 200,
+    "seam": "BC-5 Measurement \u2192 BC-3 Incrementality"
+  },
+  "acl_result": {
+    "kind": "incremental",
+    "count": 128,
+    "seam": "BC-5 Measurement \u2192 BC-3 Incrementality"
+  },
+  "recorded_lift": 200,
+  "incremental_lift": 128,
+  "leaked_conversions": 72,
+  "corruption": {
+    "magnitude": 72,
+    "direction": "inflation",
+    "upward_bias_pct": 56.25
+  },
+  "per_origin": {
+    "treatment_caused": 128,
+    "would_have_anyway": 72
+  },
+  "synthetic_inputs": [
+    {
+      "name": "incremental_fraction",
+      "value": 0.62,
+      "label": "[SYNTHETIC] ground-truth incremental fraction. Unobservable per-event in reality; a controlled holdout only ESTIMATES it. Seeded here for bit-for-bit replay \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    }
+  ],
+  "grounding": "Rokt's dedup key is a de-facto Published Language for the RECORDED meaning (conversions.py:18); there is no published identity for the INCREMENTAL meaning, which is exactly where the Conformist leak hides.",
+  "note": "Conformist (identity ACL) counts the would-have-converted-anyway set as lift: 72 of 200 recorded conversions inflate the true incremental lift of 128 upward by 56.25%. The translation math is standard incrementality; the seam and baseline are [INFERENCE]/synthetic; the numbers are computed live, not asserted."
+}

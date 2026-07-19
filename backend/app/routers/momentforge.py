@@ -7,6 +7,8 @@ PolicyVersionRow / ReplayJobRow / OutboxEventRow / ConversionRow):
   missing-attribute inversion flag (no sessions).  §2.1
 - POST /simulations       — ephemeral wrapper over `run_replay` that accepts an
   inline / edited proposed policy or muted contexts.  §2.2
+- POST /translation-audit — runs the pure Translation Map over a seeded conversion
+  corpus and returns the Conformist-vs-ACL upward-bias leak.  §3
 
 Zero new decision logic (ADR-002): everything on the compute path is one of the
 existing pure domain functions (`diff_policies`, `run_replay`, `Policy`) plus the
@@ -24,10 +26,12 @@ from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..db import get_db
+from ..domain import failclosed
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
 from ..domain.replay import run_replay
+from ..domain.translation import DEFAULT_INCREMENTAL_FRACTION, audit_translation
 from ..observability import get_meter, get_tracer
 from .common import load_policy
 
@@ -43,6 +47,9 @@ _validation_error_total = _meter.create_counter("momentforge_validation_error_to
 _compile_duration = _meter.create_histogram("momentforge_compile_duration_ms")
 _simulate_duration = _meter.create_histogram("momentforge_simulate_duration_ms")
 _simulate_sessions = _meter.create_histogram("momentforge_simulate_sessions")
+_translation_audit_total = _meter.create_counter("momentforge_translation_audit_total")
+_translation_audit_duration = _meter.create_histogram("momentforge_translation_audit_duration_ms")
+_translation_leak = _meter.create_histogram("momentforge_translation_leak")
 
 router = APIRouter(prefix="/api/v1/merchants/{merchant_id}")
 
@@ -73,6 +80,15 @@ class SimulationRequest(BaseModel):
         default_factory=lambda: ["timeout", "invalid_output", "stale_identity"])
 
 
+class TranslationAuditRequest(BaseModel):
+    # `conversion` is the only modelled seam (BC-5→BC-3); other terms are 422 (§3).
+    term: str = "conversion"
+    seed: int = 42
+    count: int = Field(default=200, ge=1, le=5000)  # bounded like the sim
+    incremental_fraction: float = Field(
+        default=DEFAULT_INCREMENTAL_FRACTION, gt=0.0, le=1.0)
+
+
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
@@ -92,6 +108,14 @@ def _validate_muted(muted: list[str]) -> None:
     if unknown:
         raise _reject("unknown_muted_contexts",
                       f"unknown muted_contexts: {', '.join(unknown)}")
+
+
+def _validate_injections(injections: list[str]) -> None:
+    unknown = [i for i in injections if i not in failclosed.VALID_INJECTIONS]
+    if unknown:
+        raise _reject("unknown_injection",
+                      f"unknown injection(s): {', '.join(unknown)}; "
+                      f"valid: {', '.join(sorted(failclosed.VALID_INJECTIONS))}")
 
 
 def _validate_policy_document(document: dict) -> Policy:
@@ -198,10 +222,18 @@ def _resolve_proposed(
         _validate_policy_document(doc)
         rules = doc.get("eligibility_rules", [])
         by_id = {r["id"]: r for r in rules}
+        # An override targeting a rule id that does not exist is almost certainly a
+        # typo; silently ignoring it would run the sim on a policy the operator never
+        # authored (surprising in a SAFETY tool). Fail closed with a clear 422 (F3).
+        unknown_ids = [ov.get("id") for ov in proposed.rule_overrides
+                       if ov.get("id") not in by_id]
+        if unknown_ids:
+            raise _reject("unknown_override_rule_id",
+                          "rule_overrides reference unknown rule id(s): "
+                          f"{', '.join(str(u) for u in unknown_ids)}")
         for ov in proposed.rule_overrides:
             rid = ov.get("id")
-            if rid in by_id:
-                by_id[rid].update({k: v for k, v in ov.items() if k != "id"})
+            by_id[rid].update({k: v for k, v in ov.items() if k != "id"})
         doc["eligibility_rules"] = list(by_id.values())
 
     # 4. validate the resolved policy (422 on schema failure, F3)
@@ -221,6 +253,7 @@ def simulate(
 ) -> dict:
     t0 = time.perf_counter()
     _validate_muted(req.proposed.muted_contexts)  # F10
+    _validate_injections(req.injections)  # 422 on an out-of-contract injection kind
 
     base = load_policy(db, merchant_id, req.base_version)  # 404 (F2)
 
@@ -276,3 +309,48 @@ def simulate(
         "context_toggles_applied": list(req.proposed.muted_contexts),
         "audit": audit,
     }
+
+
+# --------------------------------------------------------------------------- #
+# C. Translation Map — the ACL seam made executable (§3)
+# --------------------------------------------------------------------------- #
+@router.post("/translation-audit")
+def translation_audit(
+    merchant_id: str,
+    req: TranslationAuditRequest,
+    request: Request,
+) -> dict:
+    """Thin, READ-ONLY, NON-persisting: runs the pure `audit_translation` over a
+    seeded conversion corpus and returns the Conformist-vs-ACL upward-bias leak. No
+    DB, no writes; deterministic (same body → identical bytes). No new decision logic
+    in the money path (ADR-002) — the whole compute path is the one pure function."""
+    t0 = time.perf_counter()
+
+    # `conversion` is the only modelled polysemic seam; anything else is a 422 (F).
+    if req.term != "conversion":
+        raise _reject("unknown_term",
+                      f"unknown term: {req.term!r}; only 'conversion' is modelled")
+
+    with tracer.start_as_current_span("momentforge.translation_audit") as span:
+        result = audit_translation(req.seed, req.count, req.incremental_fraction)
+        span.set_attribute("momentforge.term", req.term)
+        span.set_attribute("threshold.seed", req.seed)
+        span.set_attribute("threshold.count", req.count)
+        span.set_attribute("momentforge.recorded_lift", result["recorded_lift"])
+        span.set_attribute("momentforge.incremental_lift", result["incremental_lift"])
+        span.set_attribute("momentforge.leaked_conversions", result["leaked_conversions"])
+
+    duration_ms = (time.perf_counter() - t0) * 1000.0
+    _translation_audit_total.add(1, {"result": "ok"})
+    _translation_audit_duration.record(duration_ms)
+    _translation_leak.record(result["leaked_conversions"])
+    log.info(
+        '{"route":"translation-audit","merchant_id":"%s","request_id":"%s",'
+        '"term":"%s","seed":%d,"count":%d,"recorded_lift":%d,"incremental_lift":%d,'
+        '"leaked_conversions":%d,"duration_ms":%.2f}',
+        merchant_id, _rid(request), req.term, req.seed, req.count,
+        result["recorded_lift"], result["incremental_lift"],
+        result["leaked_conversions"], duration_ms,
+    )
+
+    return result

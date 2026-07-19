@@ -26,7 +26,13 @@ export const RuleSchema = z.object({
   id: z.string(),
   attribute: z.string(),
   op: z.string(),
-  value: z.array(z.union([z.string(), z.number()])).optional(),
+  // The engine's Rule.value is polymorphic: a scalar for equals/not_equals/gte/lte
+  // (e.g. "premium", 25) and a list for the membership ops (in / include_is_not_in /
+  // exclude_is_in). Accept both so GET /policies/{version} validates.
+  value: z
+    .union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number()]))])
+    .nullable()
+    .optional(),
   sensitive: z.boolean().optional(),
   consent_required: z.boolean().optional(),
 });
@@ -48,7 +54,12 @@ export const PolicyDocumentSchema = z.object({
     category: z.string(),
   }),
   eligibility_rules: z.array(RuleSchema),
-});
+})
+  // Preserve governance fields the schema doesn't enumerate (country, disclaimers,
+  // language, objective, timezone, …). The inline rule editor round-trips this whole
+  // document back to /simulations; stripping those fields would make the engine read
+  // them as removed and trip spurious immutable-field / re-approval violations.
+  .passthrough();
 export type PolicyDocument = z.infer<typeof PolicyDocumentSchema>;
 
 // ---- Policy diff -----------------------------------------------------------
@@ -382,3 +393,50 @@ export const SimulationResultSchema = ReplayJobSchema.omit({
   audit: AuditLogSchema,
 });
 export type SimulationResult = z.infer<typeof SimulationResultSchema>;
+
+// ---- Moment Forge: Translation Map (conversion across an ACL) ---------------
+// Mirrors the recorded fixture / POST /translation-audit response exactly. Core
+// fields (§3.2 of MOMENT_FORGE_INTEGRATION_CASES) are required; enrichment fields
+// are optional so a leaner real response still validates. A mismatch → validation
+// error (never a silent fallback).
+export const ConversionEventSchema = z.object({
+  kind: z.string(),
+  count: z.number(),
+  seam: z.string(),
+});
+export type ConversionEvent = z.infer<typeof ConversionEventSchema>;
+
+export const TranslationAuditSchema = z.object({
+  term: z.string(),
+  seam: z.string(),
+  upstream_meaning: z.string(),
+  downstream_meaning: z.string(),
+  pattern: z.string(),
+  conformist_result: ConversionEventSchema,
+  acl_result: ConversionEventSchema,
+  corruption: z.object({
+    magnitude: z.number(),
+    direction: z.string(),
+    upward_bias_pct: z.number().optional(),
+  }),
+  grounding: z.string(),
+  synthetic_inputs: z.array(
+    z.object({
+      name: z.string(),
+      value: z.union([z.number(), z.string()]),
+      label: z.string().optional(),
+      note: z.string().optional(),
+    }),
+  ),
+  // enrichment present in the recorded fixture (optional so a leaner live response still validates)
+  seed: z.number().optional(),
+  count: z.number().optional(),
+  recorded_lift: z.number().optional(),
+  incremental_lift: z.number().optional(),
+  leaked_conversions: z.number().optional(),
+  per_origin: z
+    .object({ treatment_caused: z.number(), would_have_anyway: z.number() })
+    .optional(),
+  note: z.string().optional(),
+});
+export type TranslationAudit = z.infer<typeof TranslationAuditSchema>;

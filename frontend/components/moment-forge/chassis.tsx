@@ -40,7 +40,9 @@ function ThemeToggle() {
 const NAV_LINK =
   "inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0";
 
-export function MomentNav() {
+export function MomentNav({ volume = "I" }: { volume?: "I" | "II" }) {
+  const volPill =
+    "inline-flex min-h-[36px] items-center rounded-full border px-2.5 py-0.5 font-mono text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0";
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-base/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6">
@@ -52,7 +54,23 @@ export function MomentNav() {
             <p className="truncate text-sm font-semibold tracking-tight sm:text-base">
               THRESHOLD <span className="text-muted">· Moment Forge</span>
             </p>
-            <p className="truncate text-xs text-muted">A domain monograph for the Transaction Moment</p>
+            {/* Volume switcher — sub-navigation within Moment Forge (not the top nav). */}
+            <nav aria-label="Volume" className="mt-1 flex flex-wrap gap-1">
+              <Link
+                href="/moment-forge"
+                aria-current={volume === "I" ? "page" : undefined}
+                className={volPill + (volume === "I" ? " border-teal/40 bg-teal/10 text-teal" : " border-transparent text-muted hover:border-border hover:text-text")}
+              >
+                I · The Domain
+              </Link>
+              <Link
+                href="/moment-forge/system"
+                aria-current={volume === "II" ? "page" : undefined}
+                className={volPill + (volume === "II" ? " border-teal/40 bg-teal/10 text-teal" : " border-transparent text-muted hover:border-border hover:text-text")}
+              >
+                II · The System
+              </Link>
+            </nav>
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -199,7 +217,9 @@ const RAIL: { id: string; label: string; fig: string }[] = [
   { id: "sec-evidence", label: "Implementation evidence", fig: "09" },
 ];
 
-export function PlateRail() {
+export type RailItem = { id: string; label: string; fig: string };
+
+export function PlateRail({ items = RAIL }: { items?: RailItem[] }) {
   const [active, setActive] = useState(0);
   const railRef = useRef(active);
   railRef.current = active;
@@ -207,8 +227,8 @@ export function PlateRail() {
   useEffect(() => {
     const onScroll = () => {
       let idx = 0;
-      for (let i = 0; i < RAIL.length; i++) {
-        const el = document.getElementById(RAIL[i]!.id);
+      for (let i = 0; i < items.length; i++) {
+        const el = document.getElementById(items[i]!.id);
         if (!el) continue;
         if (el.getBoundingClientRect().top < window.innerHeight * 0.4) idx = i;
       }
@@ -217,7 +237,7 @@ export function PlateRail() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [items]);
 
   return (
     <nav
@@ -225,7 +245,7 @@ export function PlateRail() {
       className="pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 xl:block"
     >
       <ol className="pointer-events-auto flex flex-col gap-1.5 rounded-2xl border border-border/70 bg-base/60 p-2 backdrop-blur-xl">
-        {RAIL.map((r, i) => {
+        {items.map((r, i) => {
           const on = i === active;
           return (
             <li key={r.id}>
