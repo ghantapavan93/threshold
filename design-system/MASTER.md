@@ -2,6 +2,8 @@
 
 Single source of truth for the UI. **Every page and component must use this system — never invent a new visual style per page.** The implementation lives in `frontend/app/globals.css`, `frontend/tailwind.config.ts`, `frontend/app/layout.tsx`, and `frontend/components/visual/*`; this doc is the contract.
 
+> **Authority note.** This authored file is derived from the *implemented, shipped* system and is authoritative. `design-system/threshold/MASTER.md` is a generic auto-suggestion from the `ui-ux-pro-max` tool — kept for reference/inspiration only. We deliberately **do not** adopt its recommendation: it proposes a red/blue "Liquid Glass" style that its own output flags as **"⚠ Text contrast"** and an external Google-Fonts `@import`. Both contradict what we ship — our **teal** semantic accent, our WCAG-AA contrast fix, and **self-hosted** fonts. Contrast and brand win over trend.
+
 ## Brand & mood
 An internal, mission-critical **transaction-safety control plane** that reads as a premium shipped product — reflecting Rokt's aesthetic (dark premium foundation, bold editorial headlines, confident restraint, teal accent). Not a glowing generic dark dashboard; evidence-first, cinematic but disciplined.
 
