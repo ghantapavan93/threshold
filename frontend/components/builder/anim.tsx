@@ -11,6 +11,10 @@ import {
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+// Re-export the shared visual utilities so builder scenes have one import source.
+export { Reveal } from "@/components/visual/Reveal";
+export { Parallax } from "@/components/visual/Parallax";
+
 /* ────────────────────────────────────────────────────────────────────────────
    Builder scene primitives — GSAP + ScrollTrigger building blocks used across
    the /builder cinematic page.
@@ -193,17 +197,19 @@ export function ClipReveal({
 export function StaggerGroup({
   children,
   className,
+  as = "div",
   y = 26,
   stagger = 0.09,
   start = "top 85%",
 }: {
   children: ReactNode;
   className?: string;
+  as?: ElementType;
   y?: number;
   stagger?: number;
   start?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   useIsoLayoutEffect(() => {
     const el = ref.current;
@@ -229,9 +235,10 @@ export function StaggerGroup({
     return () => ctx.revert();
   }, [y, stagger, start]);
 
+  const Tag = as;
   return (
-    <div ref={ref} className={className}>
+    <Tag ref={ref as Ref<HTMLElement>} className={className}>
       {children}
-    </div>
+    </Tag>
   );
 }

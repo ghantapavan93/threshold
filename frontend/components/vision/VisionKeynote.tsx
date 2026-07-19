@@ -2,45 +2,40 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
+import { Reveal } from "@/components/visual/Reveal";
+import { Parallax } from "@/components/visual/Parallax";
+import {
+  TransactionMomentMotif,
+  SilentWideningDiagram,
+  FailClosedLaneMotif,
+  IntegrityShield,
+} from "@/components/visual/illustrations";
+import {
+  MaskedLines,
+  IllustrationReveal,
+  useGsapScene,
+  MOTION_OK,
+} from "@/components/vision/motion";
 
 /* ────────────────────────────────────────────────────────────────────────────
-   /vision — Threshold cinematic keynote.
+   /vision — Threshold cinematic keynote (GSAP + ScrollTrigger).
    Narrative/keynote content sourced from docs/FUTURE_VISION.md. The scale
    figures and Rokt direction are Rokt's verified public statements (rokt.com),
    presented as context — this page renders no application/API data.
+
+   Motion model:
+     • GSAP ScrollTrigger scenes: a PINNED hero with scrubbed parallax depth,
+       masked line-by-line heading reveals, clip-path wipes on illustrations,
+       a SCRUBBED roadmap spine that draws as you scroll (milestones pop in
+       sequence), and an integration diagram that ASSEMBLES piece by piece.
+     • Every animation lives behind (prefers-reduced-motion: no-preference) via
+       gsap.matchMedia — under "reduce" nothing runs and the DOM stays in its
+       final, fully-visible, fully-readable state.
+     • Pinning/parallax intensity is desktop-gated; mobile degrades to simple
+       reveals. All ScrollTriggers are reverted on unmount (mm.revert()).
    ──────────────────────────────────────────────────────────────────────────── */
-
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-/** Fade-up on scroll into view, gated by reduced-motion at the call site. */
-function Reveal({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const reduced = useReducedMotion();
-  const variants: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE, delay } },
-  };
-  return (
-    <motion.div
-      className={className}
-      variants={variants}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
@@ -112,62 +107,105 @@ function VisionNav() {
   );
 }
 
-// ── Hero ────────────────────────────────────────────────────────────────────
+// ── Hero — pinned scene with entrance + scrubbed parallax depth ───────────────
+const HERO_STATS = [
+  { figure: "33,000+", label: "clients" },
+  { figure: "10B+", label: "transactions / year" },
+  { figure: "17", label: "countries" },
+  { figure: "90%+", label: "ancillary revenue in the Transaction Moment" },
+];
+
 function Hero() {
-  const reduced = useReducedMotion();
+  const ref = useGsapScene<HTMLElement>((root, mm) => {
+    const q = gsap.utils.selector(root);
+
+    // Entrance — masked headline lines + fades. Any width, motion permitting.
+    mm.add(MOTION_OK, () => {
+      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+      tl.from(q("[data-hero-line]"), { yPercent: 120, duration: 1, stagger: 0.12 })
+        .from(
+          q("[data-hero-fade]"),
+          { autoAlpha: 0, y: 22, duration: 0.8, stagger: 0.1 },
+          "-=0.55",
+        )
+        .from(
+          q("[data-hero-stat]"),
+          { autoAlpha: 0, y: 18, scale: 0.97, duration: 0.6, stagger: 0.07 },
+          "-=0.4",
+        )
+        .from(q("[data-hero-motif]"), { autoAlpha: 0, duration: 1.1 }, "-=1.1");
+    });
+
+    // Pin + scrubbed parallax — DESKTOP ONLY. Only decorative/foreground layers
+    // move (readability of the copy is never reduced); mobile skips this entirely.
+    mm.add(`(min-width: 768px) and ${MOTION_OK}`, () => {
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: root,
+            start: "top top",
+            end: "+=55%",
+            pin: true,
+            scrub: true,
+          },
+        })
+        .to(q("[data-hero-motif]"), { yPercent: 14, scale: 1.06, ease: "none" }, 0)
+        .to(q("[data-hero-glow]"), { yPercent: 28, ease: "none" }, 0)
+        .to(q("[data-hero-stat-row]"), { yPercent: -12, ease: "none" }, 0);
+    });
+  });
+
   return (
-    <section aria-label="Vision overview" className="relative overflow-hidden">
+    <section ref={ref} aria-label="Vision overview" className="relative overflow-hidden">
+      {/* decorative depth layers (desktop) */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 -top-28 hidden h-[30rem] w-[30rem] lg:block"
+        className="pointer-events-none absolute -right-16 -top-10 hidden w-[30rem] lg:block"
       >
-        <div className="thr-ring h-full w-full rounded-full opacity-70" />
-        <div
-          className="absolute inset-12 rounded-full opacity-60 blur-2xl animate-float-soft"
-          style={{
-            background:
-              "radial-gradient(circle at 40% 35%, rgba(34,230,200,0.3), transparent 60%), radial-gradient(circle at 70% 70%, rgba(91,140,255,0.22), transparent 60%)",
-          }}
-        />
+        <div data-hero-glow className="relative">
+          <div className="thr-ring mx-auto h-[26rem] w-[26rem] rounded-full opacity-60" />
+          <div
+            className="absolute inset-16 rounded-full opacity-60 blur-2xl"
+            style={{
+              background:
+                "radial-gradient(circle at 40% 35%, rgba(34,230,200,0.3), transparent 60%), radial-gradient(circle at 70% 70%, rgba(91,140,255,0.22), transparent 60%)",
+            }}
+          />
+        </div>
+        <div data-hero-motif className="absolute inset-x-0 top-24 px-8">
+          <TransactionMomentMotif className="w-full" />
+        </div>
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div data-hero-fade>
           <Eyebrow>Keynote · Future Vision · Grounded in Rokt&apos;s public direction</Eyebrow>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.06 }}
-          className="mt-6 max-w-4xl text-4xl font-semibold leading-[1.03] tracking-tight sm:text-5xl lg:text-[3.6rem]"
-        >
-          Turn <span className="gradient-text">&ldquo;we reviewed it&rdquo;</span> into{" "}
-          <span className="gradient-text">&ldquo;we proved it.&rdquo;</span>
-        </motion.h1>
+        <h1 className="mt-6 max-w-4xl text-4xl font-semibold leading-[1.03] tracking-tight sm:text-5xl lg:text-[3.6rem]">
+          <span className="block overflow-hidden">
+            <span data-hero-line className="block will-change-transform">
+              Turn <span className="gradient-text">&ldquo;we reviewed it&rdquo;</span> into
+            </span>
+          </span>
+          <span className="block overflow-hidden">
+            <span data-hero-line className="block will-change-transform">
+              <span className="gradient-text">&ldquo;we proved it.&rdquo;</span>
+            </span>
+          </span>
+        </h1>
 
-        <motion.p
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.14 }}
+        <p
+          data-hero-fade
           className="mt-6 max-w-3xl text-base leading-relaxed text-muted sm:text-lg"
         >
           A checkout-policy change is one edit away from silently charging the wrong customers the
           wrong thing. Threshold replays that change before it ships, proves it can&apos;t harm
           checkout or quietly widen who gets an offer, and only lets it through to a controlled
           test. As Rokt grows, the same gate runs on real traffic, at scale, in the deploy pipeline.
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.22 }}
-          className="mt-9 flex flex-wrap items-center gap-3"
-        >
+        <div data-hero-fade className="mt-9 flex flex-wrap items-center gap-3">
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
@@ -181,26 +219,19 @@ function Hero() {
           >
             Read the roadmap
           </a>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.3 }}
+        <div
+          data-hero-stat-row
           className="mt-12 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4"
         >
-          {[
-            { figure: "33,000+", label: "clients" },
-            { figure: "10B+", label: "transactions / year" },
-            { figure: "17", label: "countries" },
-            { figure: "90%+", label: "ancillary revenue in the Transaction Moment" },
-          ].map((s) => (
-            <div key={s.label} className="glass rounded-xl px-4 py-3">
+          {HERO_STATS.map((s) => (
+            <div key={s.label} data-hero-stat className="glass rounded-xl px-4 py-3">
               <p className="font-mono text-xl font-semibold sm:text-2xl">{s.figure}</p>
               <p className="mt-0.5 text-[11px] leading-snug text-muted">{s.label}</p>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -218,14 +249,23 @@ function ConnectedStory() {
           The one connected story · 8 seconds
         </p>
       </Reveal>
-      <Reveal delay={0.05}>
-        <blockquote className="mt-5 border-l-2 border-teal/60 pl-5 text-2xl font-medium leading-snug tracking-tight sm:text-[2rem]">
-          A change ships. Threshold replays it first, proves it{" "}
-          <span className="text-teal">fails closed</span> and never{" "}
-          <span className="text-crimson">silently widens</span> eligibility, and clears it only for
-          a controlled holdout. As decisioning gets faster, the same gate turns review into proof.
-        </blockquote>
-      </Reveal>
+      <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+        <Reveal delay={0.05}>
+          <blockquote className="border-l-2 border-teal/60 pl-5 text-2xl font-medium leading-snug tracking-tight sm:text-[2rem]">
+            A change ships. Threshold replays it first, proves it{" "}
+            <span className="text-teal">fails closed</span> and never{" "}
+            <span className="text-crimson">silently widens</span> eligibility, and clears it only
+            for a controlled holdout. As decisioning gets faster, the same gate turns review into
+            proof.
+          </blockquote>
+        </Reveal>
+        <IllustrationReveal from="left" className="glass rounded-2xl p-5">
+          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+            Silent widening — a band flips eligible, invisibly
+          </p>
+          <SilentWideningDiagram className="w-full" />
+        </IllustrationReveal>
+      </div>
     </section>
   );
 }
@@ -248,21 +288,24 @@ const DIRECTION: { title: string; body: string }[] = [
 
 function Direction() {
   return (
-    <section
-      aria-labelledby="direction-title"
-      className="mx-auto max-w-6xl px-4 py-16 sm:px-6"
-    >
+    <section aria-labelledby="direction-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <Reveal>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
           Where Rokt is heading · verified, rokt.com
         </p>
-        <h2
-          id="direction-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          The platform is accelerating toward{" "}
-          <span className="gradient-text">real-time relevance.</span>
-        </h2>
+      </Reveal>
+      <MaskedLines
+        as="h2"
+        id="direction-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        lines={[
+          "The platform is accelerating toward",
+          <span key="l2" className="gradient-text">
+            real-time relevance.
+          </span>,
+        ]}
+      />
+      <Reveal delay={0.05}>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
           The implication for Threshold is the whole thesis: as decisioning gets faster and more
           data-driven, the <strong className="text-text">blast radius of a bad policy change
@@ -295,27 +338,37 @@ function CoreInvariant() {
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
             The invariant
           </p>
-          <h2
+          <MaskedLines
+            as="h2"
             id="core-title"
             className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-          >
-            The deterministic core stays boring — on purpose.
-          </h2>
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
-            Every future milestone plugs into the <strong className="text-text">same pure
-            engine</strong>. It never learns, never calls an LLM, never gains a serving-path
-            dependency. That is the invariant that keeps the whole thing auditable and defensible.
-            New capabilities attach at the <span className="text-teal">edges</span>.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2 font-mono text-xs">
-            {["evaluator", "constraints", "diff", "failclosed", "verdict", "audit"].map((c) => (
-              <span
-                key={c}
-                className="thr-edge rounded-md bg-surface-2/60 px-2.5 py-1 text-text"
-              >
-                {c}
-              </span>
-            ))}
+            lines={["The deterministic core stays boring", "— on purpose."]}
+          />
+          <div className="mt-4 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+            <div>
+              <p className="max-w-3xl text-base leading-relaxed text-muted">
+                Every future milestone plugs into the <strong className="text-text">same pure
+                engine</strong>. It never learns, never calls an LLM, never gains a serving-path
+                dependency. That is the invariant that keeps the whole thing auditable and
+                defensible. New capabilities attach at the <span className="text-teal">edges</span>.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2 font-mono text-xs">
+                {["evaluator", "constraints", "diff", "failclosed", "verdict", "audit"].map((c) => (
+                  <span
+                    key={c}
+                    className="thr-edge rounded-md bg-surface-2/60 px-2.5 py-1 text-text"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <IllustrationReveal from="bottom" className="rounded-2xl">
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+                Fail closed — offer lane drops, checkout stays green
+              </p>
+              <FailClosedLaneMotif className="w-full" />
+            </IllustrationReveal>
           </div>
         </div>
       </Reveal>
@@ -323,7 +376,7 @@ function CoreInvariant() {
   );
 }
 
-// ── Roadmap — cinematic vertical timeline ────────────────────────────────────
+// ── Roadmap — scrubbed spine that draws; milestones pop in sequence ───────────
 type Milestone = {
   id: string;
   horizon: string;
@@ -377,55 +430,102 @@ const MILESTONES: Milestone[] = [
 ];
 
 function Roadmap() {
+  const ref = useGsapScene<HTMLElement>((root, mm) => {
+    const q = gsap.utils.selector(root);
+    mm.add(MOTION_OK, () => {
+      const list = q("[data-list]")[0];
+
+      // Spine draws top→bottom, scrubbed to scroll through the list.
+      gsap.fromTo(
+        q("[data-spine]"),
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          transformOrigin: "top center",
+          ease: "none",
+          scrollTrigger: { trigger: list, start: "top 72%", end: "bottom 78%", scrub: true },
+        },
+      );
+
+      // Each milestone: node pops, card slides in — as it reaches the spine.
+      q("[data-milestone]").forEach((li) => {
+        const node = li.querySelector("[data-node]");
+        const card = li.querySelector("[data-card]");
+        gsap
+          .timeline({ scrollTrigger: { trigger: li, start: "top 80%", once: true } })
+          .from(node, { scale: 0, autoAlpha: 0, duration: 0.5, ease: "back.out(2)" })
+          .from(card, { autoAlpha: 0, x: 28, duration: 0.7, ease: "power3.out" }, "-=0.25");
+      });
+    });
+  });
+
   return (
-    <section id="roadmap" aria-labelledby="roadmap-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <section
+      id="roadmap"
+      ref={ref}
+      aria-labelledby="roadmap-title"
+      className="mx-auto max-w-6xl px-4 py-16 sm:px-6"
+    >
       <Reveal>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
           Roadmap · five milestones
         </p>
-        <h2
-          id="roadmap-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          From working prototype to{" "}
-          <span className="gradient-text">a gate on real traffic.</span>
-        </h2>
       </Reveal>
+      <MaskedLines
+        as="h2"
+        id="roadmap-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        lines={[
+          "From working prototype to",
+          <span key="l2" className="gradient-text">
+            a gate on real traffic.
+          </span>,
+        ]}
+      />
 
-      <ol className="relative mt-12 space-y-6 border-l border-border/70 pl-6 sm:pl-8">
-        {MILESTONES.map((m, i) => (
-          <li key={m.id} className="relative">
+      <ol data-list className="relative mt-12 space-y-6 pl-6 sm:pl-8">
+        {/* animated spine (replaces the static border rail) */}
+        <span
+          data-spine
+          aria-hidden
+          className="absolute inset-y-1 left-0 w-px origin-top"
+          style={{
+            background:
+              "linear-gradient(to bottom, var(--c-teal), var(--c-offer-blue) 55%, transparent)",
+          }}
+        />
+        {MILESTONES.map((m) => (
+          <li data-milestone key={m.id} className="relative">
             {/* node on the rail */}
             <span
+              data-node
               aria-hidden
               className="absolute -left-[calc(1.5rem+1px)] top-1.5 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border bg-base font-mono text-sm font-semibold sm:-left-[calc(2rem+1px)]"
               style={{ borderColor: m.accent, color: m.accent }}
             >
               {m.id}
             </span>
-            <Reveal delay={i * 0.04}>
-              <div className="holo-card rounded-2xl p-5 sm:p-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    Milestone {m.id} — {m.title}
-                  </h3>
-                  <span
-                    className="rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide"
-                    style={{
-                      color: m.accent,
-                      borderColor: m.accent,
-                      backgroundColor: `color-mix(in srgb, ${m.accent} 12%, transparent)`,
-                    }}
-                  >
-                    {m.horizon}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{m.body}</p>
-                <p className="mt-3 border-l-2 border-border pl-3 font-mono text-xs leading-relaxed text-muted">
-                  {m.plug}
-                </p>
+            <div data-card className="holo-card rounded-2xl p-5 sm:p-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-semibold tracking-tight">
+                  Milestone {m.id} — {m.title}
+                </h3>
+                <span
+                  className="rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide"
+                  style={{
+                    color: m.accent,
+                    borderColor: m.accent,
+                    backgroundColor: `color-mix(in srgb, ${m.accent} 12%, transparent)`,
+                  }}
+                >
+                  {m.horizon}
+                </span>
               </div>
-            </Reveal>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{m.body}</p>
+              <p className="mt-3 border-l-2 border-border pl-3 font-mono text-xs leading-relaxed text-muted">
+                {m.plug}
+              </p>
+            </div>
           </li>
         ))}
       </ol>
@@ -433,7 +533,7 @@ function Roadmap() {
   );
 }
 
-// ── Integration diagram — core boring, capabilities at edges ──────────────────
+// ── Integration diagram — assembles piece by piece ────────────────────────────
 const EDGES_LEFT = [
   { label: "Real event-time logs", tag: "A" },
   { label: "One Platform schema", tag: "A" },
@@ -446,8 +546,40 @@ const EDGES_RIGHT = [
 ];
 
 function IntegrationDiagram() {
+  const ref = useGsapScene<HTMLElement>((root, mm) => {
+    const q = gsap.utils.selector(root);
+    mm.add(MOTION_OK, () => {
+      gsap
+        .timeline({
+          scrollTrigger: { trigger: q("[data-diagram]")[0], start: "top 74%", once: true },
+        })
+        .from(q("[data-core]"), { scale: 0.82, autoAlpha: 0, duration: 0.6, ease: "power3.out" })
+        .from(
+          q("[data-core-chip]"),
+          { autoAlpha: 0, y: 8, scale: 0.9, duration: 0.35, stagger: 0.05, ease: "power2.out" },
+          "-=0.2",
+        )
+        .from(
+          q("[data-bus]"),
+          { scaleX: 0, autoAlpha: 0, transformOrigin: "center", duration: 0.5, ease: "power2.out" },
+          "-=0.15",
+        )
+        .from(
+          q("[data-edge-left]"),
+          { xPercent: -35, autoAlpha: 0, duration: 0.6, stagger: 0.12, ease: "power3.out" },
+          "-=0.25",
+        )
+        .from(
+          q("[data-edge-right]"),
+          { xPercent: 35, autoAlpha: 0, duration: 0.6, stagger: 0.12, ease: "power3.out" },
+          "<",
+        );
+    });
+  });
+
   return (
     <section
+      ref={ref}
       aria-labelledby="integration-title"
       className="mx-auto max-w-6xl px-4 py-16 sm:px-6"
     >
@@ -455,66 +587,81 @@ function IntegrationDiagram() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
           Integration points
         </p>
-        <h2
-          id="integration-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          The future attaches{" "}
-          <span className="gradient-text">without touching the core.</span>
-        </h2>
       </Reveal>
+      <MaskedLines
+        as="h2"
+        id="integration-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        lines={[
+          "The future attaches",
+          <span key="l2" className="gradient-text">
+            without touching the core.
+          </span>,
+        ]}
+      />
 
-      <Reveal delay={0.05}>
-        <div className="mt-10 grid items-stretch gap-4 lg:grid-cols-[1fr_auto_1fr]">
-          {/* left edges */}
-          <div className="flex flex-col justify-center gap-3">
-            {EDGES_LEFT.map((e) => (
-              <div
-                key={e.label}
-                className="glass flex items-center justify-between gap-3 rounded-xl px-4 py-3"
-              >
-                <span className="text-sm text-text">{e.label}</span>
-                <span className="font-mono text-[11px] text-teal">{e.tag}</span>
-              </div>
-            ))}
-          </div>
+      <div
+        data-diagram
+        className="mt-10 grid items-stretch gap-4 lg:grid-cols-[1fr_auto_1fr]"
+      >
+        {/* left edges */}
+        <div className="flex flex-col justify-center gap-3">
+          {EDGES_LEFT.map((e) => (
+            <div
+              key={e.label}
+              data-edge-left
+              className="glass flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+            >
+              <span className="text-sm text-text">{e.label}</span>
+              <span className="font-mono text-[11px] text-teal">{e.tag}</span>
+            </div>
+          ))}
+        </div>
 
-          {/* core */}
-          <div className="flex items-center">
-            <div className="thr-edge relative mx-auto w-full max-w-xs rounded-2xl bg-surface/70 p-6 text-center backdrop-blur">
-              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
-                Deterministic core
-              </p>
-              <p className="mt-2 text-sm font-semibold text-text">never changes</p>
-              <div className="mt-4 flex flex-wrap justify-center gap-1.5 font-mono text-[11px]">
-                {["evaluator", "constraints", "diff", "failclosed", "verdict", "audit"].map(
-                  (c) => (
-                    <span
-                      key={c}
-                      className="rounded bg-surface-2/70 px-2 py-0.5 text-muted"
-                    >
-                      {c}
-                    </span>
-                  ),
-                )}
-              </div>
+        {/* core */}
+        <div className="flex items-center">
+          <div
+            data-core
+            className="thr-edge relative mx-auto w-full max-w-xs rounded-2xl bg-surface/70 p-6 text-center backdrop-blur"
+          >
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
+              Deterministic core
+            </p>
+            <p className="mt-2 text-sm font-semibold text-text">never changes</p>
+            <span
+              data-bus
+              aria-hidden
+              className="mx-auto mt-3 block h-px w-3/4 origin-center"
+              style={{ background: "var(--thr-iris-soft)" }}
+            />
+            <div className="mt-4 flex flex-wrap justify-center gap-1.5 font-mono text-[11px]">
+              {["evaluator", "constraints", "diff", "failclosed", "verdict", "audit"].map((c) => (
+                <span
+                  key={c}
+                  data-core-chip
+                  className="rounded bg-surface-2/70 px-2 py-0.5 text-muted"
+                >
+                  {c}
+                </span>
+              ))}
             </div>
           </div>
-
-          {/* right edges */}
-          <div className="flex flex-col justify-center gap-3">
-            {EDGES_RIGHT.map((e) => (
-              <div
-                key={e.label}
-                className="glass flex items-center justify-between gap-3 rounded-xl px-4 py-3"
-              >
-                <span className="font-mono text-[11px] text-teal">{e.tag}</span>
-                <span className="text-right text-sm text-text">{e.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
-      </Reveal>
+
+        {/* right edges */}
+        <div className="flex flex-col justify-center gap-3">
+          {EDGES_RIGHT.map((e) => (
+            <div
+              key={e.label}
+              data-edge-right
+              className="glass flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+            >
+              <span className="font-mono text-[11px] text-teal">{e.tag}</span>
+              <span className="text-right text-sm text-text">{e.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
       <Reveal delay={0.1}>
         <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted">
           The engine is the fixed point. Capabilities attach at the edges — the deterministic
@@ -534,14 +681,20 @@ function Compounds() {
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
             Why this compounds Rokt&apos;s revenue
           </p>
-          <h2
+          <MaskedLines
+            as="h2"
             id="compounds-title"
             className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-          >
-            Faster decisioning makes a silent error{" "}
-            <span className="text-crimson">more</span> expensive — and a pre-flight{" "}
-            <span className="text-teal">more</span> valuable.
-          </h2>
+            lines={[
+              <span key="l1">
+                Faster decisioning makes a silent error{" "}
+                <span className="text-crimson">more</span> expensive —
+              </span>,
+              <span key="l2">
+                and a pre-flight <span className="text-teal">more</span> valuable.
+              </span>,
+            ]}
+          />
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
               {
@@ -600,13 +753,13 @@ function ChangeTable() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
           What scales vs. what is invariant
         </p>
-        <h2
-          id="change-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          Everything on the left can change. Nothing on the right does.
-        </h2>
       </Reveal>
+      <MaskedLines
+        as="h2"
+        id="change-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        lines={["Everything on the left can change.", "Nothing on the right does."]}
+      />
       <Reveal delay={0.05}>
         <div className="mt-8 overflow-hidden rounded-2xl border border-border/70">
           <div className="scroll-x">
@@ -619,10 +772,7 @@ function ChangeTable() {
               </thead>
               <tbody>
                 {CHANGE_TABLE.map((row) => (
-                  <tr
-                    key={row.changes}
-                    className="border-t border-border/60 align-top"
-                  >
+                  <tr key={row.changes} className="border-t border-border/60 align-top">
                     <td className="px-4 py-3 text-muted">{row.changes}</td>
                     <td className="px-4 py-3 text-text">{row.invariant}</td>
                   </tr>
@@ -642,20 +792,31 @@ function NorthStar() {
     <section aria-labelledby="northstar-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <div className="grid gap-4 lg:grid-cols-2">
         <Reveal>
-          <div className="holo-card h-full rounded-3xl p-8 glow-teal">
+          <div className="holo-card relative h-full overflow-hidden rounded-3xl p-8 glow-teal">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
               North-star
             </p>
-            <h2
+            <MaskedLines
+              as="h2"
               id="northstar-title"
               className="mt-3 text-2xl font-semibold leading-snug tracking-tight"
-            >
-              Policy changes that reach a reviewer or holdout are{" "}
-              <span className="gradient-text">provably structurally safe.</span>
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+              lines={[
+                "Policy changes that reach a reviewer or holdout are",
+                <span key="l2" className="gradient-text">
+                  provably structurally safe.
+                </span>,
+              ]}
+            />
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
               Zero silent eligibility-widenings and zero checkout regressions escape pre-flight.
             </p>
+            <IllustrationReveal
+              from="bottom"
+              start="top 85%"
+              className="pointer-events-none absolute -bottom-4 -right-2 w-28 opacity-90 sm:w-32"
+            >
+              <IntegrityShield className="w-full" />
+            </IllustrationReveal>
           </div>
         </Reveal>
         <Reveal delay={0.06}>
@@ -699,12 +860,19 @@ function NorthStar() {
 function ClosingCta() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <Reveal>
+      <Parallax speed={8}>
         <div className="thr-edge relative overflow-hidden rounded-3xl bg-surface/60 p-10 text-center backdrop-blur sm:p-14">
-          <h2 className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            See the mechanism run on{" "}
-            <span className="gradient-text">the live console.</span>
-          </h2>
+          <MaskedLines
+            as="h2"
+            className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl"
+            start="top 88%"
+            lines={[
+              <span key="l1">
+                See the mechanism run on{" "}
+                <span className="gradient-text">the live console.</span>
+              </span>,
+            ]}
+          />
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted">
             The prototype proves the mechanism on synthetic data against a real backend. Press
             &ldquo;Play the story&rdquo; and watch a cosmetic-looking edit get caught before a
@@ -720,7 +888,7 @@ function ClosingCta() {
             </Link>
           </div>
         </div>
-      </Reveal>
+      </Parallax>
     </section>
   );
 }

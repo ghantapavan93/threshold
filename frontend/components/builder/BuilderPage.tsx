@@ -1,54 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useTheme } from "@/app/providers";
+import {
+  ClipReveal,
+  MaskText,
+  Parallax,
+  Reveal,
+  StaggerGroup,
+} from "@/components/builder/anim";
+import { BuilderHero } from "@/components/builder/BuilderHero";
+import { DoTimeline } from "@/components/builder/DoTimeline";
 
 /* ────────────────────────────────────────────────────────────────────────────
    /builder — "How I'd Own the Rokt Builder Role".
    First-person, confident-but-humble narrative. NO live API data — every claim
    ties to something real in the Threshold repo or a clearly-labeled hypothesis.
-   Same cinematic design system as /vision.
+
+   WAVE 2: elevated into an Awwwards-grade, scroll-driven cinematic page with
+   GSAP ScrollTrigger — pinned hero, masked text reveals, clip-path card wipes, a
+   scrubbed "drawn spine" timeline, and staggered scene reveals. EVERY animation
+   is gated on prefers-reduced-motion (see components/builder/anim.tsx).
    ──────────────────────────────────────────────────────────────────────────── */
-
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-function Reveal({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const reduced = useReducedMotion();
-  const variants: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE, delay } },
-  };
-  return (
-    <motion.div
-      className={className}
-      variants={variants}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function Eyebrow({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-2/50 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.22em] text-muted backdrop-blur">
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-teal" />
-      {children}
-    </span>
-  );
-}
 
 // ── Top nav (Console · Vision · Builder) ────────────────────────────────────
 function ThemeToggle() {
@@ -111,98 +85,27 @@ function BuilderNav() {
   );
 }
 
-// ── Hero ────────────────────────────────────────────────────────────────────
-function Hero() {
-  const reduced = useReducedMotion();
-  return (
-    <section aria-label="Introduction" className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-32 -top-28 hidden h-[30rem] w-[30rem] lg:block"
-      >
-        <div className="thr-ring h-full w-full rounded-full opacity-70" />
-        <div
-          className="absolute inset-12 rounded-full opacity-60 blur-2xl animate-float-soft"
-          style={{
-            background:
-              "radial-gradient(circle at 40% 35%, rgba(34,230,200,0.3), transparent 60%), radial-gradient(circle at 70% 70%, rgba(91,140,255,0.22), transparent 60%)",
-          }}
-        />
-      </div>
-
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Eyebrow>Junior SWE · Builder · Proof of work over credentials</Eyebrow>
-        </motion.div>
-
-        <motion.h1
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.06 }}
-          className="mt-6 max-w-4xl text-4xl font-semibold leading-[1.03] tracking-tight sm:text-5xl lg:text-[3.4rem]"
-        >
-          {"I don't want to be handed a ticket. "}
-          <span className="gradient-text">Here&apos;s how I&apos;d own the work.</span>
-        </motion.h1>
-
-        <motion.p
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.14 }}
-          className="mt-6 max-w-3xl text-base leading-relaxed text-muted sm:text-lg"
-        >
-          Rokt&apos;s Junior SWE role is a <strong className="text-text">Builder</strong> — someone
-          who grows across systems, software, data, and data science, ships to internet-scale, uses
-          AI as leverage, and drives incremental revenue. I built Threshold to <em>show</em> that,
-          not say it. Below: for each part of the role, what I already did — and how I&apos;d own it
-          next.
-        </motion.p>
-
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: EASE, delay: 0.22 }}
-          className="mt-9 flex flex-wrap items-center gap-3"
-        >
-          <a
-            href="#what-ill-do"
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-          >
-            See how I&apos;d own it <span aria-hidden>→</span>
-          </a>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
-          >
-            Open the working proof
-          </Link>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 // ── The role, as I read it ───────────────────────────────────────────────────
 function RoleReading() {
   return (
     <section aria-labelledby="role-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-      <Reveal>
+      <ClipReveal>
         <div className="holo-card overflow-hidden rounded-3xl p-8 sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
             The role, as I read it
           </p>
-          <h2
+          <MaskText
+            as="h2"
             id="role-title"
             className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-          >
-            A Builder grows{" "}
-            <span className="gradient-text">across systems, software, data, and data science.</span>
-          </h2>
+            segments={[
+              { text: "A Builder grows " },
+              {
+                text: "across systems, software, data, and data science.",
+                className: "gradient-text",
+              },
+            ]}
+          />
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
             Rokt frames its engineers as Builders — hands-on across a diversity of services, from
             internal tools through to internet-scale production systems, shipping features that
@@ -225,132 +128,7 @@ function RoleReading() {
             )}
           </div>
         </div>
-      </Reveal>
-    </section>
-  );
-}
-
-// ── What I'll do — the six cards ─────────────────────────────────────────────
-type DoCard = {
-  n: string;
-  title: string;
-  intent: string;
-  proof: string;
-  ownNext: string;
-};
-
-const DO_CARDS: DoCard[] = [
-  {
-    n: "1",
-    title: "Design & build innovative products",
-    intent: "Start from the customer and a verified seam, then ship the whole thing.",
-    proof:
-      "I found an adjacent, evidence-backed opportunity — a one-operator policy edit that silently widens a missing-attribute audience, grounded in Rokt's own audience docs — and built it end-to-end: deterministic engine, API, cinematic console, tests, docs, and a self-driving demo.",
-    ownNext:
-      "Ship next-gen Transaction-Moment features the same way: start from the customer and a verified seam, prototype one golden path, prove failure and recovery, then measure.",
-  },
-  {
-    n: "2",
-    title: "Accelerate development with AI",
-    intent: "Use AI as real leverage — and know exactly when not to.",
-    proof:
-      "A multi-agent research + verification pipeline and an agent-built frontend gave me leverage, but I kept AI out of the correctness path and enforced that with an AST-based fitness test. The judgment of when not to reach for AI is the actual skill.",
-    ownNext:
-      "Bring that AI-as-copilot workflow to the team — faster coding, testing, and deploy — while holding deterministic guarantees wherever money and eligibility live.",
-  },
-  {
-    n: "3",
-    title: "Full-stack product ownership",
-    intent: "Own the whole lifecycle, including the unglamorous parts.",
-    proof:
-      "I owned it solo, cradle-to-grave: ideation → research → prototype → implementation → 33 tests → docs → demo. Backend (FastAPI, deterministic engine, idempotency, tamper-evident audit), frontend (Next.js, cinematic console, real-API-only), and the story that ties them together.",
-    ownNext:
-      "Own features cradle-to-grave at Rokt — including migrations, observability, and rollback — not just the happy path.",
-  },
-  {
-    n: "4",
-    title: "Collaborate & innovate",
-    intent: "Build for a conversation, not for a verdict.",
-    proof:
-      "The whole thing is built to be challenged: an honest LIMITATIONS.md, an interview Q&A, and a humble outreach note that literally says “tear it apart.” I framed it as a hypothesis, never a claim about Rokt's roadmap.",
-    ownNext:
-      "Partner with PM, design, and engineering; seek feedback early; make the trade-offs legible so the team decides with me, not around me.",
-  },
-  {
-    n: "5",
-    title: "Optimize & scale",
-    intent: "Scale to billions without breaking the invariants.",
-    proof:
-      "The pure engine parallelizes trivially, and I documented the exact path from a synchronous MVP to 10B+ transactions — async workers → transactional outbox → batched evaluation → Kafka ingestion → read replicas — with the invariants that survive the jump.",
-    ownNext:
-      "Find bottlenecks with data, hold p99, add drift monitoring — scale the platform to billions of transactions without breaking the invariants that make it defensible.",
-  },
-  {
-    n: "6",
-    title: "Drive revenue growth",
-    intent: "Protect the revenue engines before a change ships.",
-    proof:
-      "The thesis is revenue: as decisioning accelerates toward real-time relevance, the blast radius of a silent policy error grows — a deterministic pre-flight protects incrementality and loyalty economics, Rokt's own growth engines, before a change reaches a customer.",
-    ownNext:
-      "Build features that safely raise incremental revenue — and prove the lift with a holdout, never a claim.",
-  },
-];
-
-function WhatIllDo() {
-  return (
-    <section
-      id="what-ill-do"
-      aria-labelledby="do-title"
-      className="mx-auto max-w-6xl px-4 py-16 sm:px-6"
-    >
-      <Reveal>
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
-          What I&apos;ll do
-        </p>
-        <h2
-          id="do-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          Six dimensions — <span className="gradient-text">proof, then ownership.</span>
-        </h2>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
-          For each part of the role: the intent, the proof already in Threshold, and how I&apos;d
-          own it next at Rokt.
-        </p>
-      </Reveal>
-
-      <ol className="relative mt-12 space-y-6 border-l border-border/70 pl-6 sm:pl-8">
-        {DO_CARDS.map((c, i) => (
-          <li key={c.n} className="relative">
-            <span
-              aria-hidden
-              className="absolute -left-[calc(1.5rem+1px)] top-1.5 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border border-teal/60 bg-base font-mono text-sm font-semibold text-teal sm:-left-[calc(2rem+1px)]"
-            >
-              {c.n}
-            </span>
-            <Reveal delay={i * 0.03}>
-              <div className="holo-card rounded-2xl p-5 sm:p-6">
-                <h3 className="text-lg font-semibold tracking-tight">{c.title}</h3>
-                <p className="mt-1.5 text-sm italic leading-relaxed text-muted">{c.intent}</p>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl border border-teal/30 bg-teal/[0.05] p-4">
-                    <p className="font-mono text-[11px] uppercase tracking-wide text-teal">
-                      Proof in Threshold
-                    </p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-text">{c.proof}</p>
-                  </div>
-                  <div className="rounded-xl border border-offer-blue/30 bg-offer-blue/[0.05] p-4">
-                    <p className="font-mono text-[11px] uppercase tracking-wide text-offer-blue">
-                      How I&apos;d own it next
-                    </p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-text">{c.ownNext}</p>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </li>
-        ))}
-      </ol>
+      </ClipReveal>
     </section>
   );
 }
@@ -388,28 +166,29 @@ function WhoIAm() {
     <section aria-labelledby="who-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <Reveal>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">Who I am</p>
-        <h2
-          id="who-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          Five traits — <span className="gradient-text">one proof each.</span>
-        </h2>
       </Reveal>
-      <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {WHO.map((w, i) => (
-          <Reveal key={w.label} delay={i * 0.04}>
-            <div className="holo-card h-full rounded-2xl p-5">
-              <div className="flex items-center gap-2">
-                <span aria-hidden className="text-teal">
-                  ◆
-                </span>
-                <h3 className="text-sm font-semibold text-text">{w.label}</h3>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{w.proof}</p>
+      <MaskText
+        as="h2"
+        id="who-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        segments={[
+          { text: "Five traits — " },
+          { text: "one proof each.", className: "gradient-text" },
+        ]}
+      />
+      <StaggerGroup className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {WHO.map((w) => (
+          <div key={w.label} className="holo-card h-full rounded-2xl p-5">
+            <div className="flex items-center gap-2">
+              <span aria-hidden className="text-teal">
+                ◆
+              </span>
+              <h3 className="text-sm font-semibold text-text">{w.label}</h3>
             </div>
-          </Reveal>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{w.proof}</p>
+          </div>
         ))}
-      </div>
+      </StaggerGroup>
     </section>
   );
 }
@@ -448,40 +227,61 @@ const OPPS: { title: string; body: string; approach: string }[] = [
 
 function Opportunities() {
   return (
-    <section aria-labelledby="opps-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <section
+      aria-labelledby="opps-title"
+      className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6"
+    >
+      {/* Parallax section-background depth — restrained, decorative. */}
+      <Parallax
+        speed={16}
+        className="pointer-events-none absolute -right-24 top-10 -z-10 hidden h-80 w-80 rounded-full opacity-50 blur-3xl lg:block"
+      >
+        <div
+          className="h-full w-full"
+          aria-hidden
+          style={{
+            background:
+              "radial-gradient(circle at 50% 40%, rgba(91,140,255,0.22), transparent 62%)",
+          }}
+        />
+      </Parallax>
+
       <Reveal>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">
           More opportunities I see · senior-engineer lens
         </p>
-        <h2
-          id="opps-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          Adjacent bets — <span className="gradient-text">hypotheses, not claims.</span>
-        </h2>
+      </Reveal>
+      <MaskText
+        as="h2"
+        id="opps-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        segments={[
+          { text: "Adjacent bets — " },
+          { text: "hypotheses, not claims.", className: "gradient-text" },
+        ]}
+      />
+      <Reveal delay={0.05}>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
           Drawn from Rokt&apos;s public 2025-26 direction and framed as things I&apos;d want to
           explore — never as gaps Rokt hasn&apos;t already considered. Each is a starting
           hypothesis I&apos;d validate with a Rokt engineer before building.
         </p>
       </Reveal>
-      <div className="mt-10 grid gap-4 md:grid-cols-2">
-        {OPPS.map((o, i) => (
-          <Reveal key={o.title} delay={i * 0.04}>
-            <div className="holo-card h-full rounded-2xl p-6">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber/40 bg-amber/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber">
-                <span aria-hidden>◇</span> Hypothesis
-              </span>
-              <h3 className="mt-3 text-base font-semibold text-text">{o.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{o.body}</p>
-              <p className="mt-3 border-l-2 border-teal/50 pl-3 text-sm leading-relaxed text-text">
-                <span className="font-semibold text-teal">How I&apos;d approach it: </span>
-                {o.approach}
-              </p>
-            </div>
-          </Reveal>
+      <StaggerGroup className="mt-10 grid gap-4 md:grid-cols-2">
+        {OPPS.map((o) => (
+          <div key={o.title} className="holo-card h-full rounded-2xl p-6">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber/40 bg-amber/10 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-amber">
+              <span aria-hidden>◇</span> Hypothesis
+            </span>
+            <h3 className="mt-3 text-base font-semibold text-text">{o.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{o.body}</p>
+            <p className="mt-3 border-l-2 border-teal/50 pl-3 text-sm leading-relaxed text-text">
+              <span className="font-semibold text-teal">How I&apos;d approach it: </span>
+              {o.approach}
+            </p>
+          </div>
         ))}
-      </div>
+      </StaggerGroup>
     </section>
   );
 }
@@ -548,59 +348,67 @@ function OwnEndToEnd() {
     <section aria-labelledby="own-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <Reveal>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">My method</p>
-        <h2
-          id="own-title"
-          className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
-        >
-          How I own a problem, <span className="gradient-text">end-to-end.</span>
-        </h2>
+      </Reveal>
+      <MaskText
+        as="h2"
+        id="own-title"
+        className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl"
+        segments={[{ text: "How I own a problem, " }, { text: "end-to-end.", className: "gradient-text" }]}
+      />
+      <Reveal delay={0.05}>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
           The exact loop I ran for Threshold — and would run again.
         </p>
       </Reveal>
 
-      <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {LOOP.map((l, i) => (
-          <Reveal key={l.n} delay={i * 0.03}>
-            <div className="glass h-full rounded-2xl p-5">
-              <div className="flex items-center gap-2.5">
-                <span
-                  aria-hidden
-                  className="thr-edge flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2/70 font-mono text-xs font-semibold text-teal"
-                >
-                  {l.n}
-                </span>
-                <h3 className="text-sm font-semibold text-text">{l.step}</h3>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{l.detail}</p>
+      {/* The 6-step loop animates step-by-step. Ordered list for a11y. */}
+      <StaggerGroup
+        as="ol"
+        className="mt-10 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        stagger={0.1}
+      >
+        {LOOP.map((l) => (
+          <li key={l.n} className="glass h-full rounded-2xl p-5">
+            <div className="flex items-center gap-2.5">
+              <span
+                aria-hidden
+                className="thr-edge flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2/70 font-mono text-xs font-semibold text-teal"
+              >
+                {l.n}
+              </span>
+              <h3 className="text-sm font-semibold text-text">
+                <span className="sr-only">Step {l.n}: </span>
+                {l.step}
+              </h3>
             </div>
-          </Reveal>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{l.detail}</p>
+          </li>
         ))}
-      </div>
+      </StaggerGroup>
 
-      <Reveal delay={0.05}>
-        <div className="mt-8">
+      <div className="mt-8">
+        <Reveal>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-muted">
             The same discipline, per layer
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {LAYERS.map((l) => (
-              <div key={l.layer} className="holo-card h-full rounded-2xl p-5">
-                <span
-                  className="inline-flex rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold"
-                  style={{
-                    color: l.accent,
-                    backgroundColor: `color-mix(in srgb, ${l.accent} 14%, transparent)`,
-                  }}
-                >
-                  {l.layer}
-                </span>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{l.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Reveal>
+        </Reveal>
+        <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {LAYERS.map((l) => (
+            <div key={l.layer} className="holo-card h-full rounded-2xl p-5">
+              <span
+                className="inline-flex rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold"
+                style={{
+                  color: l.accent,
+                  backgroundColor: `color-mix(in srgb, ${l.accent} 14%, transparent)`,
+                }}
+              >
+                {l.layer}
+              </span>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{l.body}</p>
+            </div>
+          ))}
+        </StaggerGroup>
+      </div>
     </section>
   );
 }
@@ -609,12 +417,14 @@ function OwnEndToEnd() {
 function ClosingAsk() {
   return (
     <section aria-label="The ask" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-      <Reveal>
-        <div className="thr-edge relative overflow-hidden rounded-3xl bg-surface/60 p-10 text-center backdrop-blur sm:p-14">
+      <ClipReveal scale={0.94} y={36}>
+        <div className="thr-edge glow-teal-pulse relative overflow-hidden rounded-3xl bg-surface/60 p-10 text-center backdrop-blur sm:p-14">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">The ask</p>
-          <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ten minutes. <span className="gradient-text">Tear it apart.</span>
-          </h2>
+          <MaskText
+            as="h2"
+            className="mx-auto mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl"
+            segments={[{ text: "Ten minutes. " }, { text: "Tear it apart.", className: "gradient-text" }]}
+          />
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
             Ten minutes with a Rokt engineer. Tell me what I got right and — more usefully — what I
             got wrong. I want to be a long-term Builder, not collect a company name.
@@ -635,7 +445,7 @@ function ClosingAsk() {
             </Link>
           </div>
         </div>
-      </Reveal>
+      </ClipReveal>
     </section>
   );
 }
@@ -648,9 +458,9 @@ export function BuilderPage() {
       <div className="relative z-10">
         <BuilderNav />
         <main id="main">
-          <Hero />
+          <BuilderHero />
           <RoleReading />
-          <WhatIllDo />
+          <DoTimeline />
           <WhoIAm />
           <Opportunities />
           <OwnEndToEnd />
