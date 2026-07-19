@@ -99,7 +99,7 @@ export function Hero() {
       onClick={() => setProposedVersion(v)}
       aria-pressed={active === v}
       disabled={busy}
-      className="px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50"
+      className="inline-flex min-h-[44px] flex-1 items-center justify-center px-3 py-2 text-center text-xs font-medium leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50 sm:px-4 sm:text-sm"
       style={active === v ? { backgroundColor: on, color: fg } : { color: "var(--c-muted)" }}
     >
       {label}
@@ -199,7 +199,7 @@ export function Hero() {
           <div
             role="group"
             aria-label="Compare outcomes"
-            className="thr-edge inline-flex overflow-hidden rounded-lg"
+            className="thr-edge flex overflow-hidden rounded-lg sm:inline-flex"
           >
             {seg(DANGEROUS, "⚠ Dangerous edit · V18", "var(--c-crimson)", "#fff")}
             <span aria-hidden className="w-px self-stretch bg-border" />

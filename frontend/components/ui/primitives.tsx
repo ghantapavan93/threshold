@@ -40,6 +40,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         "active:scale-[0.97] disabled:active:scale-100",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-base",
         "disabled:cursor-not-allowed",
+        // ≥44px effective tap target on touch; natural height on desktop.
+        "min-h-[44px] sm:min-h-0",
         size === "sm" ? "px-2.5 py-1 text-xs" : "px-3.5 py-2 text-sm",
         buttonVariants[variant],
         className,
@@ -180,7 +182,7 @@ export function SegmentedToggle<T extends string>({
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={cx(
-              "rounded-md px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal",
+              "inline-flex min-h-[40px] items-center justify-center rounded-md px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0",
               active
                 ? "bg-surface text-text shadow-sm"
                 : "text-muted hover:text-text",

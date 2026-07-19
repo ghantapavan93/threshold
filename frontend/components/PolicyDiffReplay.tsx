@@ -98,7 +98,7 @@ function RunControls({
                   aria-pressed={active}
                   onClick={() => toggleInjection(inj.value)}
                   className={
-                    "rounded-md border px-2.5 py-1 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal " +
+                    "inline-flex min-h-[44px] items-center rounded-md border px-2.5 py-1 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0 " +
                     (active
                       ? "border-offer-blue/50 bg-offer-blue/15 text-offer-blue"
                       : "border-border bg-surface-2 text-muted hover:text-text")
