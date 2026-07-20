@@ -310,7 +310,7 @@ export function Scene({
         </motion.div>
         <AmbientMotes accent={accent} />
         {clip ? (
-          <SceneMedia variant="backdrop" src={`/media/${clip}.webm`} poster={`/media/${clip}.jpg`} label="" />
+          <SceneMedia variant="backdrop" src={`/media/${clip}.mp4`} poster={`/media/${clip}.jpg`} label="" />
         ) : null}
         {/* giant ghosted chapter numeral — cinematic depth marker */}
         <motion.span

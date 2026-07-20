@@ -1,3 +1,19 @@
 {
-  "available": []
+  "available": [
+    "kc-moment.mp4",
+    "kc-change.mp4",
+    "kc-customers.mp4",
+    "kc-failure.mp4",
+    "kc-machine.mp4",
+    "kc-evidence.mp4",
+    "kc-experiment.mp4",
+    "kc-frontier.mp4",
+    "kc-handoff.mp4",
+    "kc-afterglow.mp4",
+    "mf-translation.mp4",
+    "mf-reconciliation.mp4",
+    "mf-unitwall.mp4",
+    "mf-compiler.mp4",
+    "mf-sim.mp4"
+  ]
 }

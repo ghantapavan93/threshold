@@ -32,7 +32,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
    copy the file, add its name to manifest.json. Fetched once per session. */
 let manifestPromise: Promise<Set<string>> | null = null;
 function loadManifest(): Promise<Set<string>> {
-  manifestPromise ??= fetch("/media/manifest.json")
+  manifestPromise ??= fetch("/media/manifest.json", { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : { available: [] }))
     .then((j: { available?: string[] }) => new Set(j.available ?? []))
     .catch(() => new Set<string>());
@@ -64,24 +64,32 @@ export function SceneMedia({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<"pending" | "ready" | "missing">("pending");
   const [reduced, setReduced] = useState<boolean | null>(null);
-  const [nearView, setNearView] = useState(false);
+  // Default to visible so playback starts even if the IntersectionObserver is
+  // slow or unreliable; IO only downgrades to paused when genuinely off-screen.
+  const [nearView, setNearView] = useState(true);
   const [listed, setListed] = useState<boolean | null>(null);
+  const [posterListed, setPosterListed] = useState(false);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  // Only attempt files the manifest declares — no 404s for pending slots.
+  // Only attempt files the manifest declares — no 404s for pending slots. The
+  // poster is checked separately so a clip without a still never shows a broken
+  // image; it simply falls back to the code-drawn scene.
   useEffect(() => {
     let alive = true;
     const name = src.split("/").pop() ?? src;
+    const posterName = poster ? poster.split("/").pop() ?? poster : null;
     void loadManifest().then((available) => {
-      if (alive) setListed(available.has(name));
+      if (!alive) return;
+      setListed(available.has(name));
+      setPosterListed(!!posterName && available.has(posterName));
     });
     return () => {
       alive = false;
     };
-  }, [src]);
+  }, [src, poster]);
 
   // Mount the <video> only when the slot approaches the viewport.
   useEffect(() => {
@@ -95,13 +103,15 @@ export function SceneMedia({
     return () => io.disconnect();
   }, []);
 
-  // Pause when scrolled away; resume when back (only once ready).
+  // Once ready, play; pause only when the observer says the scene is off-screen.
+  // Mounting no longer depends on the observer (see below), so a flaky reading
+  // can never leave a visible clip unmounted — at worst it keeps playing.
   useEffect(() => {
     const v = videoRef.current;
     if (!v || status !== "ready") return;
     if (nearView) void v.play().catch(() => {});
     else v.pause();
-  }, [nearView, status]);
+  }, [status, nearView]);
 
   // Until the client knows the motion preference, render the fallback only —
   // identical on server and client, so hydration stays clean.
@@ -114,31 +124,37 @@ export function SceneMedia({
         aria-hidden
         className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
       >
-        {reduced && poster && listed === true ? (
+        {reduced && posterListed ? (
           // Reduced motion: the beautiful static frame, never playback.
           // eslint-disable-next-line @next/next/no-img-element
           <img src={poster} alt="" className="h-full w-full object-cover opacity-25" />
         ) : null}
-        {playbackAllowed && listed === true && status !== "missing" && nearView ? (
+        {playbackAllowed && listed === true && status !== "missing" ? (
           <video
             ref={videoRef}
             className="h-full w-full object-cover transition-opacity duration-700"
-            style={{ opacity: status === "ready" ? 0.3 : 0 }}
+            style={{ opacity: status === "ready" ? 0.34 : 0 }}
             src={src}
-            poster={poster}
+            poster={posterListed ? poster : undefined}
             muted
             loop
             playsInline
             autoPlay
             preload="none"
             onLoadedData={() => setStatus("ready")}
-            onError={() => setStatus("missing")}
+            onError={(e) => {
+              // Ignore transient aborts/network blips (StrictMode + IO remount
+              // churn in dev fire spurious aborts); only give up on a real
+              // decode/source failure so a good clip is never killed by a hiccup.
+              const code = e.currentTarget.error?.code;
+              if (code === 3 || code === 4) setStatus("missing");
+            }}
           />
         ) : null}
         {/* Scrim: legibility never depends on what the video is doing. Rendered
             only while media is actually visible, so a pending slot changes
             nothing about the page. */}
-        {status === "ready" || (reduced === true && !!poster && listed === true) ? (
+        {status === "ready" || (reduced === true && posterListed) ? (
           <div
             className="absolute inset-0"
             style={{
@@ -159,7 +175,7 @@ export function SceneMedia({
         style={{ opacity: status === "ready" && playbackAllowed ? 0 : 1 }}
         aria-hidden={status === "ready" && playbackAllowed}
       >
-        {reduced && poster && listed === true ? (
+        {reduced && posterListed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={poster} alt={label} className="w-full rounded-xl border border-border/60" />
         ) : (
@@ -173,7 +189,7 @@ export function SceneMedia({
           className="absolute inset-0 h-full w-full rounded-xl border border-border/60 object-cover transition-opacity duration-500"
           style={{ opacity: status === "ready" ? 1 : 0 }}
           src={src}
-          poster={poster}
+          poster={posterListed ? poster : undefined}
           muted
           loop
           playsInline

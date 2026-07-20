@@ -62,7 +62,7 @@ function CinemaIntro({ clip, children }: { clip: string; children: React.ReactNo
     <div className="relative mb-2 overflow-hidden rounded-2xl">
       <SceneMedia
         variant="backdrop"
-        src={`/media/${clip}.webm`}
+        src={`/media/${clip}.mp4`}
         poster={`/media/${clip}.jpg`}
         label=""
       />

@@ -10,6 +10,14 @@
       "autoPort": false
     },
     {
+      "name": "frontend-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "cwd": "frontend",
+      "port": 3000,
+      "autoPort": false
+    },
+    {
       "name": "backend",
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8000"],
