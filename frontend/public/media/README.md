@@ -19,6 +19,116 @@ Two classes of media, per the project's honesty posture (nothing fabricated):
   contradict the "every number computed live" thesis.
 - **AI ambient loops (Veo / Gemini)** only for abstract, text-free atmosphere.
 
+---
+
+# ★ BUILDER KEYNOTE — the ten cinema clips (`/builder`)
+
+The primary experience. Each of the ten chapters has a code-drawn environment already
+on screen; these ambient loops layer **on top at 30% opacity under a scrim**, so they
+add depth and life without ever fighting the copy or the live UI. One clip per chapter.
+
+**Platform:** Google **Veo 3** via the Gemini app or Google Flow (labs.google/flow) is the
+top pick — extend/loop tools, best physical realism. Kling AI or Runway Gen-3 also work.
+
+**File naming (exact):** `kc-<chapter>.webm` for the loop **and** `kc-<chapter>.jpg` for the
+poster still, dropped in this folder, then added to `manifest.json`. Chapters:
+`kc-moment · kc-change · kc-customers · kc-failure · kc-machine · kc-evidence · kc-experiment · kc-frontier · kc-handoff · kc-afterglow`.
+
+## ① Paste this CONTEXT PREAMBLE first, once per session
+
+> You are generating abstract cinematic background loops for **"Threshold — Builder
+> Keynote"**, a dark, premium engineering film about a deterministic safety gate that
+> proves an e-commerce checkout-policy change is safe *before any customer sees it*. The
+> film is told as chapters; each loop is the atmospheric backdrop behind one chapter's
+> text and live product UI, so it must be **calm, out-of-focus, and never compete for
+> attention**. Visual identity — museum-dark and precise:
+> • base / void: deep ink-navy **#0B0F19**
+> • teal **#22E6C8** = safe, verified, alive
+> • crimson **#FF4D6A** = blocked, failure, leak
+> • amber **#F5B84B** = a visible, honest warning
+> • soft blue **#5B8CFF** = offers, customers, value
+> Style for EVERY clip: cinematic macro/wide abstraction, volumetric haze, shallow depth
+> of field, film grain, gentle bokeh, extremely slow and deliberate motion, elegant and
+> restrained. HARD RULES (obey on every clip — this saves credits): **no text, no
+> letters, no numbers, no logos, no UI, no readable screens, no people, no faces, no
+> brand marks**; seamless loop; no camera cuts; hold the same mood start to end; 16:9;
+> about 10 seconds; leave the centre calmer/darker so overlaid text stays legible.
+
+## ② The ten prompts (each inherits the preamble)
+
+**kc-moment** — *00 · The Moment.* A premium, empty movie theatre at rest, seen wide from
+the back rows: a large screen glowing a soft teal (#22E6C8) haze, raked rows of dark
+seats catching faint teal rim-light, slow dust motes drifting through a projector beam.
+Warm, expectant, still — a moment about to begin. Deep ink-navy (#0B0F19) throughout.
+
+**kc-change** — *01 · The Change.* A dark chamber of thin converging perspective lines
+receding to a single glowing crimson (#FF4D6A) vanishing point; two tall monolithic slabs
+of faint light face each other in the space, one cool and neutral, one edged in crimson.
+Tension held, nothing moving fast — the instant before a decision. Ink-navy void.
+
+**kc-customers** — *02 · The Customers.* An immense dark auditorium rendered as a vast
+field of tiny luminous points, like an audience of soft blue (#5B8CFF) lights receding
+into haze; one slow wave of teal (#22E6C8) illumination sweeps across them, and a
+scattered few points quietly flare crimson (#FF4D6A) in its wake, then settle. Awe, scale.
+
+**kc-failure** — *03 · The Failure.* Two parallel streams of light flow left to right
+through the dark; the upper stream (the optional offer) breaks apart into drifting crimson
+(#FF4D6A) embers and dissolves, while the lower stream (the purchase) continues perfectly
+steady and unbroken in teal (#22E6C8). A calm, clean separation — failure contained, never
+chaotic. Ink-navy background.
+
+**kc-machine** — *04 · The Machine.* A slow travelling shot gliding through the interior of
+an immense, precise machine: luminous teal (#22E6C8) pulses of energy flow along fine
+conduits, passing in sequence through a series of softly-lit gates and chambers, over a
+faint blueprint grid. Ordered, mechanical, accountable — like watching a clockwork engine
+from inside. Deep navy metal and shadow.
+
+**kc-evidence** — *05 · The Evidence.* A dark archive of translucent luminous planes
+floating in space (abstract records, no readable text); a clean vertical boundary of light
+sweeps slowly across, and where it passes, cluttered scattered crimson (#FF4D6A) fragments
+resolve into fewer, calmer, ordered teal (#22E6C8) planes. Truth being distilled — less,
+but truer. Ink-navy void.
+
+**kc-experiment** — *06 · The Experiment.* A vast dark field of faint points of light; a
+small, bright cohort of teal (#22E6C8) points sits isolated inside a soft luminous ring,
+clearly separated from the larger surrounding field which glows calm and protected in soft
+blue (#5B8CFF). Controlled, careful, quiet — a contained experiment. Deep navy expanse.
+
+**kc-frontier** — *07 · The Frontier.* A single luminous capsule of soft-blue (#5B8CFF)
+light travels slowly toward a tall shimmering vertical membrane (a consent boundary); as it
+meets the membrane, approved light passes through and continues as clean blue, while a thin
+haze of unsupported particles dissolves away at the surface. Futuristic, permissioned,
+trustworthy. Ink-navy depth with teal (#22E6C8) accents.
+
+**kc-handoff** — *08 · The Hand-off.* A soft cinematic haze in deep ink-navy slowly
+crystallizes and resolves into a clean, precise architectural lattice of fine teal
+(#22E6C8) lines — the moment a dreamlike film settles into a real, engineered structure.
+Calm, confident, grounded. No UI, purely abstract geometry emerging from fog.
+
+**kc-afterglow** — *09 · The Afterglow.* An empty movie theatre after hours, lights down:
+the screen dark, the raked seats barely visible in deep ink-navy (#0B0F19), and a single
+faint teal (#22E6C8) trace-line still glowing quietly across the space as the last dust
+settles. Resolved, calm, the end of the story — stillness with one light left on.
+
+## ③ Poster stills (`.jpg`, required — reduced-motion users see these)
+
+For each clip, generate one still (ChatGPT / any image model) with the SAME prompt prefixed
+by: *"A single static cinematic frame, photographic quality —"*, save as `kc-<chapter>.jpg`.
+
+## ④ Manifest once the keynote clips land
+
+```json
+{ "available": [
+  "kc-moment.webm","kc-moment.jpg","kc-change.webm","kc-change.jpg",
+  "kc-customers.webm","kc-customers.jpg","kc-failure.webm","kc-failure.jpg",
+  "kc-machine.webm","kc-machine.jpg","kc-evidence.webm","kc-evidence.jpg",
+  "kc-experiment.webm","kc-experiment.jpg","kc-frontier.webm","kc-frontier.jpg",
+  "kc-handoff.webm","kc-handoff.jpg","kc-afterglow.webm","kc-afterglow.jpg"
+] }
+```
+
+---
+
 ## File specs (all slots)
 
 - `webm` (VP9) preferred, `mp4` (H.264) also works — if you use mp4, update the `src`
