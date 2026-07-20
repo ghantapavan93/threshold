@@ -6,6 +6,7 @@ import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "@/app/providers";
 import { FilmGrain } from "@/components/moment-forge/garnish";
 import { MeasurementLive } from "@/components/plan/MeasurementLive";
+import { CreativeLinter } from "@/components/plan/CreativeLinter";
 import {
   ChapterRail,
   Pill,
@@ -352,6 +353,7 @@ export function PlanKeynote() {
                   </div>
                 </article>
               ))}
+              <CreativeLinter />
               <p className="max-w-[64ch] text-sm leading-relaxed text-muted">
                 The through-line: all four are the same move Threshold already makes — catch the problem before it
                 reaches a customer, with a human keeping the decision. Not four ideas; one discipline, four times.
