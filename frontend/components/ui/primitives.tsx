@@ -239,8 +239,17 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-surface/40 px-6 py-10 text-center">
       {icon ? <div className="text-muted">{icon}</div> : null}
-      <p className="text-sm font-medium text-text">{title}</p>
-      {hint ? <p className="max-w-md text-xs text-muted">{hint}</p> : null}
+      <WordReveal as="p" text={title} blur={false} stagger={0.02} className="text-sm font-medium text-text" />
+      {hint ? (
+        <WordReveal
+          as="p"
+          text={hint}
+          blur={false}
+          stagger={0.01}
+          delay={0.1}
+          className="max-w-md text-xs text-muted"
+        />
+      ) : null}
     </div>
   );
 }
