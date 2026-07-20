@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api";
 import { useTranslationAudit } from "@/lib/hooks";
 import type { TranslationAudit } from "@/lib/schemas";
 import { translationFixture } from "./fixtures";
+import { CelebrationBurst, Magnetic } from "./garnish";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Translation Map (Fig. 03b) — closes the honest self-critique: the demo bug
@@ -26,6 +27,8 @@ export function TranslationMap({ offline }: { offline: boolean }) {
   const [result, setResult] = useState<TranslationAudit | null>(null);
   const [usedFixture, setUsedFixture] = useState(false);
   const [err, setErr] = useState<ApiError | null>(null);
+  // Counts successful runs — the celebration burst fires per REAL result landing.
+  const [runId, setRunId] = useState(0);
 
   const run = async () => {
     setStatus("loading");
@@ -34,6 +37,7 @@ export function TranslationMap({ offline }: { offline: boolean }) {
       setResult(translationFixture());
       setUsedFixture(true);
       setStatus("ok");
+      setRunId((n) => n + 1);
     };
     if (offline) {
       try {
@@ -49,6 +53,7 @@ export function TranslationMap({ offline }: { offline: boolean }) {
       setResult(d);
       setUsedFixture(false);
       setStatus("ok");
+      setRunId((n) => n + 1);
     } catch (e) {
       const ae = e instanceof ApiError ? e : new ApiError({ kind: "network", message: String(e) });
       if (ae.isUnreachable) {
@@ -106,14 +111,16 @@ export function TranslationMap({ offline }: { offline: boolean }) {
           <span aria-hidden>⇄</span>
           <span className={aclOn ? "text-muted" : "text-crimson"}>identity</span>
         </button>
-        <button
-          type="button"
-          onClick={run}
-          disabled={status === "loading"}
-          className="press ml-auto inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-teal/50 bg-teal/15 px-3 py-1 font-semibold text-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-60 sm:min-h-0"
-        >
-          {status === "loading" ? "auditing…" : "▸ Audit translation"}
-        </button>
+        <Magnetic className="ml-auto">
+          <button
+            type="button"
+            onClick={run}
+            disabled={status === "loading"}
+            className="press inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-teal/50 bg-teal/15 px-3 py-1 font-semibold text-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-60 sm:min-h-0"
+          >
+            {status === "loading" ? "auditing…" : "▸ Audit translation"}
+          </button>
+        </Magnetic>
       </div>
 
       {offline ? (
@@ -156,9 +163,10 @@ export function TranslationMap({ offline }: { offline: boolean }) {
 
             {/* the count at the wall — the live number that inflates */}
             <div
-              className="rounded-lg border p-4"
+              className="relative rounded-lg border p-4"
               style={{ borderColor: aclOn ? "var(--c-teal)" : "var(--c-crimson)" }}
             >
+              <CelebrationBurst fireKey={runId || null} />
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
                   &ldquo;incremental&rdquo; lift that leaves the seam

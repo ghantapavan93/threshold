@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api";
 import { useReconciliationAudit, useReconciliationProof } from "@/lib/hooks";
 import type { ReconciliationAudit, ReconciliationProof } from "@/lib/schemas";
 import { reconciliationFixture } from "./fixtures";
+import { CelebrationBurst, Magnetic } from "./garnish";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Reconciliation Lane (Fig. 03c) — closes W2 of the integration critique: the
@@ -52,6 +53,8 @@ export function ReconciliationLane({ offline }: { offline: boolean }) {
   const [proofStatus, setProofStatus] = useState<Status>("idle");
   const [proofResult, setProofResult] = useState<ReconciliationProof | null>(null);
   const [proofErr, setProofErr] = useState<ApiError | null>(null);
+  // Counts successful runs — the celebration burst fires per REAL result landing.
+  const [runId, setRunId] = useState(0);
 
   const run = async () => {
     setStatus("loading");
@@ -60,6 +63,7 @@ export function ReconciliationLane({ offline }: { offline: boolean }) {
       setResult(reconciliationFixture());
       setUsedFixture(true);
       setStatus("ok");
+      setRunId((n) => n + 1);
     };
     if (offline) {
       try {
@@ -75,6 +79,7 @@ export function ReconciliationLane({ offline }: { offline: boolean }) {
       setResult(d);
       setUsedFixture(false);
       setStatus("ok");
+      setRunId((n) => n + 1);
     } catch (e) {
       const ae = e instanceof ApiError ? e : new ApiError({ kind: "network", message: String(e) });
       if (ae.isUnreachable) {
@@ -146,14 +151,16 @@ export function ReconciliationLane({ offline }: { offline: boolean }) {
           <span aria-hidden>⇄</span>
           <span className={strategy === "outbox" ? "text-teal" : "text-muted"}>▣ outbox</span>
         </button>
-        <button
-          type="button"
-          onClick={run}
-          disabled={status === "loading"}
-          className="press ml-auto inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-teal/50 bg-teal/15 px-3 py-1 font-semibold text-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-60 sm:min-h-0"
-        >
-          {status === "loading" ? "reconciling…" : "▸ Reconcile"}
-        </button>
+        <Magnetic className="ml-auto">
+          <button
+            type="button"
+            onClick={run}
+            disabled={status === "loading"}
+            className="press inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-teal/50 bg-teal/15 px-3 py-1 font-semibold text-teal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-60 sm:min-h-0"
+          >
+            {status === "loading" ? "reconciling…" : "▸ Reconcile"}
+          </button>
+        </Magnetic>
       </div>
 
       {offline ? (
@@ -196,7 +203,8 @@ export function ReconciliationLane({ offline }: { offline: boolean }) {
             </p>
 
             {/* the number that matters: SILENT divergence under the selected pattern */}
-            <div className="rounded-lg border p-4" style={{ borderColor: silentTone }}>
+            <div className="relative rounded-lg border p-4" style={{ borderColor: silentTone }}>
+              <CelebrationBurst fireKey={runId || null} color="rgba(245,184,75,.85)" />
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
                   earns that diverged with NO visible trace

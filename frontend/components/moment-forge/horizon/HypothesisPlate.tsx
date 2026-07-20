@@ -1,6 +1,7 @@
 "use client";
 
 import { MaskText } from "@/components/builder/anim";
+import { Tilt3D } from "../garnish";
 import { CLOSING_BRIDGE, OPENING_BRIDGE, type Hypothesis } from "./horizon.data";
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -22,10 +23,11 @@ export function MovementHeader({ eyebrow, line }: { eyebrow: string; line: strin
 
 export function HypothesisPlate({ h }: { h: Hypothesis }) {
   return (
+    <Tilt3D max={4} className="mx-auto mt-8 max-w-4xl">
     <article
       id={`hyp-${h.id}`}
       aria-labelledby={`${h.id}-h`}
-      className="mx-auto mt-8 max-w-4xl rounded-2xl border border-border/70 bg-base/70 p-6 backdrop-blur-sm sm:p-8"
+      className="rounded-2xl border border-border/70 bg-base/70 p-6 backdrop-blur-sm sm:p-8"
     >
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         {/* left — the argument */}
@@ -80,6 +82,7 @@ export function HypothesisPlate({ h }: { h: Hypothesis }) {
         {h.risk}
       </p>
     </article>
+    </Tilt3D>
   );
 }
 

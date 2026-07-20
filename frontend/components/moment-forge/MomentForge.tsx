@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useHealth } from "@/lib/hooks";
 import { scrollToId } from "@/lib/scroll";
 import { MaskText, Reveal } from "@/components/builder/anim";
@@ -15,6 +16,7 @@ import {
   PlateRail,
 } from "./chassis";
 import { SceneMedia } from "@/components/visual/SceneMedia";
+import { FilmGrain } from "./garnish";
 import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
 import { TranslationMap } from "./TranslationMap";
@@ -82,6 +84,13 @@ const BEAT_TEXT: Record<BeatAccent, string> = {
   "offer-blue": "text-offer-blue",
 };
 
+const BEAT_BAR: Record<BeatAccent, string> = {
+  teal: "linear-gradient(to right, var(--c-teal), transparent)",
+  crimson: "linear-gradient(to right, var(--c-crimson), transparent)",
+  amber: "linear-gradient(to right, var(--c-amber), transparent)",
+  "offer-blue": "linear-gradient(to right, var(--c-offer-blue), transparent)",
+};
+
 function BeatIntro({
   kicker,
   body,
@@ -97,12 +106,24 @@ function BeatIntro({
   side: "left" | "right";
   depth?: React.ReactNode;
 }) {
+  const reduced = useReducedMotion();
+  const [open, setOpen] = useState(false);
   const text = (
     <div className={side === "left" ? "lg:order-2" : undefined}>
       <p className={`font-mono text-[11px] uppercase tracking-[0.22em] ${BEAT_TEXT[accent]}`}>
         {kicker}
       </p>
-      <p className="mt-2 max-w-[46ch] text-lg leading-relaxed text-text sm:text-xl">{body}</p>
+      {/* gradient underline — draws itself as the beat scrolls into view */}
+      <motion.span
+        aria-hidden
+        className="mt-2 block h-px w-24 origin-left"
+        style={{ background: BEAT_BAR[accent] }}
+        initial={reduced ? false : { scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, margin: "-15% 0px" }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      />
+      <p className="mt-3 max-w-[46ch] text-lg leading-relaxed text-text sm:text-xl">{body}</p>
     </div>
   );
   const list = (
@@ -130,17 +151,41 @@ function BeatIntro({
         {list}
       </div>
       {depth ? (
-        <details className="group mt-4">
-          <summary className="inline-flex min-h-[36px] cursor-pointer list-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0 [&::-webkit-details-marker]:hidden">
-            <span aria-hidden className="transition-transform group-open:rotate-90">
+        <div className="mt-4">
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+            className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
+          >
+            <span
+              aria-hidden
+              className="transition-transform duration-300"
+              style={{ transform: open ? "rotate(90deg)" : "none" }}
+            >
               ▸
             </span>
             The full argument
-          </summary>
-          <div className="mt-3 max-w-[62ch] border-l border-border/70 pl-4 text-sm leading-relaxed text-muted">
-            {depth}
-          </div>
-        </details>
+          </button>
+          {/* framer measures the real content height so the reveal is smooth
+              and correct; reduced motion collapses it to an instant toggle */}
+          <AnimatePresence initial={false}>
+            {open ? (
+              <motion.div
+                key="depth"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: reduced ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 max-w-[62ch] border-l border-border/70 pl-4 text-sm leading-relaxed text-muted">
+                  {depth}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
       ) : null}
     </div>
   );
@@ -160,6 +205,7 @@ export function MomentForge() {
   return (
     <div className="relative min-h-screen text-text">
       <BlueprintSubstrate />
+      <FilmGrain />
       <div className="relative z-10">
         <MomentNav />
         <PlateRail />
