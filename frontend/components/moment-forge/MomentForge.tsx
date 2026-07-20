@@ -69,6 +69,83 @@ function CinemaIntro({ clip, children }: { clip: string; children: React.ReactNo
   );
 }
 
+/* The ShelfTrace-derived beat grammar — attention first, rigor on demand.
+   Every section intro is exactly: an all-caps kicker, ONE sentence, three
+   bullets, and a "full argument" disclosure holding the original paragraph.
+   Sides alternate section to section so the page reads as a rhythm, not a
+   column of essays. */
+type BeatAccent = "teal" | "crimson" | "amber" | "offer-blue";
+const BEAT_TEXT: Record<BeatAccent, string> = {
+  teal: "text-teal",
+  crimson: "text-crimson",
+  amber: "text-amber",
+  "offer-blue": "text-offer-blue",
+};
+
+function BeatIntro({
+  kicker,
+  body,
+  bullets,
+  accent,
+  side,
+  depth,
+}: {
+  kicker: string;
+  body: React.ReactNode;
+  bullets: React.ReactNode[];
+  accent: BeatAccent;
+  side: "left" | "right";
+  depth?: React.ReactNode;
+}) {
+  const text = (
+    <div className={side === "left" ? "lg:order-2" : undefined}>
+      <p className={`font-mono text-[11px] uppercase tracking-[0.22em] ${BEAT_TEXT[accent]}`}>
+        {kicker}
+      </p>
+      <p className="mt-2 max-w-[46ch] text-lg leading-relaxed text-text sm:text-xl">{body}</p>
+    </div>
+  );
+  const list = (
+    <ul className={`space-y-2.5 lg:pt-7 ${side === "left" ? "lg:order-1" : ""}`}>
+      {bullets.map((b, i) => (
+        <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed text-muted">
+          <span aria-hidden className={`mt-0.5 font-mono text-xs ${BEAT_TEXT[accent]}`}>
+            ▛
+          </span>
+          <span>{b}</span>
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <div>
+      <div
+        className={
+          side === "left"
+            ? "grid gap-5 lg:grid-cols-[1fr_1.25fr] lg:gap-10"
+            : "grid gap-5 lg:grid-cols-[1.25fr_1fr] lg:gap-10"
+        }
+      >
+        {text}
+        {list}
+      </div>
+      {depth ? (
+        <details className="group mt-4">
+          <summary className="inline-flex min-h-[36px] cursor-pointer list-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0 [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="transition-transform group-open:rotate-90">
+              ▸
+            </span>
+            The full argument
+          </summary>
+          <div className="mt-3 max-w-[62ch] border-l border-border/70 pl-4 text-sm leading-relaxed text-muted">
+            {depth}
+          </div>
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
 export function MomentForge() {
   const health = useHealth();
   const offline = health.isError ? health.error.isUnreachable : false;
@@ -145,7 +222,7 @@ export function MomentForge() {
               figure="02"
               title="The Living Bounded-Context Map"
               tone="teal"
-              caption="Seven bounded contexts of the Transaction Moment. Each edge is a DDD relationship pattern (color + line-style + glyph + label). Select a context to study its role, its language, and its relationships. Modelling choices [INFERENCE]; the seams are [VERIFIED-PUBLIC]."
+              caption="Seven contexts, every edge a named relationship pattern — select one to study its role, its language, its seams. Modelling [INFERENCE]; the seams [VERIFIED-PUBLIC]."
             >
               <ContextMap />
             </Plate>
@@ -157,7 +234,7 @@ export function MomentForge() {
               figure="03"
               title="The Language Lens"
               tone="crimson"
-              caption="Take one word and move it across a bounded-context boundary; its definition, concept-shape and connotation mutate at the seam. Same word, different model — the general disease Threshold's missing-attribute check treats."
+              caption="Same word, different model — drag it across a boundary and watch its meaning mutate at the seam."
             >
               <LanguageLens />
             </Plate>
@@ -167,20 +244,42 @@ export function MomentForge() {
           <Section id="sec-translation" label="Translation Map — conversion across an anticorruption layer">
             <CinemaIntro clip="mf-translation">
             <Reveal>
-              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                An honest self-critique: the missing-attribute inversion never actually <em>crosses</em> a
-                boundary — it lives in one function. Here the word{" "}
-                <span className="text-text">&ldquo;conversion&rdquo;</span> genuinely crosses a real
-                anticorruption layer (Measurement → Incrementality) in deterministic code. Toggle the ACL off and
-                a real number inflates at the wall — the leak the ACL exists to stop.
-              </p>
+              <BeatIntro
+                accent="crimson"
+                side="right"
+                kicker="One word, two meanings"
+                body={
+                  <>
+                    &ldquo;Conversion&rdquo; crosses a real anticorruption layer — Measurement →
+                    Incrementality — in running code. Toggle the ACL off and a real number inflates
+                    at the wall.
+                  </>
+                }
+                bullets={[
+                  "The Conformist path counts would-have-bought-anyway as lift",
+                  "The ACL removes the baseline — only caused conversions cross",
+                  <>
+                    Every number computed live — <span className="font-mono text-text">POST /translation-audit</span>
+                  </>,
+                ]}
+                depth={
+                  <>
+                    An honest self-critique: the missing-attribute inversion never actually{" "}
+                    <em>crosses</em> a boundary — it lives in one function. Here the word{" "}
+                    <span className="text-text">&ldquo;conversion&rdquo;</span> genuinely crosses a
+                    real anticorruption layer (Measurement → Incrementality) in deterministic code.
+                    Toggle the ACL off and a real number inflates at the wall — the leak the ACL
+                    exists to stop.
+                  </>
+                }
+              />
             </Reveal>
             </CinemaIntro>
             <Plate
               figure="03b"
               title="The Translation Map"
               tone="crimson"
-              caption="LIVE · POST /translation-audit. The Conformist (identity) path over-counts lift; the ACL path excludes non-incremental conversions. The one synthetic baseline is labelled; every number is computed live, never asserted."
+              caption="LIVE · POST /translation-audit · the one synthetic baseline is labelled; every number computed live, never asserted."
             >
               <TranslationMap offline={offline} />
             </Plate>
@@ -190,21 +289,41 @@ export function MomentForge() {
           <Section id="sec-reconciliation" label="Reconciliation Lane — the cross-aggregate invariant closed">
             <CinemaIntro clip="mf-reconciliation">
             <Reveal>
-              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                The second honest gap: <span className="text-text">earned ⇒ issued</span> spans two aggregates
-                that cannot share a transaction, so no single object can enforce it — Vernon&apos;s rule is
-                eventual consistency plus a <span className="text-text">process manager</span> that closes the
-                loop. This lane runs the same seeded faults through a naive dual-write and through the repo&apos;s
-                real transactional-outbox pattern, then reconciles both. The difference isn&apos;t fewer failures —
-                it&apos;s that <em>none of them are silent</em>.
-              </p>
+              <BeatIntro
+                accent="amber"
+                side="left"
+                kicker="Failure, made visible"
+                body={
+                  <>
+                    <span className="text-text">earned ⇒ issued</span> spans two aggregates that can
+                    never share a transaction. Same seeded faults, two integration patterns — the
+                    difference isn&apos;t fewer failures. It&apos;s that <em>none are silent</em>.
+                  </>
+                }
+                bullets={[
+                  "Dual-write: orphaned earns and double-issues leave no trace",
+                  "The outbox: every failure retries, then dead-letters in the open",
+                  <>
+                    The same proof runs on the real fan-out rows — <span className="font-mono text-text">GET /reconciliation</span>
+                  </>,
+                ]}
+                depth={
+                  <>
+                    No single object can enforce a cross-aggregate rule — Vernon&apos;s rule is
+                    eventual consistency plus a <span className="text-text">process manager</span>{" "}
+                    that closes the loop. This lane runs the same seeded faults through a naive
+                    dual-write and through the repo&apos;s real transactional-outbox pattern, then
+                    reconciles both lifecycles earn by earn.
+                  </>
+                }
+              />
             </Reveal>
             </CinemaIntro>
             <Plate
               figure="03c"
               title="The Reconciliation Lane"
               tone="crimson"
-              caption="LIVE · POST /reconciliation-audit + GET /reconciliation. Dual-write orphans and double-issues leave no trace; the outbox turns every failure into a visible dead-letter — and the reconciler proves it, on synthetic faults and on the real fan-out rows."
+              caption="LIVE · POST /reconciliation-audit + GET /reconciliation · proven on seeded faults and on the real fan-out rows."
             >
               <ReconciliationLane offline={offline} />
             </Plate>
@@ -214,21 +333,47 @@ export function MomentForge() {
           <Section id="sec-unitwall" label="The Unit Wall — whole values at every seam">
             <CinemaIntro clip="mf-unitwall">
             <Reveal>
-              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                The root cause of the whole disease class: the polysemic terms were{" "}
-                <span className="text-text">primitives</span> — a conversion an int, a reward a string, an
-                impression not a type at all — so a cross-context copy type-checked silently. Now all three
-                carry their owning context in a type, and the backend demonstrates it live: an illegal
-                cross-unit addition <em>actually raises</em>, and a degraded agent rendering is{" "}
-                <em>refused</em> at the measurement seam rather than blended into the count.
-              </p>
+              <BeatIntro
+                accent="offer-blue"
+                side="right"
+                kicker="A type at every seam"
+                body={
+                  <>
+                    A conversion was an int, a reward a string, an impression not a type at all — so
+                    a cross-context copy type-checked silently. Now the illegal move{" "}
+                    <em>raises, live</em>.
+                  </>
+                }
+                bullets={[
+                  <>
+                    <span className="font-mono text-text">recorded + incremental</span> → UnitMismatchError,
+                    performed by the engine
+                  </>,
+                  "A degraded agent rendering is refused — never blended into the count",
+                  <>
+                    <span className="font-mono text-text">ConversionKind · RewardStatus · ImpressionFidelity</span> —
+                    whole values everywhere
+                  </>,
+                ]}
+                depth={
+                  <>
+                    The root cause of the whole disease class: the polysemic terms were{" "}
+                    <span className="text-text">primitives</span>, so an implicit Conformist was a
+                    silent copy the compiler waved through. With the owning context stamped in the
+                    type, a cross-context assignment requires a translation — and the backend
+                    demonstrates it live: the illegal cross-unit addition actually raises, and a
+                    degraded agent rendering is refused at the measurement seam rather than blended
+                    into the count.
+                  </>
+                }
+              />
             </Reveal>
             </CinemaIntro>
             <Plate
               figure="03d"
               title="The Unit Wall"
               tone="crimson"
-              caption="LIVE · POST /impression-audit. The refuse-to-conform ACL keeps the measurement atom honest; the unit wall (recorded + incremental → UnitMismatchError) is performed by the running engine, never asserted. The weakest-grounded case of the four — labelled as such."
+              caption="LIVE · POST /impression-audit · the unit wall is performed by the running engine; the weakest-grounded case of the four, labelled as such."
             >
               <UnitWall offline={offline} />
             </Plate>
@@ -238,19 +383,40 @@ export function MomentForge() {
           <Section id="sec-compiler" label="Semantic Change Compiler">
             <CinemaIntro clip="mf-compiler">
             <Reveal>
-              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                Threshold reframed: a <span className="text-text">Semantic Change Compiler</span>. It
-                compiles a proposed change into its semantic delta across bounded contexts, then flags any
-                change whose <em>meaning</em> shifts across a seam. This console calls the real backend and
-                renders only real output.
-              </p>
+              <BeatIntro
+                accent="teal"
+                side="left"
+                kicker="Changes compile to meaning"
+                body={
+                  <>
+                    Threshold, reframed: a <span className="text-text">compiler</span> whose output
+                    is meaning. A proposed change compiles into its semantic delta across contexts —
+                    and any shift at a seam is flagged.
+                  </>
+                }
+                bullets={[
+                  "The static pass flags the inversion before a single session runs",
+                  "Blast radius comes only from the Simulator's counterfactual — an honest split",
+                  <>
+                    Real console, real output — <span className="font-mono text-text">POST /semantic-compile</span>
+                  </>,
+                ]}
+                depth={
+                  <>
+                    The console compiles a proposed change into its semantic delta across bounded
+                    contexts, then flags any change whose <em>meaning</em> shifts across a seam. It
+                    calls the real backend and renders only real output — the loading, empty and
+                    error states are part of the contract, not an afterthought.
+                  </>
+                }
+              />
             </Reveal>
             </CinemaIntro>
             <Plate
               figure="04"
               title="Semantic Change Compiler"
               tone="teal"
-              caption="LIVE · POST /semantic-compile. The static compiler flags the inversion; the blast-radius proof (how many sessions actually flip) comes only from the Simulator's counterfactual — an intentional, honest split."
+              caption="LIVE · POST /semantic-compile · the static meaning-check lives here; the blast-radius proof belongs to the Simulator."
             >
               <CompilerConsole offline={offline} />
             </Plate>
@@ -262,7 +428,7 @@ export function MomentForge() {
               figure="05"
               title="Context Fracture"
               tone="crimson"
-              caption="A failure originates, propagates, and is contained at a bounded-context boundary — the visceral argument for boundaries, anticorruption layers, and fail-closed. Storyboard; every phase is real text in order."
+              caption="A failure born, spreading, and contained at a boundary — the visceral argument for fail-closed. Every phase is real text, in order."
             >
               <FractureScene />
             </Plate>
@@ -285,18 +451,39 @@ export function MomentForge() {
           <Section id="sec-sim" label="Domain Evolution Simulator">
             <CinemaIntro clip="mf-sim">
             <Reveal>
-              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
-                Run the same change <em>forward</em> through real event-time replay and watch its impact
-                ripple across the bounded contexts to a deterministic verdict. Muting the Customer context
-                drops its rules — on the trap, that removes the operator flip and the inversion disappears.
-              </p>
+              <BeatIntro
+                accent="teal"
+                side="right"
+                kicker="Run the future first"
+                body={
+                  <>
+                    The same change runs <em>forward</em> through real event-time replay, and its
+                    impact ripples across the context map to a deterministic verdict.
+                  </>
+                }
+                bullets={[
+                  "Two hundred seeded sessions, bit-for-bit replayable",
+                  "Mute a context and its rules — and their failure modes — vanish with it",
+                  <>
+                    Ephemeral and non-persisting — <span className="font-mono text-text">POST /simulations</span>
+                  </>,
+                ]}
+                depth={
+                  <>
+                    Muting the Customer context drops its rules — on the trap, that removes the
+                    operator flip and the inversion disappears, which is exactly the point: the
+                    failure lives in a specific seam, and the simulator lets you watch it appear and
+                    disappear by reshaping the model.
+                  </>
+                }
+              />
             </Reveal>
             </CinemaIntro>
             <Plate
               figure="07"
               title="Domain Evolution Simulator"
               tone="teal"
-              caption="LIVE · POST /simulations — ephemeral, non-persisting. Impact is qualitative (the highlighted set + the decision diff), never a fabricated blast-radius percentage."
+              caption="LIVE · POST /simulations · impact is the highlighted set + the decision diff — never a fabricated percentage."
             >
               <RippleSim offline={offline} trigger={simTrigger} />
             </Plate>
