@@ -62,6 +62,18 @@ The decision engine never *selects* offers (that is Rokt Brain's job). It valida
 
 ---
 
+## Three surfaces, one engine
+
+The same deterministic backend powers three front-end experiences — each renders **only real API output**, with a recorded-fixture fallback when the backend is offline:
+
+- **`/` — the Console.** The working product: propose V17 → V18, replay it, inject failures, read the verdict, exercise conversion dedup and cancellation. This is the ground truth everything else points back to.
+- **`/builder` — the Builder Keynote.** A ten-chapter cinematic product film (The Moment → … → The Afterglow) where the *real engine lives inside each scene*: a live replay lights up a 480-seat audience, real faults fail closed, the honest verdict is `ELIGIBLE_FOR_HOLDOUT`. The prose role-case is preserved at `/builder/case`.
+- **`/moment-forge` — the domain monograph.** The bounded-context model made executable: the Translation Map, the Reconciliation Lane, and the Unit Wall each cross a real seam in running code (`/translation-audit`, `/reconciliation`, `/impression-audit`).
+
+Rokt's own 2026 public language is quoted throughout, each line attributed and dated. Nothing is fabricated; every number is computed live or clearly labelled synthetic.
+
+---
+
 ## What is VERIFIED vs. modeled
 
 Every citable fact was checked against primary Rokt docs (`research/rokt/verification/`). Highlights:
@@ -96,7 +108,7 @@ npm install
 npm run dev        # http://localhost:3000  (expects the API on :8000)
 ```
 
-**Verify everything** (tests + smokes):
+**Verify everything** (187 backend tests + smokes):
 ```bash
 cd backend && ./verify.sh          # or  .\verify.ps1  on Windows
 ```
