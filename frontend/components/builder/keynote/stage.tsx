@@ -268,24 +268,68 @@ function AmbientMotes({ accent }: { accent: Accent }) {
 }
 
 // ── Scene — one full-bleed cinematic chapter ────────────────────────────────
+// A framed "app-recording" video panel that sits BESIDE the narration (the
+// ShelfTrace split). Plays the real clip at full clarity in a bordered frame;
+// falls back to an accent gradient until the file is present + loaded.
+export function ClipPanel({ clip, accent = "teal", label }: { clip: string; accent?: Accent; label: string }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      initial={reduced ? false : { opacity: 0, y: 26 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: EASE }}
+      className="relative aspect-video w-full overflow-hidden rounded-2xl border shadow-[0_24px_80px_-24px_rgba(0,0,0,0.7)]"
+      style={{ borderColor: `color-mix(in srgb, ${ACCENT_VAR[accent]} 32%, transparent)` }}
+    >
+      <SceneMedia
+        variant="panel"
+        src={`/media/${clip}.mp4`}
+        poster={`/media/${clip}.jpg`}
+        label={label}
+        className="h-full w-full"
+        fallback={
+          <div
+            className="h-full w-full"
+            style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${ACCENT_VAR[accent]} 16%, #0b0f19), #05070e 70%)` }}
+          />
+        }
+      />
+      {/* premium framing: inner ring + a faint accent top-glow */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/[0.06]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/3"
+        style={{ background: `linear-gradient(to bottom, color-mix(in srgb, ${ACCENT_VAR[accent]} 10%, transparent), transparent)` }}
+      />
+    </motion.div>
+  );
+}
+
 export function Scene({
   id,
   n,
   label,
   accent = "teal",
   clip,
+  flip = false,
   environment,
   children,
+  live,
 }: {
   id: string;
   n: string;
   label: string;
   accent?: Accent;
-  /** basename in /media for the ambient loop that layers over the code-drawn env */
+  /** basename in /media for the framed video panel beside the narration */
   clip?: string;
-  /** the code-drawn SVG/CSS environment (always visible) */
+  /** put the video panel on the LEFT (narration right) instead of the default */
+  flip?: boolean;
+  /** the code-drawn SVG/CSS atmosphere behind everything (dimmed) */
   environment: ReactNode;
+  /** the narration column: kicker, headline, beat, echo, CTA */
   children: ReactNode;
+  /** optional live/interactive block, rendered full-width beneath the split */
+  live?: ReactNode;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
@@ -303,15 +347,13 @@ export function Scene({
 
   return (
     <section ref={sectionRef} id={id} className="relative isolate min-h-screen scroll-mt-0 overflow-hidden border-t border-border/40">
-      {/* environment layer (code-drawn, always) + optional ambient clip on top */}
+      {/* atmosphere layer (code-drawn, dimmed) — the video now lives in a framed
+          panel beside the narration, not as a full-bleed backdrop */}
       <div className="absolute inset-0 -z-10">
-        <motion.div style={{ y: envY, scale: envScale }} className="absolute inset-0">
+        <motion.div style={{ y: envY, scale: envScale }} className="absolute inset-0 opacity-70">
           {environment}
         </motion.div>
         <AmbientMotes accent={accent} />
-        {clip ? (
-          <SceneMedia variant="backdrop" src={`/media/${clip}.mp4`} poster={`/media/${clip}.jpg`} label="" />
-        ) : null}
         {/* giant ghosted chapter numeral — cinematic depth marker */}
         <motion.span
           aria-hidden
@@ -345,8 +387,18 @@ export function Scene({
         />
       </div>
       <ChapterMarker n={n} label={label} accent={accent} />
-      <div className="relative mx-auto flex min-h-[calc(100vh-8rem)] max-w-6xl flex-col justify-center px-5 py-16 sm:px-8">
-        {children}
+      <div className="relative mx-auto flex min-h-[calc(100vh-9rem)] max-w-6xl flex-col justify-center px-5 py-14 sm:px-8">
+        {clip ? (
+          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+            <div className={flip ? "lg:order-2" : undefined}>{children}</div>
+            <div className={flip ? "lg:order-1" : undefined}>
+              <ClipPanel clip={clip} accent={accent} label={label} />
+            </div>
+          </div>
+        ) : (
+          children
+        )}
+        {live ? <div className="mt-14 sm:mt-16">{live}</div> : null}
       </div>
     </section>
   );

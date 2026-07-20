@@ -73,9 +73,8 @@ function TheaterEnvironment() {
 export function ChapterMoment() {
   const reduced = useReducedMotion();
   return (
-    <Scene id="kc-moment" n="00" label="The Moment" accent="teal" clip="kc-moment" environment={<TheaterEnvironment />}>
-      <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-center">
-        <div>
+    <Scene id="kc-moment" n="00" label="The Moment" accent="teal" clip="kc-moment" flip={false} environment={<TheaterEnvironment />}>
+      <div>
           <Pill accent="teal">The Transaction Moment™</Pill>
           <SceneHeadline className="mt-6">
             A transaction is already in motion.
@@ -114,28 +113,6 @@ export function ChapterMoment() {
           >
             Enter the Transaction Moment <span aria-hidden>↓</span>
           </motion.a>
-        </div>
-
-        {/* floating ticket confirmation — the "business world first" object */}
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 28, rotateX: 8 }}
-          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-          viewport={{ once: true, margin: "-20% 0px" }}
-          transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.2 }}
-          className="glass rounded-2xl border border-teal/25 p-5"
-          style={{ perspective: 1000 }}
-        >
-          <div className="flex items-center justify-between border-b border-border/60 pb-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Aurora Tickets</p>
-            <span className="rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 font-mono text-[10px] text-teal">confirmed</span>
-          </div>
-          <p className="mt-4 text-lg font-semibold text-text">2 × Evening Screening</p>
-          <p className="mt-1 text-sm text-muted">Order AUR-10231 · paid $37.00</p>
-          <div className="mt-4 rounded-lg border border-border/60 bg-surface-2/40 p-3">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-muted">Next</p>
-            <p className="mt-1 text-sm text-text">An optional offer may render — or nothing at all. The confirmation stands either way.</p>
-          </div>
-        </motion.div>
       </div>
     </Scene>
   );

@@ -19,20 +19,16 @@ const ACTIONS: { href: string; label: string; sub: string }[] = [
 export function ChapterHandoff() {
   const reduced = useReducedMotion();
   return (
-    <Scene id="kc-handoff" n="08" label="The Hand-off" accent="teal" clip="kc-handoff" environment={<div className="absolute inset-0 bg-[#05080e]" />}>
-      <div className="mx-auto max-w-3xl text-center">
-        <Pill accent="teal">Story above · engine below</Pill>
-        <SceneHeadline className="mx-auto mt-6">
-          The story above is cinematic. The engine underneath it is real.
-        </SceneHeadline>
-        <p className="mx-auto mt-6 max-w-[54ch] text-lg leading-relaxed text-muted">
-          Every replay, failure, duplicate, cancellation, and verdict in this film connects to working services,
-          persisted state, 187 passing tests, and a tamper-evident audit trail. Don&apos;t take the film&apos;s
-          word for it — operate the real thing.
-        </p>
-      </div>
-
-      <div className="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
+    <Scene
+      id="kc-handoff"
+      n="08"
+      label="The Hand-off"
+      accent="teal"
+      clip="kc-handoff"
+      flip={false}
+      environment={<div className="absolute inset-0 bg-[#05080e]" />}
+      live={
+      <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">
         {ACTIONS.map((a, i) => (
           <motion.div
             key={a.href}
@@ -55,6 +51,19 @@ export function ChapterHandoff() {
             </Magnetic>
           </motion.div>
         ))}
+      </div>
+      }
+    >
+      <div>
+        <Pill accent="teal">Story above · engine below</Pill>
+        <SceneHeadline className="mt-6">
+          The story above is cinematic. The engine underneath it is real.
+        </SceneHeadline>
+        <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
+          Every replay, failure, duplicate, cancellation, and verdict in this film connects to working services,
+          persisted state, 187 passing tests, and a tamper-evident audit trail. Don&apos;t take the film&apos;s
+          word for it — operate the real thing.
+        </p>
       </div>
     </Scene>
   );

@@ -34,14 +34,14 @@ export function ChapterAfterglow() {
   const reduced = useReducedMotion();
   const closers = ["Every assumption visible.", "Every failure traceable.", "Every claim labelled.", "Every decision open to challenge."];
   return (
-    <Scene id="kc-afterglow" n="09" label="The Afterglow" accent="teal" clip="kc-afterglow" environment={<EmptyTheater />}>
-      <div className="mx-auto max-w-3xl text-center">
+    <Scene id="kc-afterglow" n="09" label="The Afterglow" accent="teal" clip="kc-afterglow" flip environment={<EmptyTheater />}>
+      <div>
         <Pill accent="teal">After the transaction</Pill>
-        <SceneHeadline className="mx-auto mt-6">
+        <SceneHeadline className="mt-6">
           The transaction ends. The evidence remains.
         </SceneHeadline>
 
-        <div className="mx-auto mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
           {closers.map((c, i) => (
             <motion.span
               key={c}
@@ -56,11 +56,11 @@ export function ChapterAfterglow() {
           ))}
         </div>
 
-        <p className="mx-auto mt-10 max-w-xl text-lg leading-relaxed text-text">
+        <p className="mt-10 max-w-[42ch] text-lg leading-relaxed text-text">
           Do not hire the promises. Inspect the evidence.
         </p>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/"
             className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"

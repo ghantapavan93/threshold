@@ -64,9 +64,6 @@ export function SceneMedia({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<"pending" | "ready" | "missing">("pending");
   const [reduced, setReduced] = useState<boolean | null>(null);
-  // Default to visible so playback starts even if the IntersectionObserver is
-  // slow or unreliable; IO only downgrades to paused when genuinely off-screen.
-  const [nearView, setNearView] = useState(true);
   const [listed, setListed] = useState<boolean | null>(null);
   const [posterListed, setPosterListed] = useState(false);
 
@@ -91,27 +88,15 @@ export function SceneMedia({
     };
   }, [src, poster]);
 
-  // Mount the <video> only when the slot approaches the viewport.
-  useEffect(() => {
-    const el = holderRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => setNearView(entries[0]?.isIntersecting ?? false),
-      { rootMargin: "200px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  // Once ready, play; pause only when the observer says the scene is off-screen.
-  // Mounting no longer depends on the observer (see below), so a flaky reading
-  // can never leave a visible clip unmounted — at worst it keeps playing.
+  // Once ready, keep the muted loop playing. We deliberately do NOT gate this on
+  // the IntersectionObserver: its reading is unreliable across embedded/preview
+  // contexts and would leave visible clips stuck paused. The clips are small,
+  // muted loops, so playing the mounted ones is fine.
   useEffect(() => {
     const v = videoRef.current;
     if (!v || status !== "ready") return;
-    if (nearView) void v.play().catch(() => {});
-    else v.pause();
-  }, [status, nearView]);
+    void v.play().catch(() => {});
+  }, [status]);
 
   // Until the client knows the motion preference, render the fallback only —
   // identical on server and client, so hydration stays clean.
@@ -171,22 +156,22 @@ export function SceneMedia({
   return (
     <div ref={holderRef} className={`relative ${className}`}>
       <div
-        className="transition-opacity duration-500"
+        className="h-full w-full transition-opacity duration-500"
         style={{ opacity: status === "ready" && playbackAllowed ? 0 : 1 }}
         aria-hidden={status === "ready" && playbackAllowed}
       >
         {reduced && posterListed ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={poster} alt={label} className="w-full rounded-xl border border-border/60" />
+          <img src={poster} alt={label} className="h-full w-full object-cover" />
         ) : (
           fallback
         )}
       </div>
-      {playbackAllowed && listed === true && status !== "missing" && nearView ? (
+      {playbackAllowed && listed === true && status !== "missing" ? (
         <video
           ref={videoRef}
           aria-label={label}
-          className="absolute inset-0 h-full w-full rounded-xl border border-border/60 object-cover transition-opacity duration-500"
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
           style={{ opacity: status === "ready" ? 1 : 0 }}
           src={src}
           poster={posterListed ? poster : undefined}

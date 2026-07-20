@@ -101,76 +101,73 @@ export function ChapterFailure() {
     }
   };
 
-  return (
-    <Scene id="kc-failure" n="03" label="The Failure" accent="crimson" clip="kc-failure" environment={<ConfirmationEnvironment />}>
-      <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
-        <div>
-          <Pill accent="crimson">Fail closed · proven live</Pill>
-          <SceneHeadline className="mt-6">
-            The optional experience failed. The customer&apos;s purchase did not.
-          </SceneHeadline>
-          <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
-            Inject a real fault into the offer path — a timeout, a malformed payload, a stale token. Watch the
-            offer resolve to <span className="text-text">No Offer Rendered</span> while the confirmation stays
-            alive. The engine keeps the proof.
-          </p>
-          <div className="mt-7">
-            <RoktEcho
-              accent="crimson"
-              quote="Get out of the customer's way and let them complete the purchase."
-              source="Rokt · Claire Southey, Chief AI Officer, 2026 · public"
-            />
-          </div>
-          {status !== "ok" ? (
-            <button
-              type="button"
-              onClick={run}
-              disabled={status === "loading"}
-              className="press mt-8 inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-crimson/50 bg-crimson/10 px-6 py-3 text-sm font-semibold text-crimson focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson disabled:opacity-60"
+  const live = (
+    <div className="glass mx-auto max-w-2xl rounded-2xl border border-border/60 p-5">
+      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Aurora Tickets</p>
+        <span className="rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 font-mono text-[10px] text-teal">confirmed · stable</span>
+      </div>
+      <p className="mt-3 text-sm text-muted">Order AUR-10231 — the native confirmation never flinches, whatever the offer path does.</p>
+      <div aria-live="polite" className="mt-4 min-h-[8rem]">
+        {status === "idle" ? (
+          <p className="font-mono text-xs text-muted">The offer channel sits beside the confirmation. Inject a fault and watch only the offer fall away.</p>
+        ) : null}
+        {status === "loading" ? (
+          <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 w-full animate-pulse-soft rounded bg-surface-2/60" />)}</div>
+        ) : null}
+        <AnimatePresence>
+          {status === "ok" ? (
+            <motion.div
+              initial={reduced ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: EASE }}
+              className="space-y-2"
             >
-              {status === "loading" ? "injecting faults…" : "⚡ Inject the faults"}
-            </button>
+              <p className="font-mono text-[11px] text-teal">{usedFixture ? "recorded" : "live"} engine output · {proofs.length} faults injected</p>
+              {proofs.map((p) => <ProofRow key={p.injection} proof={p} />)}
+              <div className={`rounded-lg border p-3 ${allPreserved ? "border-teal/40 bg-teal/10" : "border-crimson/40 bg-crimson/10"}`}>
+                <p className={`font-mono text-sm font-semibold ${allPreserved ? "text-teal" : "text-crimson"}`}>
+                  {allPreserved ? "▛ Every fault failed closed. Checkout preserved on all paths." : "✕ A path did not fail closed."}
+                </p>
+              </div>
+            </motion.div>
           ) : null}
-          {status === "error" && err ? (
-            <p role="alert" className="mt-4 font-mono text-[12px] text-crimson">✕ {err.message}</p>
-          ) : null}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+  return (
+    <Scene id="kc-failure" n="03" label="The Failure" accent="crimson" clip="kc-failure" flip environment={<ConfirmationEnvironment />} live={live}>
+      <div>
+        <Pill accent="crimson">Fail closed · proven live</Pill>
+        <SceneHeadline className="mt-6">
+          The optional experience failed. The customer&apos;s purchase did not.
+        </SceneHeadline>
+        <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
+          Inject a real fault into the offer path — a timeout, a malformed payload, a stale token. Watch the
+          offer resolve to <span className="text-text">No Offer Rendered</span> while the confirmation stays
+          alive. The engine keeps the proof.
+        </p>
+        <div className="mt-7">
+          <RoktEcho
+            accent="crimson"
+            quote="Get out of the customer's way and let them complete the purchase."
+            source="Rokt · Claire Southey, Chief AI Officer, 2026 · public"
+          />
         </div>
-
-        {/* the confirmation + offer-path proof card */}
-        <div className="glass rounded-2xl border border-border/60 p-5">
-          <div className="flex items-center justify-between border-b border-border/60 pb-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-teal">Aurora Tickets</p>
-            <span className="rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 font-mono text-[10px] text-teal">confirmed · stable</span>
-          </div>
-          <p className="mt-3 text-sm text-muted">Order AUR-10231 — the native confirmation never flinches, whatever the offer path does.</p>
-
-          <div aria-live="polite" className="mt-4 min-h-[8rem]">
-            {status === "idle" ? (
-              <p className="font-mono text-xs text-muted">The offer channel sits beside the confirmation. Inject a fault and watch only the offer fall away.</p>
-            ) : null}
-            {status === "loading" ? (
-              <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-10 w-full animate-pulse-soft rounded bg-surface-2/60" />)}</div>
-            ) : null}
-            <AnimatePresence>
-              {status === "ok" ? (
-                <motion.div
-                  initial={reduced ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: EASE }}
-                  className="space-y-2"
-                >
-                  <p className="font-mono text-[11px] text-teal">{usedFixture ? "recorded" : "live"} engine output · {proofs.length} faults injected</p>
-                  {proofs.map((p) => <ProofRow key={p.injection} proof={p} />)}
-                  <div className={`rounded-lg border p-3 ${allPreserved ? "border-teal/40 bg-teal/10" : "border-crimson/40 bg-crimson/10"}`}>
-                    <p className={`font-mono text-sm font-semibold ${allPreserved ? "text-teal" : "text-crimson"}`}>
-                      {allPreserved ? "▛ Every fault failed closed. Checkout preserved on all paths." : "✕ A path did not fail closed."}
-                    </p>
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </div>
-        </div>
+        {status !== "ok" ? (
+          <button
+            type="button"
+            onClick={run}
+            disabled={status === "loading"}
+            className="press mt-8 inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-crimson/50 bg-crimson/10 px-6 py-3 text-sm font-semibold text-crimson focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson disabled:opacity-60"
+          >
+            {status === "loading" ? "injecting faults…" : "⚡ Inject the faults"}
+          </button>
+        ) : null}
+        {status === "error" && err ? (
+          <p role="alert" className="mt-4 font-mono text-[12px] text-crimson">✕ {err.message}</p>
+        ) : null}
       </div>
     </Scene>
   );

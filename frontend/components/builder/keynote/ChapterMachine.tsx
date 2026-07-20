@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { CursorSpotlight, Pill, Scene, SceneHeadline, EASE } from "./stage";
+import { Pill, Scene, SceneHeadline, EASE } from "./stage";
 
 /* 04 · The Machine — travel behind the interface into the machinery. One
    customer action moves through every accountable layer; scrub the slider and
@@ -47,21 +47,10 @@ export function ChapterMachine() {
   const [active, setActive] = useState(0);
   const cur = LAYERS[active]!;
 
-  return (
-    <Scene id="kc-machine" n="04" label="The Machine" accent="teal" clip="kc-machine" environment={<MachineEnvironment />}>
-      <CursorSpotlight accent="teal">
-        <div className="max-w-3xl">
-          <Pill accent="teal">One action · every layer accountable</Pill>
-          <SceneHeadline className="mt-6">One customer action. Every layer accountable.</SceneHeadline>
-          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
-            Travel behind the interface into the machine. Scrub the transaction and watch it move through every
-            real layer of the Threshold pipeline — each one named, each one in the repo.
-          </p>
-        </div>
-
-        {/* the pipeline */}
-        <div className="mt-10">
-          <div className="flex flex-wrap gap-1.5">
+  const live = (
+    <div>
+      {/* the pipeline */}
+      <div className="flex flex-wrap gap-1.5">
             {LAYERS.map((l, i) => {
               const on = i <= active;
               return (
@@ -114,8 +103,18 @@ export function ChapterMachine() {
           <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
             Layers are the real repo pipeline · the scrub is an illustration of one transaction&apos;s path
           </p>
-        </div>
-      </CursorSpotlight>
+    </div>
+  );
+  return (
+    <Scene id="kc-machine" n="04" label="The Machine" accent="teal" clip="kc-machine" flip={false} environment={<MachineEnvironment />} live={live}>
+      <div>
+        <Pill accent="teal">One action · every layer accountable</Pill>
+        <SceneHeadline className="mt-6">One customer action. Every layer accountable.</SceneHeadline>
+        <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
+          Travel behind the interface into the machine. Scrub the transaction and watch it move through every
+          real layer of the Threshold pipeline — each one named, each one in the repo.
+        </p>
+      </div>
     </Scene>
   );
 }

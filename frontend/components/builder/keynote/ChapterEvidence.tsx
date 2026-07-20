@@ -39,9 +39,22 @@ function Ledger({ side }: { side: "before" | "after" }) {
 }
 
 export function ChapterEvidence() {
+  const live = (
+    <div className="mx-auto max-w-3xl">
+      <BeforeAfter
+        before={<Ledger side="before" />}
+        after={<Ledger side="after" />}
+        labelBefore="Before verification"
+        labelAfter="After verification"
+      />
+      <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
+        Real honesty ledger · docs/LIMITATIONS.md — nothing on this page is asserted without a source
+      </p>
+    </div>
+  );
   return (
-    <Scene id="kc-evidence" n="05" label="The Evidence" accent="teal" clip="kc-evidence" environment={<div className="absolute inset-0 bg-[#05080e]" />}>
-      <div className="max-w-3xl">
+    <Scene id="kc-evidence" n="05" label="The Evidence" accent="teal" clip="kc-evidence" flip environment={<div className="absolute inset-0 bg-[#05080e]" />} live={live}>
+      <div>
         <Pill accent="teal">Drag the boundary</Pill>
         <SceneHeadline className="mt-6">
           AI generated possibilities. Evidence decided what deserved to exist.
@@ -58,18 +71,6 @@ export function ChapterEvidence() {
             source="Rokt · Claire Southey, Chief AI Officer, 2026 · public"
           />
         </div>
-      </div>
-
-      <div className="mt-10">
-        <BeforeAfter
-          before={<Ledger side="before" />}
-          after={<Ledger side="after" />}
-          labelBefore="Before verification"
-          labelAfter="After verification"
-        />
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
-          Real honesty ledger · docs/LIMITATIONS.md — nothing on this page is asserted without a source
-        </p>
       </div>
     </Scene>
   );

@@ -80,10 +80,48 @@ export function ChapterExperiment() {
     }
   };
 
+  const live = (
+    <div className="glass mx-auto max-w-2xl rounded-2xl border border-border/60 p-5" aria-live="polite">
+      {status === "idle" ? (
+        <p className="font-mono text-xs text-muted">Run the clean change through every gate and read the honest verdict.</p>
+      ) : null}
+      {status === "loading" ? (
+        <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-9 w-full animate-pulse-soft rounded bg-surface-2/60" />)}</div>
+      ) : null}
+      <AnimatePresence>
+        {status === "ok" && verdict ? (
+          <motion.div initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }}>
+            <p className="font-mono text-[11px] text-teal">{usedFixture ? "recorded" : "live"} engine output</p>
+            <ul className="mt-3 space-y-2">
+              {gates.map((g) => (
+                <li key={g.label} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: g.pass ? "color-mix(in srgb, var(--c-teal) 40%, transparent)" : g.honest ? "color-mix(in srgb, var(--c-amber) 40%, transparent)" : "color-mix(in srgb, var(--c-crimson) 40%, transparent)" }}>
+                  <div>
+                    <p className="text-sm font-medium text-text">{g.label}</p>
+                    <p className="text-[11px] text-muted">{g.note}</p>
+                  </div>
+                  <span className={`font-mono text-[11px] ${g.pass ? "text-teal" : g.honest ? "text-amber" : "text-crimson"}`}>
+                    {g.pass ? "▛ passed" : g.honest ? "◌ unproven" : "✕ failed"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 rounded-lg border border-teal/40 bg-teal/10 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-wide text-muted">Verdict</p>
+              <p className="mt-1 font-mono text-lg font-bold text-teal">{verdict.value.replace(/_/g, " ")}</p>
+              {verdict.holdout_config ? (
+                <p className="mt-1.5 font-mono text-[11px] leading-relaxed text-muted">
+                  {verdict.holdout_config.control_pct}% control · metric {verdict.holdout_config.primary_metric} · min uplift {verdict.holdout_config.min_uplift_pct}%
+                </p>
+              ) : null}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
   return (
-    <Scene id="kc-experiment" n="06" label="The Experiment" accent="teal" clip="kc-experiment" environment={<FieldEnvironment />}>
-      <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
-        <div>
+    <Scene id="kc-experiment" n="06" label="The Experiment" accent="teal" clip="kc-experiment" flip={false} environment={<FieldEnvironment />} live={live}>
+      <div>
           <Pill accent="teal">Eligible to learn — not to claim</Pill>
           <SceneHeadline className="mt-6">
             Correctness earns the right to learn. It does not earn the right to claim impact.
@@ -112,45 +150,6 @@ export function ChapterExperiment() {
             </button>
           ) : null}
           {status === "error" && err ? <p role="alert" className="mt-4 font-mono text-[12px] text-crimson">✕ {err.message}</p> : null}
-        </div>
-
-        <div className="glass rounded-2xl border border-border/60 p-5" aria-live="polite">
-          {status === "idle" ? (
-            <p className="font-mono text-xs text-muted">Run the clean change through every gate and read the honest verdict.</p>
-          ) : null}
-          {status === "loading" ? (
-            <div className="space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-9 w-full animate-pulse-soft rounded bg-surface-2/60" />)}</div>
-          ) : null}
-          <AnimatePresence>
-            {status === "ok" && verdict ? (
-              <motion.div initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EASE }}>
-                <p className="font-mono text-[11px] text-teal">{usedFixture ? "recorded" : "live"} engine output</p>
-                <ul className="mt-3 space-y-2">
-                  {gates.map((g) => (
-                    <li key={g.label} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: g.pass ? "color-mix(in srgb, var(--c-teal) 40%, transparent)" : g.honest ? "color-mix(in srgb, var(--c-amber) 40%, transparent)" : "color-mix(in srgb, var(--c-crimson) 40%, transparent)" }}>
-                      <div>
-                        <p className="text-sm font-medium text-text">{g.label}</p>
-                        <p className="text-[11px] text-muted">{g.note}</p>
-                      </div>
-                      <span className={`font-mono text-[11px] ${g.pass ? "text-teal" : g.honest ? "text-amber" : "text-crimson"}`}>
-                        {g.pass ? "▛ passed" : g.honest ? "◌ unproven" : "✕ failed"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 rounded-lg border border-teal/40 bg-teal/10 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-wide text-muted">Verdict</p>
-                  <p className="mt-1 font-mono text-lg font-bold text-teal">{verdict.value.replace(/_/g, " ")}</p>
-                  {verdict.holdout_config ? (
-                    <p className="mt-1.5 font-mono text-[11px] leading-relaxed text-muted">
-                      {verdict.holdout_config.control_pct}% control · metric {verdict.holdout_config.primary_metric} · min uplift {verdict.holdout_config.min_uplift_pct}%
-                    </p>
-                  ) : null}
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
       </div>
     </Scene>
   );

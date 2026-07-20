@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { CursorSpotlight, Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
+import { Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
 
 /* 01 · The Change — a dark decision chamber. The current and proposed policy
    hang in the scene as physical slabs, not dashboard panels. One rule flips a
@@ -64,87 +64,58 @@ function RuleSlab({
 
 export function ChapterChange() {
   const reduced = useReducedMotion();
+  const live = (
+    <div>
+      <div className="mx-auto grid max-w-3xl items-center gap-5 sm:grid-cols-[1fr_auto_1fr]">
+        <RuleSlab version="V17" op="include · is not in" tone="muted" delay={0.1} />
+        <span aria-hidden className="mx-auto font-mono text-2xl text-crimson">→</span>
+        <RuleSlab version="V18" op="exclude · is in" tone="crimson" delay={0.25} />
+      </div>
+      <div className="mx-auto mt-8 flex max-w-3xl flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/"
+          className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-crimson/50 bg-crimson/10 px-5 py-3 text-sm font-semibold text-crimson transition-colors hover:bg-crimson/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
+        >
+          Approve it blindly <span aria-hidden>→</span>
+        </Link>
+        <a
+          href="#kc-customers"
+          className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+        >
+          Replay it first <span aria-hidden>↓</span>
+        </a>
+      </div>
+    </div>
+  );
   return (
-    <Scene id="kc-change" n="01" label="The Change" accent="crimson" clip="kc-change" environment={<ChamberEnvironment />}>
-      <CursorSpotlight accent="crimson">
-        <div className="mx-auto max-w-3xl text-center">
-          <Pill accent="crimson">One operator, flipped</Pill>
-          <SceneHeadline className="mx-auto mt-6">
-            Most dangerous changes compile successfully.
-          </SceneHeadline>
-          <motion.p
-            initial={reduced ? false : { opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20% 0px" }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
-            className="mx-auto mt-6 max-w-[52ch] text-lg leading-relaxed text-muted"
-          >
-            V17 to V18 changes a single operator on one rule. It passes every type check, every test, every
-            review. And it silently widens who is eligible.
-          </motion.p>
-          <motion.div
-            initial={reduced ? false : { opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20% 0px" }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
-            className="mx-auto mt-8 flex justify-center"
-          >
-            <RoktEcho
-              accent="crimson"
-              quote="A unified, AI-driven software platform."
-              source="Rokt · Sam Dozor, CTO, 2026 · public"
-            />
-          </motion.div>
-          <motion.p
-            initial={reduced ? false : { opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-20% 0px" }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.28 }}
-            className="mx-auto mt-5 max-w-[52ch] text-sm leading-relaxed text-muted"
-          >
-            As Rokt unifies Brain v4 and the mParticle data platform into one system, every change crosses more
-            seams — and more seams is exactly where a change like this hides. Threshold sits <em>beside</em> the
-            Brain, guarding changes to the rules around the decision, never the decision itself.
-          </motion.p>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-3xl items-center gap-5 sm:grid-cols-[1fr_auto_1fr]">
-          <RuleSlab version="V17" op="include · is not in" tone="muted" delay={0.1} />
-          <motion.span
-            aria-hidden
-            initial={reduced ? false : { opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
-            className="mx-auto font-mono text-2xl text-crimson"
-          >
-            →
-          </motion.span>
-          <RuleSlab version="V18" op="exclude · is in" tone="crimson" delay={0.25} />
-        </div>
-
-        <motion.div
+    <Scene id="kc-change" n="01" label="The Change" accent="crimson" clip="kc-change" flip environment={<ChamberEnvironment />} live={live}>
+      <div>
+        <Pill accent="crimson">One operator, flipped</Pill>
+        <SceneHeadline className="mt-6">Most dangerous changes compile successfully.</SceneHeadline>
+        <motion.p
           initial={reduced ? false : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20% 0px" }}
-          transition={{ duration: 0.7, ease: EASE, delay: 0.3 }}
-          className="mx-auto mt-10 flex max-w-3xl flex-wrap items-center justify-center gap-3"
+          transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
+          className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted"
         >
-          <Link
-            href="/"
-            className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-crimson/50 bg-crimson/10 px-5 py-3 text-sm font-semibold text-crimson transition-colors hover:bg-crimson/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
-          >
-            Approve it blindly <span aria-hidden>→</span>
-          </Link>
-          <a
-            href="#kc-customers"
-            className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-          >
-            Replay it first <span aria-hidden>↓</span>
-          </a>
-        </motion.div>
-      </CursorSpotlight>
+          V17 to V18 changes a single operator on one rule. It passes every type check, every test, every
+          review. And it silently widens who is eligible.
+        </motion.p>
+        <div className="mt-7">
+          <RoktEcho
+            accent="crimson"
+            quote="A unified, AI-driven software platform."
+            source="Rokt · Sam Dozor, CTO, 2026 · public"
+          />
+        </div>
+        <p className="mt-5 max-w-[48ch] text-sm leading-relaxed text-muted">
+          As Rokt unifies Brain v4 and the mParticle data platform into one system, every change crosses more
+          seams — and more seams is exactly where a change like this hides. Threshold sits <em>beside</em> the
+          Brain, guarding the rules around the decision, never the decision itself.
+        </p>
+      </div>
     </Scene>
   );
 }

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import { HYPOTHESES } from "@/components/moment-forge/horizon/horizon.data";
-import { CursorSpotlight, Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
+import { Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
 
 /* 07 · The Frontier — when AI handles discovery, checkout becomes the ceremony
    of trust. An intent capsule from a shopping agent reaches a consent /
@@ -29,29 +29,8 @@ export function ChapterFrontier() {
   const [sel, setSel] = useState(0);
   const cur = FUTURES[sel]!;
 
-  return (
-    <Scene id="kc-frontier" n="07" label="The Frontier" accent="offer-blue" clip="kc-frontier" environment={<FrontierEnvironment />}>
-      <CursorSpotlight accent="offer-blue">
-        <div className="max-w-3xl">
-          <Pill accent="offer-blue">Hypotheses · clearly labelled</Pill>
-          <SceneHeadline className="mt-6">
-            When AI handles discovery, checkout becomes the ceremony of trust.
-          </SceneHeadline>
-          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted">
-            A shopping agent passes a permissioned intent toward checkout; unsupported claims stop at the consent
-            boundary, approved intent continues. These are forward-looking hypotheses layered on the real engine —
-            each one tagged, none of it claimed as shipped.
-          </p>
-          <div className="mt-7">
-            <RoktEcho
-              accent="offer-blue"
-              quote="Smarter signals replace more impressions."
-              source="Rokt · 2026 Commerce Outlook · public"
-            />
-          </div>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+  const live = (
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           {/* selectors */}
           <div className="flex flex-col gap-2">
             {FUTURES.map((f, i) => (
@@ -103,7 +82,27 @@ export function ChapterFrontier() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </CursorSpotlight>
+  );
+  return (
+    <Scene id="kc-frontier" n="07" label="The Frontier" accent="offer-blue" clip="kc-frontier" flip environment={<FrontierEnvironment />} live={live}>
+      <div>
+        <Pill accent="offer-blue">Hypotheses · clearly labelled</Pill>
+        <SceneHeadline className="mt-6">
+          When AI handles discovery, checkout becomes the ceremony of trust.
+        </SceneHeadline>
+        <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted">
+          A shopping agent passes a permissioned intent toward checkout; unsupported claims stop at the consent
+          boundary, approved intent continues. Forward-looking hypotheses layered on the real engine — each one
+          tagged, none claimed as shipped.
+        </p>
+        <div className="mt-7">
+          <RoktEcho
+            accent="offer-blue"
+            quote="Smarter signals replace more impressions."
+            source="Rokt · 2026 Commerce Outlook · public"
+          />
+        </div>
+      </div>
     </Scene>
   );
 }
