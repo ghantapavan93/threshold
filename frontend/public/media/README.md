@@ -36,26 +36,30 @@ poster still, dropped in this folder, then added to `manifest.json`. Chapters:
 
 ## ① Paste this CONTEXT PREAMBLE first, once per session
 
-> You are generating abstract cinematic background loops for **"Threshold — Builder
-> Keynote"**, a dark, premium engineering film about a deterministic safety gate that
-> proves an e-commerce checkout-policy change is safe *before any customer sees it*. The
-> film is told as chapters; each loop is the atmospheric backdrop behind one chapter's
-> text and live product UI, so it must be **calm, out-of-focus, and never compete for
-> attention**. Visual identity — museum-dark and precise:
+> You are generating **cinematic product-demo footage — clips that look like a real
+> screen recording of a premium dark-mode software product in action** — for **"Threshold
+> — Builder Keynote"**. Threshold is a deterministic safety gate that proves an e-commerce
+> checkout-policy change is safe *before any customer sees it*. Each clip should read as
+> *"this is the actual app doing the thing"* — real-feeling dashboards, a checkout screen,
+> a policy editor, analytics grids, monitoring panels — captured as a smooth, high-end
+> product walkthrough. Visual identity — museum-dark and precise:
 > • base / void: deep ink-navy **#0B0F19**
 > • teal **#22E6C8** = safe, verified, alive
 > • crimson **#FF4D6A** = blocked, failure, leak
 > • amber **#F5B84B** = a visible, honest warning
 > • soft blue **#5B8CFF** = offers, customers, value
-> The feel to match is our product's own: **museum-grade, editorial, Awwwards-caliber —
-> restrained, precise, expensive, confident, never busy or gamer-flashy.** Think a
-> high-end film title sequence for a serious engineering product, not a tech demo.
-> Style for EVERY clip: cinematic macro/wide abstraction, volumetric haze, shallow depth
-> of field, film grain, gentle bokeh, extremely slow and deliberate motion, elegant and
-> restrained. HARD RULES (obey on every clip — this saves credits): **no text, no
-> letters, no numbers, no logos, no UI, no readable screens, no people, no faces, no
-> brand marks**; seamless loop; no camera cuts; hold the same mood start to end; 16:9;
-> about 10 seconds; leave the centre calmer/darker so overlaid text stays legible.
+> The feel to match is our product's own: **premium, dark-mode SaaS — museum-grade,
+> editorial, Awwwards-caliber, restrained and expensive, never busy or gamer-flashy.**
+> Think Linear / Vercel / Stripe product films: real-looking interfaces, smooth cursor
+> movement, panels and charts animating, numbers ticking, all in slow confident motion.
+> Style for EVERY clip: cinematic screen-recording / product-walkthrough aesthetic,
+> clean modern dark-mode interface, shallow depth of field, subtle screen glow, faint film
+> grain, extremely slow and deliberate motion. HARD RULES (obey on every clip — this
+> saves credits): the model **cannot spell — so keep ALL on-screen text, labels and
+> numbers soft, blurred, and unreadable; never rely on legible words**; **no real brand
+> logos or watermarks**; keep any people peripheral, from behind, out of focus (no faces).
+> Seamless loop; no camera cuts; hold the same mood start to end; 16:9; about 10 seconds;
+> keep the centre calmer/darker so our overlaid text stays legible.
 
 ### Google Veo / Flow — run settings (do this once)
 
@@ -63,68 +67,79 @@ poster still, dropped in this folder, then added to `manifest.json`. Chapters:
 - **Audio:** none needed — the loops play muted. If Veo insists, ask for *"ambient
   silence, no music, no dialogue"* and strip audio in encode (`-an`, see File specs).
 - **Negative prompt** (paste into Flow's negative field, or append "avoid:" to the prompt):
-  `text, letters, numbers, words, captions, subtitles, logos, watermark, UI, interface,
-  screens, buttons, people, faces, hands, brand names`
-- **Style tail** — append to any prompt for batch consistency: *"Shot on a cinema camera,
-  anamorphic, volumetric haze, film grain, shallow depth of field, extremely slow
-  deliberate motion, seamless loop, no camera cuts, calm dark centre for text overlay."*
+  `readable text, legible words, sharp typography, captions, subtitles, real brand logos,
+  watermark, brand names, distorted faces, deformed hands, extra fingers, cluttered,
+  garish neon, cartoonish`
+  *(Note: we WANT interfaces/screens/dashboards now — just with unreadable, soft text.)*
+- **Style tail** — append to any prompt for batch consistency: *"premium dark-mode SaaS
+  product-demo aesthetic, clean modern interface, smooth cursor and micro-animations,
+  shallow depth of field, subtle screen glow, faint film grain, extremely slow deliberate
+  motion, on-screen text soft and unreadable, seamless loop, calm dark centre."*
 - Generate one clip per prompt; if a fake letter/screen appears, re-roll — do not keep it.
 
 ## ② The ten prompts (each inherits the preamble)
 
-**kc-moment** — *00 · The Moment.* A premium, empty movie theatre at rest, seen wide from
-the back rows: a large screen glowing a soft teal (#22E6C8) haze, raked rows of dark
-seats catching faint teal rim-light, slow dust motes drifting through a projector beam.
-Warm, expectant, still — a moment about to begin. Deep ink-navy (#0B0F19) throughout.
+Each reads as a screen recording of the app doing that chapter's job. On-screen text stays
+soft/unreadable (the model can't spell); the *shapes* of the UI carry the story.
 
-**kc-change** — *01 · The Change.* A dark chamber of thin converging perspective lines
-receding to a single glowing crimson (#FF4D6A) vanishing point; two tall monolithic slabs
-of faint light face each other in the space, one cool and neutral, one edged in crimson.
-Tension held, nothing moving fast — the instant before a decision. Ink-navy void.
+**kc-moment** — *00 · The Moment.* Cinematic screen-recording of a sleek dark-mode
+e-commerce checkout interface at the exact instant a purchase is confirmed: a clean
+confirmation panel softly illuminating in teal (#22E6C8) on a deep ink-navy (#0B0F19) UI,
+a gentle success glow spreading, cursor resting, subtle interface micro-animations. The
+calm after "buy." On-screen text soft and unreadable; no logos.
 
-**kc-customers** — *02 · The Customers.* An immense dark auditorium rendered as a vast
-field of tiny luminous points, like an audience of soft blue (#5B8CFF) lights receding
-into haze; one slow wave of teal (#22E6C8) illumination sweeps across them, and a
-scattered few points quietly flare crimson (#FF4D6A) in its wake, then settle. Awe, scale.
+**kc-change** — *01 · The Change.* Cinematic screen-recording of a dark-mode policy / rules
+editor showing two configuration versions side by side; a single toggle flips and one row
+in the diff highlights crimson (#FF4D6A) against ink-navy (#0B0F19) with teal (#22E6C8)
+accents, cursor gliding, panels updating. A small edit with big weight. Text soft/blurred
+and unreadable; no logos.
 
-**kc-failure** — *03 · The Failure.* Two parallel streams of light flow left to right
-through the dark; the upper stream (the optional offer) breaks apart into drifting crimson
-(#FF4D6A) embers and dissolves, while the lower stream (the purchase) continues perfectly
-steady and unbroken in teal (#22E6C8). A calm, clean separation — failure contained, never
-chaotic. Ink-navy background.
+**kc-customers** — *02 · The Customers.* Cinematic screen-recording of a dark-mode analytics
+dashboard visualizing a huge grid of thousands of customer-session cells; a live replay
+sweeps left to right lighting cells teal (#22E6C8) while a scattered few flip crimson
+(#FF4D6A) and soft blue (#5B8CFF), counters ticking up. Watching thousands of shoppers at
+once. On ink-navy (#0B0F19); numbers/text soft and unreadable; no logos.
 
-**kc-machine** — *04 · The Machine.* A slow travelling shot gliding through the interior of
-an immense, precise machine: luminous teal (#22E6C8) pulses of energy flow along fine
-conduits, passing in sequence through a series of softly-lit gates and chambers, over a
-faint blueprint grid. Ordered, mechanical, accountable — like watching a clockwork engine
-from inside. Deep navy metal and shadow.
+**kc-failure** — *03 · The Failure.* Cinematic screen-recording of a dark-mode monitoring
+dashboard: one panel (the optional offer) flashes, drops into a crimson (#FF4D6A) error
+state and dims out, while the adjacent order-confirmation panel stays solid and healthy in
+teal (#22E6C8). The extra fails, the purchase survives. On ink-navy (#0B0F19); text
+soft/unreadable; no logos.
 
-**kc-evidence** — *05 · The Evidence.* A dark archive of translucent luminous planes
-floating in space (abstract records, no readable text); a clean vertical boundary of light
-sweeps slowly across, and where it passes, cluttered scattered crimson (#FF4D6A) fragments
-resolve into fewer, calmer, ordered teal (#22E6C8) planes. Truth being distilled — less,
-but truer. Ink-navy void.
+**kc-machine** — *04 · The Machine.* Cinematic screen-recording of a dark-mode pipeline /
+trace visualization: a horizontal flow of connected nodes and stages lights up one after
+another as a teal (#22E6C8) pulse travels through them over a faint grid, a waterfall of
+spans filling in beneath. The system checking every layer. On ink-navy (#0B0F19); labels
+soft/unreadable; no logos.
 
-**kc-experiment** — *06 · The Experiment.* A vast dark field of faint points of light; a
-small, bright cohort of teal (#22E6C8) points sits isolated inside a soft luminous ring,
-clearly separated from the larger surrounding field which glows calm and protected in soft
-blue (#5B8CFF). Controlled, careful, quiet — a contained experiment. Deep navy expanse.
+**kc-evidence** — *05 · The Evidence.* Cinematic screen-recording of a dark-mode audit /
+verification interface: a before-and-after comparison where cluttered crimson (#FF4D6A)
+flagged rows resolve into fewer clean verified rows glowing teal (#22E6C8), checkmarks
+appearing down a ledger. Proof being distilled. On ink-navy (#0B0F19); text soft/unreadable;
+no logos.
 
-**kc-frontier** — *07 · The Frontier.* A single luminous capsule of soft-blue (#5B8CFF)
-light travels slowly toward a tall shimmering vertical membrane (a consent boundary); as it
-meets the membrane, approved light passes through and continues as clean blue, while a thin
-haze of unsupported particles dissolves away at the surface. Futuristic, permissioned,
-trustworthy. Ink-navy depth with teal (#22E6C8) accents.
+**kc-experiment** — *06 · The Experiment.* Cinematic screen-recording of a dark-mode
+experimentation dashboard: a controlled A/B split with a small highlighted treatment cohort
+in teal (#22E6C8) beside a large protected control group in soft blue (#5B8CFF), gauges and
+a verdict panel settling into place. A careful, contained test. On ink-navy (#0B0F19);
+numbers/text soft/unreadable; no logos.
 
-**kc-handoff** — *08 · The Hand-off.* A soft cinematic haze in deep ink-navy slowly
-crystallizes and resolves into a clean, precise architectural lattice of fine teal
-(#22E6C8) lines — the moment a dreamlike film settles into a real, engineered structure.
-Calm, confident, grounded. No UI, purely abstract geometry emerging from fog.
+**kc-frontier** — *07 · The Frontier.* Cinematic screen-recording of a near-future
+agentic-commerce interface: a glowing AI-assistant panel autonomously moving through a
+checkout flow and pausing at a permission / consent prompt, approved steps lighting soft
+blue (#5B8CFF) and teal (#22E6C8). The future of the checkout. On ink-navy (#0B0F19); text
+soft/unreadable; no logos.
 
-**kc-afterglow** — *09 · The Afterglow.* An empty movie theatre after hours, lights down:
-the screen dark, the raked seats barely visible in deep ink-navy (#0B0F19), and a single
-faint teal (#22E6C8) trace-line still glowing quietly across the space as the last dust
-settles. Resolved, calm, the end of the story — stillness with one light left on.
+**kc-handoff** — *08 · The Hand-off.* Cinematic shot where a soft, out-of-focus haze
+resolves and sharpens into a fully rendered dark-mode product console assembling panel by
+panel in teal (#22E6C8) on ink-navy (#0B0F19) — a dreamlike view becoming a real, working
+dashboard. The film becoming the product. Text soft/unreadable; no logos.
+
+**kc-afterglow** — *09 · The Afterglow.* Cinematic screen-recording of a dark-mode dashboard
+at rest in an all-verified state: every status calm and teal (#22E6C8), a completed
+transaction summary and a quiet audit trail glowing softly on ink-navy (#0B0F19), no
+alerts, everything settled. The work is done; the evidence remains. Text soft/unreadable;
+no logos.
 
 ## ③ Poster stills (`.jpg`, required — reduced-motion users see these)
 
