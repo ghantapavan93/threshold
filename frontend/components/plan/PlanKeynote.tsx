@@ -7,6 +7,7 @@ import { useTheme } from "@/app/providers";
 import { FilmGrain } from "@/components/moment-forge/garnish";
 import { MeasurementLive } from "@/components/plan/MeasurementLive";
 import { CreativeLinter } from "@/components/plan/CreativeLinter";
+import { FindingGlyph, PhaseGlyph } from "@/components/plan/PlanGlyph";
 import {
   ChapterRail,
   Pill,
@@ -225,7 +226,7 @@ type Phase = {
   goal: string; ships: string[]; derisk: string; metric: string; value: string;
 };
 
-function PhaseBody({ p }: { p: Phase }) {
+function PhaseBody({ p, month }: { p: Phase; month?: string }) {
   const reduced = useReducedMotion();
   return (
     <motion.div
@@ -237,6 +238,7 @@ function PhaseBody({ p }: { p: Phase }) {
     >
       <div>
         <p className="font-mono text-[11px] uppercase tracking-wide text-teal">What ships</p>
+        {month ? <PhaseGlyph month={month} /> : null}
         <ul className="mt-3 space-y-2.5">
           {p.ships.map((s, i) => (
             <li key={i} className="flex items-start gap-2.5 text-base leading-relaxed text-text">
@@ -333,7 +335,10 @@ export function PlanKeynote() {
                   <div className="flex items-start gap-4">
                     <span className="font-mono text-2xl font-semibold text-amber/80" style={{ fontFamily: "var(--font-display)" }}>{f.n}</span>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold leading-snug text-text">{f.title}</h3>
+                      <div className="flex items-start justify-between gap-4">
+                        <h3 className="text-lg font-semibold leading-snug text-text">{f.title}</h3>
+                        <FindingGlyph n={f.n} />
+                      </div>
                       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
                         <div>
                           <dt className="font-mono text-[10px] uppercase tracking-wide text-muted">Observed · Rokt public docs</dt>
@@ -376,6 +381,7 @@ export function PlanKeynote() {
         <Scene id="pk-30" n="03" label="Days 0–30" accent="teal" environment={<StepEnv accent="teal" step={0} />}
           live={
             <PhaseBody
+              month="30"
               p={{
                 goal: "",
                 ships: [
@@ -401,6 +407,7 @@ export function PlanKeynote() {
         <Scene id="pk-60" n="04" label="Days 31–60" accent="teal" environment={<StepEnv accent="teal" step={1} />}
           live={
             <PhaseBody
+              month="60"
               p={{
                 goal: "",
                 ships: [
@@ -426,6 +433,7 @@ export function PlanKeynote() {
         <Scene id="pk-90" n="05" label="Days 61–90" accent="teal" environment={<StepEnv accent="teal" step={2} />}
           live={
             <PhaseBody
+              month="90"
               p={{
                 goal: "",
                 ships: [
