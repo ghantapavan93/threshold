@@ -303,6 +303,21 @@ p {
   50% { transform: scale(1.18); }
 }
 
+/* Scenario-card glyphs — subtle, slow ambient loops that say what each card
+   teaches. Collapsed to one frame by the reduced-motion safety net. */
+.sg-pulse { animation: sg-pulse 2.6s ease-in-out infinite; }
+.sg-flip { animation: sg-flip 2.6s ease-in-out infinite; }
+.sg-blink { animation: sg-blink 1.6s steps(1, end) infinite; }
+.sg-shake { animation: sg-shake 2.4s ease-in-out infinite; transform-origin: 98px 18px; }
+.sg-flow { animation: sg-flow 2.8s ease-in-out infinite; }
+.sg-dash { animation: sg-dash 1s linear infinite; }
+@keyframes sg-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes sg-flip { 0%, 100% { fill-opacity: 0.5; } 50% { fill-opacity: 1; } }
+@keyframes sg-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.15; } }
+@keyframes sg-shake { 0%, 70%, 100% { transform: translateX(0) rotate(0); } 80% { transform: translateX(-3px) rotate(-8deg); } 90% { transform: translateX(2px) rotate(6deg); } }
+@keyframes sg-flow { 0% { transform: translateX(8px); opacity: 0; } 15% { opacity: 1; } 70%, 100% { transform: translateX(84px); opacity: 0; } }
+@keyframes sg-dash { to { stroke-dashoffset: -14; } }
+
 /* Teal-forward gradient text with a slow shimmer.
    CRITICAL: a solid, high-contrast color is set FIRST as the fallback, so the
    text is always visible even where background-clip:text is unsupported. The

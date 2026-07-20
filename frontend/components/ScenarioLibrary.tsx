@@ -13,6 +13,7 @@ import {
   Skeleton,
 } from "./ui/primitives";
 import { VERDICT_COLOR, VERDICT_LABEL } from "@/lib/utils";
+import { ScenarioGlyph } from "./ScenarioGlyph";
 import { scrollToId } from "@/lib/scroll";
 
 // Same replay parameters the Hero's self-driving demo uses — identical real path.
@@ -71,6 +72,7 @@ function ScenarioCard({
       }
       style={selected ? { borderColor: "var(--c-teal)" } : undefined}
     >
+      <ScenarioGlyph id={scenario.id} />
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-sm font-semibold leading-snug text-text">
           {scenario.title}
