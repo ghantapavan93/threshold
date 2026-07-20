@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
 import { Reveal } from "@/components/visual/Reveal";
+import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
 import {
@@ -560,20 +561,23 @@ function Roadmap() {
               {m.id}
             </span>
             <div data-card className="holo-card rounded-2xl p-5 sm:p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-semibold tracking-tight">
-                  Milestone {m.id} — {m.title}
-                </h3>
-                <span
-                  className="rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide"
-                  style={{
-                    color: m.accent,
-                    borderColor: m.accent,
-                    backgroundColor: `color-mix(in srgb, ${m.accent} 12%, transparent)`,
-                  }}
-                >
-                  {m.horizon}
-                </span>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    Milestone {m.id} — {m.title}
+                  </h3>
+                  <span
+                    className="rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide"
+                    style={{
+                      color: m.accent,
+                      borderColor: m.accent,
+                      backgroundColor: `color-mix(in srgb, ${m.accent} 12%, transparent)`,
+                    }}
+                  >
+                    {m.horizon}
+                  </span>
+                </div>
+                <MilestoneGlyph id={m.id} />
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted">{m.body}</p>
               <p className="mt-3 border-l-2 border-border pl-3 font-mono text-xs leading-relaxed text-muted">
