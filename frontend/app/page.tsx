@@ -4,6 +4,7 @@ import { API_BASE } from "@/lib/api";
 import { useHealth } from "@/lib/hooks";
 import { RECORDED_DESCRIPTION } from "@/lib/replay-fixture";
 import { ConsoleProvider, useConsole } from "@/components/console-context";
+import { Intro } from "@/components/Intro";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ScenarioLibrary } from "@/components/ScenarioLibrary";
@@ -60,6 +61,7 @@ function BackendBanner() {
 export default function Page() {
   return (
     <ConsoleProvider initialBase="V17" initialProposed="V18">
+      <Intro />
       <div className="relative min-h-screen text-text">
         <div className="aurora-threshold" aria-hidden />
         <div className="relative z-10">
