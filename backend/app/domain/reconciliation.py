@@ -82,13 +82,15 @@ _SYNTHETIC_LABEL = (
 
 
 class RewardStatus(str, Enum):
-    """Whole-value slice for Case B (the §2.2 fix): the lifecycle stage is stamped in
-    the type, so "reward" can never hide WHICH of the states you hold. REDEEMABLE is
-    deliberately out of scope — expiry/clawback would be a third aggregate and this
-    module refuses to fake one."""
+    """Whole-value for Case B (the §2.2 fix): the lifecycle stage is stamped in the
+    type, so "reward" can never hide WHICH of the three states you hold. The TYPE
+    names the full lifecycle; the reconciler PROVES only earned ⇒ issued —
+    REDEEMABLE's expiry/clawback rules would need a third aggregate this module
+    refuses to fake, so no invariant over it is claimed."""
 
-    EARNED = "earned"  # the shopper qualified — a fact in BC-4 Loyalty
-    ISSUED = "issued"  # the reward is materialized — a booked liability in Fulfilment
+    EARNED = "earned"          # the shopper qualified — a fact in BC-4 Loyalty
+    ISSUED = "issued"          # the reward is materialized — a booked liability in Fulfilment
+    REDEEMABLE = "redeemable"  # currently usable (not expired / clawed back) — named, not proven
 
 
 class Strategy(str, Enum):

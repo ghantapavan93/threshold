@@ -84,15 +84,59 @@ class CausalOrigin(str, Enum):
     WOULD_HAVE_ANYWAY = "would_have_anyway"  # baseline — converts regardless (the leak)
 
 
+class UnitMismatchError(TypeError):
+    """Raised when two quantities with DIFFERENT owning contexts are combined
+    without a translation. This is the Whole Value / Quantity discipline made
+    enforceable (Cunningham CHECKS; Evans Value Object): `recorded + incremental`
+    must not silently type-check into a number — the silent copy IS the disease."""
+
+
 @dataclass(frozen=True)
 class ConversionEvent:
     """A typed whole-value carrying its meaning across the seam. `origin` is the seeded
-    ground truth on corpus events; it is None on translation RESULTS (aggregates)."""
+    ground truth on corpus events; it is None on translation RESULTS (aggregates).
+
+    Whole-value algebra (the W3 fix): adding two events of the SAME kind merges
+    them; adding across kinds raises `UnitMismatchError`. A cross-context
+    assignment therefore REQUIRES a translation function (the ACL) — an implicit
+    Conformist becomes a runtime error at the seam instead of a silent copy."""
 
     kind: ConversionKind
     count: int
     seam: str
     origin: CausalOrigin | None = None
+
+    def __add__(self, other: object) -> "ConversionEvent":
+        if not isinstance(other, ConversionEvent):
+            return NotImplemented
+        if other.kind is not self.kind:
+            raise UnitMismatchError(
+                f"cannot add {self.kind.value} + {other.kind.value}: the two counts "
+                "belong to different bounded contexts and mean different things. "
+                "Translate across the seam first (acl_translate), or the sum is a lie."
+            )
+        return ConversionEvent(kind=self.kind, count=self.count + other.count, seam=self.seam)
+
+
+def demonstrate_unit_wall() -> dict:
+    """Actually PERFORM the illegal cross-kind addition and report what the type
+    system did about it — real runtime output, never a hand-written claim. Also
+    performs the legal same-kind merge for contrast."""
+    recorded = ConversionEvent(kind=ConversionKind.RECORDED, count=10, seam=SEAM)
+    incremental = ConversionEvent(kind=ConversionKind.INCREMENTAL, count=6, seam=SEAM)
+    try:
+        recorded + incremental  # type: ignore[expression-not-assigned]  # noqa: B018
+        blocked: dict = {"raised": False}
+    except UnitMismatchError as exc:
+        blocked = {"raised": True, "error": type(exc).__name__, "message": str(exc)}
+    legal = recorded + ConversionEvent(kind=ConversionKind.RECORDED, count=5, seam=SEAM)
+    return {
+        "illegal": {"attempted": "recorded(10) + incremental(6)", **blocked},
+        "legal": {
+            "attempted": "recorded(10) + recorded(5)",
+            "result": {"kind": legal.kind.value, "count": legal.count},
+        },
+    }
 
 
 # --------------------------------------------------------------------------- #

@@ -422,17 +422,21 @@ mechanism and the proof are `[REPO]`. This is exactly the "make the already-ship
 do domain work" bonus: `GET /reconciliation` reads the rows the engine actually wrote.
 WHS-exclusion-is-global remains `[HYPOTHESIS]` — one invariant proven, not all three claimed.
 
-### W3. Polysemic terms are primitives, not whole-values — the silent root cause.
+### W3. Polysemic terms are primitives, not whole-values — the silent root cause. — CLOSED (2026-07-19)
 *conversion* is an `int`, *reward* a `str`, *impression* nonexistent, so a cross-context
 assignment is a silent copy that type-checks. This is the Whole Value / Quantity anti-pattern
 (Cunningham CHECKS; Evans Value Object) and it is *why* every ACL in §1 can be skipped with
 zero compiler complaint. `Decision` proves the team can build proper frozen whole-values
 (`[REPO evaluator.py:26-39]`) — the discipline just stops at the aggregate boundary.
-**Highest-leverage fix:** typed whole-values with the owning context stamped in the type
-(`ConversionKind`, `RewardStatus`, `ImpressionFidelity`), so an implicit conformist becomes a
-runtime error at the seam. This hardens the model against the *whole* A–D disease class and
-is the exact substrate the §3 Translation Map runs on — W1's fix and W3's fix are the same
-lever pulled at two altitudes.
+**The fix, now built:** all three whole-values exist in running code with the owning
+context stamped in the type — `ConversionKind` (`[REPO translation.py]`), `RewardStatus`
+incl. REDEEMABLE-named-not-proven (`[REPO reconciliation.py]`), and `ImpressionFidelity`
+(`[REPO impressions.py]`). The implicit conformist IS a runtime error at the seam:
+`ConversionEvent.__add__` raises `UnitMismatchError` on a cross-kind addition, and
+`POST /impression-audit` *performs* the illegal addition live and reports the caught error
+(`[REPO test_wholevalues.py]`). Case C ships as its honest self: a refuse-to-conform ACL
+over a labelled synthetic corpus (counts only, no rate claimed), drawn as Fig. 03d. W1's
+fix and W3's fix are the same lever pulled at two altitudes.
 
 ---
 
@@ -445,9 +449,10 @@ lever pulled at two altitudes.
   Vernon/Evans/Cunningham/Fowler pattern definitions (cited, re-verified 2026-07-19).
 - **`[REPO]`:** the single-context evaluator, diff, counterfactual constraint, verdict,
   ope, contexts rollup, and the tested transactional outbox with `VERDICT_ISSUED` fan-out
-  to billing/analytics/partner; the Translation Map (`translation.py`, `/translation-audit`)
-  and the Reconciliation Process (`reconciliation.py`, `/reconciliation-audit`,
-  `/reconciliation`) with their test suites.
+  to billing/analytics/partner; the Translation Map (`translation.py`, `/translation-audit`),
+  the Reconciliation Process (`reconciliation.py`, `/reconciliation-audit`,
+  `/reconciliation`), and the whole-value slice (`impressions.py`, `UnitMismatchError`
+  algebra, `/impression-audit`) with their test suites.
 - **`[INFERENCE]`/`[HYPOTHESIS]` (mine, not Rokt's):** the seven bounded-context names; every
   context-map pattern assignment; the four integration cases as *modelling claims*; the
   `translation.py` module and its synthetic baseline; the reward/WHS/impression extensions.

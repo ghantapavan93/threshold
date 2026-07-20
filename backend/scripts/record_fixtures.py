@@ -92,6 +92,15 @@ def main() -> None:
         reconciliation_resp.raise_for_status()
         _write("reconciliation-audit.json", reconciliation_resp.content)
 
+        # Whole values (W3): impression fidelity across BC-7→BC-5 + the live
+        # unit-wall demonstration — REAL engine output.
+        impression_resp = client.post(
+            f"{BASE}/impression-audit",
+            json={"seed": SEED, "count": COUNT},
+        )
+        impression_resp.raise_for_status()
+        _write("impression-audit.json", impression_resp.content)
+
 
 if __name__ == "__main__":
     main()

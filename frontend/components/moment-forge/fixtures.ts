@@ -5,12 +5,15 @@ import compileConsent from "@/lib/fixtures/momentforge/compile.consent.json";
 import compileImmutable from "@/lib/fixtures/momentforge/compile.immutable.json";
 import translationAuditFixture from "@/lib/fixtures/momentforge/translation-audit.json";
 import reconciliationAuditFixture from "@/lib/fixtures/momentforge/reconciliation-audit.json";
+import impressionAuditFixture from "@/lib/fixtures/momentforge/impression-audit.json";
 import { ApiError } from "@/lib/api";
 import {
+  ImpressionAuditSchema,
   ReconciliationAuditSchema,
   SemanticDeltaSchema,
   SimulationResultSchema,
   TranslationAuditSchema,
+  type ImpressionAudit,
   type ReconciliationAudit,
   type SemanticDelta,
   type SimulationResult,
@@ -91,6 +94,17 @@ export function translationFixture(): TranslationAudit {
     throw new ApiError({
       kind: "validation",
       message: "Recorded translation-audit fixture did not match the API contract",
+    });
+  }
+  return parsed.data;
+}
+
+export function impressionFixture(): ImpressionAudit {
+  const parsed = ImpressionAuditSchema.safeParse(impressionAuditFixture);
+  if (!parsed.success) {
+    throw new ApiError({
+      kind: "validation",
+      message: "Recorded impression-audit fixture did not match the API contract",
     });
   }
   return parsed.data;

@@ -505,3 +505,44 @@ export const ReconciliationProofSchema = z.object({
   grounding: z.string(),
 });
 export type ReconciliationProof = z.infer<typeof ReconciliationProofSchema>;
+
+// ---- Moment Forge: Whole values (impression fidelity + the unit wall) --------
+// Mirrors POST /impression-audit exactly. Core fields required; enrichment
+// optional. A mismatch → validation error, never a silent fallback.
+export const ImpressionAuditSchema = z.object({
+  term: z.string(),
+  seam: z.string(),
+  upstream_meaning: z.string(),
+  downstream_meaning: z.string(),
+  pattern: z.string(),
+  seed: z.number(),
+  count: z.number(),
+  per_channel: z.object({ human: z.number(), agent: z.number() }),
+  per_fidelity: z.object({ faithful: z.number(), degraded: z.number() }),
+  conformist_result: z.object({ kind: z.string(), count: z.number() }),
+  acl_result: z.object({ counted: z.number(), refused: z.number() }),
+  blended_units: z.number(),
+  unit_wall: z.object({
+    illegal: z.object({
+      attempted: z.string(),
+      raised: z.boolean(),
+      error: z.string().optional(),
+      message: z.string().optional(),
+    }),
+    legal: z.object({
+      attempted: z.string(),
+      result: z.object({ kind: z.string(), count: z.number() }),
+    }),
+  }),
+  synthetic_inputs: z.array(
+    z.object({
+      name: z.string(),
+      value: z.union([z.number(), z.string()]),
+      label: z.string().optional(),
+      note: z.string().optional(),
+    }),
+  ),
+  grounding: z.string(),
+  note: z.string().optional(),
+});
+export type ImpressionAudit = z.infer<typeof ImpressionAuditSchema>;

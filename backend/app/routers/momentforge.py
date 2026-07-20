@@ -13,6 +13,9 @@ PolicyVersionRow / ReplayJobRow / OutboxEventRow / ConversionRow):
   fault world: dual-write vs transactional outbox, reconciled side by side (W2).
 - GET  /reconciliation — the same process-manager move over the REAL replay-job
   fan-out rows (read-only): proves the outbox invariant on actual data.
+- POST /impression-audit — the third whole-value (W3): impression fidelity across
+  the BC-7→BC-5 seam, refuse-to-conform ACL vs blended Conformist, plus the live
+  unit-wall demonstration (cross-kind addition raising UnitMismatchError).
 
 Zero new decision logic (ADR-002): everything on the compute path is one of the
 existing pure domain functions (`diff_policies`, `run_replay`, `Policy`) plus the
@@ -36,6 +39,11 @@ from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_att
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
 from ..domain.replay import run_replay
+from ..domain.impressions import (
+    DEFAULT_AGENT_SHARE,
+    DEFAULT_DEGRADED_FRACTION,
+    audit_impressions,
+)
 from ..domain.reconciliation import (
     DEFAULT_AMBIGUOUS_TIMEOUT_FRACTION,
     DEFAULT_CRASH_FRACTION,
@@ -43,7 +51,11 @@ from ..domain.reconciliation import (
     audit_reconciliation,
     reconcile_fanout,
 )
-from ..domain.translation import DEFAULT_INCREMENTAL_FRACTION, audit_translation
+from ..domain.translation import (
+    DEFAULT_INCREMENTAL_FRACTION,
+    audit_translation,
+    demonstrate_unit_wall,
+)
 from ..models import OutboxEventRow, ReplayJobRow
 from ..observability import get_meter, get_tracer
 from .common import load_policy
@@ -67,6 +79,9 @@ _reconciliation_audit_total = _meter.create_counter("momentforge_reconciliation_
 _reconciliation_audit_duration = _meter.create_histogram("momentforge_reconciliation_audit_duration_ms")
 _reconciliation_silent = _meter.create_histogram("momentforge_reconciliation_silent_divergence")
 _reconciliation_proof_total = _meter.create_counter("momentforge_reconciliation_proof_total")
+_impression_audit_total = _meter.create_counter("momentforge_impression_audit_total")
+_impression_audit_duration = _meter.create_histogram("momentforge_impression_audit_duration_ms")
+_impression_refused = _meter.create_histogram("momentforge_impression_refused_units")
 
 router = APIRouter(prefix="/api/v1/merchants/{merchant_id}")
 
@@ -107,6 +122,16 @@ class ReconciliationAuditRequest(BaseModel):
         default=DEFAULT_AMBIGUOUS_TIMEOUT_FRACTION, ge=0.0, le=1.0)
     hard_failure_fraction: float = Field(
         default=DEFAULT_HARD_FAILURE_FRACTION, ge=0.0, le=1.0)
+
+
+class ImpressionAuditRequest(BaseModel):
+    # `impression` is the only modelled term on this seam; both fractions are the
+    # labelled synthetic corpus parameters.
+    term: str = "impression"
+    seed: int = 42
+    count: int = Field(default=200, ge=1, le=5000)  # bounded like the sim
+    agent_share: float = Field(default=DEFAULT_AGENT_SHARE, ge=0.0, le=1.0)
+    degraded_fraction: float = Field(default=DEFAULT_DEGRADED_FRACTION, ge=0.0, le=1.0)
 
 
 class TranslationAuditRequest(BaseModel):
@@ -429,6 +454,46 @@ def reconciliation_audit(
         '"duration_ms":%.2f}',
         merchant_id, _rid(request), req.seed, req.count,
         silent_dual, silent_outbox, duration_ms,
+    )
+
+    return result
+
+
+@router.post("/impression-audit")
+def impression_audit(
+    merchant_id: str,
+    req: ImpressionAuditRequest,
+    request: Request,
+) -> dict:
+    """Thin, READ-ONLY, NON-persisting: runs the pure impression-fidelity audit
+    over a seeded corpus (refuse-to-conform ACL vs blended Conformist) and attaches
+    the live unit-wall demonstration — the illegal cross-kind addition is actually
+    performed and the caught UnitMismatchError reported. No DB, no writes;
+    deterministic (same body → identical bytes)."""
+    t0 = time.perf_counter()
+
+    if req.term != "impression":
+        raise _reject("unknown_term",
+                      f"unknown term: {req.term!r}; only 'impression' is modelled")
+
+    with tracer.start_as_current_span("momentforge.impression_audit") as span:
+        result = audit_impressions(
+            req.seed, req.count, req.agent_share, req.degraded_fraction)
+        result["unit_wall"] = demonstrate_unit_wall()
+        span.set_attribute("threshold.seed", req.seed)
+        span.set_attribute("threshold.count", req.count)
+        span.set_attribute("momentforge.refused_units", result["acl_result"]["refused"])
+        span.set_attribute("momentforge.blended_units", result["blended_units"])
+
+    duration_ms = (time.perf_counter() - t0) * 1000.0
+    _impression_audit_total.add(1, {"result": "ok"})
+    _impression_audit_duration.record(duration_ms)
+    _impression_refused.record(result["acl_result"]["refused"])
+    log.info(
+        '{"route":"impression-audit","merchant_id":"%s","request_id":"%s",'
+        '"seed":%d,"count":%d,"counted":%d,"refused":%d,"duration_ms":%.2f}',
+        merchant_id, _rid(request), req.seed, req.count,
+        result["acl_result"]["counted"], result["acl_result"]["refused"], duration_ms,
     )
 
     return result

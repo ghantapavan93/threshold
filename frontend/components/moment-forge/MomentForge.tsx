@@ -18,6 +18,7 @@ import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
 import { TranslationMap } from "./TranslationMap";
 import { ReconciliationLane } from "./ReconciliationLane";
+import { UnitWall } from "./UnitWall";
 import { CompilerConsole } from "./CompilerConsole";
 import { FractureScene } from "./FractureScene";
 import { LawGallery, EvidenceIndex } from "./laws-future";
@@ -182,6 +183,28 @@ export function MomentForge() {
               caption="LIVE · POST /reconciliation-audit + GET /reconciliation. Dual-write orphans and double-issues leave no trace; the outbox turns every failure into a visible dead-letter — and the reconciler proves it, on synthetic faults and on the real fan-out rows."
             >
               <ReconciliationLane offline={offline} />
+            </Plate>
+          </Section>
+
+          {/* ── 3d · The Unit Wall [LIVE] — whole values close the disease class ── */}
+          <Section id="sec-unitwall" label="The Unit Wall — whole values at every seam">
+            <Reveal>
+              <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
+                The root cause of the whole disease class: the polysemic terms were{" "}
+                <span className="text-text">primitives</span> — a conversion an int, a reward a string, an
+                impression not a type at all — so a cross-context copy type-checked silently. Now all three
+                carry their owning context in a type, and the backend demonstrates it live: an illegal
+                cross-unit addition <em>actually raises</em>, and a degraded agent rendering is{" "}
+                <em>refused</em> at the measurement seam rather than blended into the count.
+              </p>
+            </Reveal>
+            <Plate
+              figure="03d"
+              title="The Unit Wall"
+              tone="crimson"
+              caption="LIVE · POST /impression-audit. The refuse-to-conform ACL keeps the measurement atom honest; the unit wall (recorded + incremental → UnitMismatchError) is performed by the running engine, never asserted. The weakest-grounded case of the four — labelled as such."
+            >
+              <UnitWall offline={offline} />
             </Plate>
           </Section>
 

@@ -1,0 +1,55 @@
+{
+  "term": "impression",
+  "seam": "BC-7 Agent-Mediation \u2192 BC-5 Measurement",
+  "upstream_meaning": "'shown' by an LLM shopping agent \u2014 possibly stripped, truncated, reordered, buried",
+  "downstream_meaning": "a faithful rendering seen by a human \u2014 the atomic unit incrementality assumes",
+  "pattern": "Anticorruption Layer (refuse-to-conform)",
+  "seed": 42,
+  "count": 200,
+  "per_channel": {
+    "human": 124,
+    "agent": 76
+  },
+  "per_fidelity": {
+    "faithful": 138,
+    "degraded": 62
+  },
+  "conformist_result": {
+    "kind": "impression (blended \u2014 the lie)",
+    "count": 200
+  },
+  "acl_result": {
+    "counted": 138,
+    "refused": 62
+  },
+  "blended_units": 62,
+  "synthetic_inputs": [
+    {
+      "name": "agent_share",
+      "value": 0.35,
+      "label": "[SYNTHETIC] corpus parameter. No public number exists for this; it is seeded only so the mechanism is bit-for-bit replayable \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    },
+    {
+      "name": "degraded_fraction",
+      "value": 0.8,
+      "label": "[SYNTHETIC] corpus parameter. No public number exists for this; it is seeded only so the mechanism is bit-for-bit replayable \u2014 labelled exactly like the engine's '~18% omit cc_bin' synthetic. No Rokt-internal number is asserted."
+    }
+  ],
+  "grounding": "Agent-mediated checkout and its near-zero sales lesson are public (research 26 #2/#3); everything else here is a modelling claim. The ACL refuses to count a degraded rendering as the measurement atom \u2014 it does not estimate anything, and no degradation rate is asserted: both fractions are labelled synthetic inputs.",
+  "note": "Of 200 'impressions', 62 are a different unit (agent-degraded renderings). The Conformist path counts 200; the ACL counts 138 and refuses 62 \u2014 visibly, without estimating anything. The channel and degradation fractions are [SYNTHETIC]; the unit mismatch is the claim, not a rate.",
+  "unit_wall": {
+    "illegal": {
+      "attempted": "recorded(10) + incremental(6)",
+      "raised": true,
+      "error": "UnitMismatchError",
+      "message": "cannot add recorded + incremental: the two counts belong to different bounded contexts and mean different things. Translate across the seam first (acl_translate), or the sum is a lie."
+    },
+    "legal": {
+      "attempted": "recorded(10) + recorded(5)",
+      "result": {
+        "kind": "recorded",
+        "count": 15
+      }
+    }
+  }
+}

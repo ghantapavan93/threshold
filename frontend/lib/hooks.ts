@@ -10,6 +10,7 @@ import {
   api,
   ApiError,
   MERCHANT_ID,
+  type ImpressionAuditInput,
   type ReconciliationAuditInput,
   type SemanticCompileInput,
   type SimulationInput,
@@ -25,6 +26,7 @@ import type {
   PolicyDiff,
   OutboxEvent,
   PolicyDocument,
+  ImpressionAudit,
   PolicyListItem,
   ReconciliationAudit,
   ReconciliationProof,
@@ -165,6 +167,17 @@ export function useTranslationAudit(
   return useMutation<TranslationAudit, ApiError, TranslationAuditInput>({
     mutationKey: ["translation-audit", merchantId],
     mutationFn: (input) => api.translationAudit(merchantId, input),
+    retry: retryPolicy,
+  });
+}
+
+/** Moment Forge — Whole-values / impression-fidelity mutation (real backend). */
+export function useImpressionAudit(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<ImpressionAudit, ApiError, ImpressionAuditInput> {
+  return useMutation<ImpressionAudit, ApiError, ImpressionAuditInput>({
+    mutationKey: ["impression-audit", merchantId],
+    mutationFn: (input) => api.impressionAudit(merchantId, input),
     retry: retryPolicy,
   });
 }

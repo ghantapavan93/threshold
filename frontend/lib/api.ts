@@ -12,6 +12,7 @@ import {
   PolicyListSchema,
   ReplayJobSchema,
   ScenarioListSchema,
+  ImpressionAuditSchema,
   ReconciliationAuditSchema,
   ReconciliationProofSchema,
   SemanticDeltaSchema,
@@ -28,6 +29,7 @@ import type {
   OutboxEvent,
   PolicyDiff,
   PolicyDocument,
+  ImpressionAudit,
   PolicyListItem,
   ReconciliationAudit,
   ReconciliationProof,
@@ -45,6 +47,15 @@ export type ReconciliationAuditInput = {
   crash_fraction?: number;
   ambiguous_timeout_fraction?: number;
   hard_failure_fraction?: number;
+};
+
+/** Moment Forge — Whole-values / impression-fidelity request. */
+export type ImpressionAuditInput = {
+  term?: string;
+  seed?: number;
+  count?: number;
+  agent_share?: number;
+  degraded_fraction?: number;
 };
 
 /** Moment Forge — Translation Map request. */
@@ -391,6 +402,20 @@ export const api = {
     signal?: AbortSignal,
   ): Promise<ReconciliationAudit> {
     return requestData(`${base(merchantId)}/reconciliation-audit`, ReconciliationAuditSchema, {
+      method: "POST",
+      body,
+      signal,
+    });
+  },
+
+  /** Moment Forge — Whole values: impression fidelity + the live unit wall
+   *  (read-only, pure). */
+  impressionAudit(
+    merchantId: string,
+    body: ImpressionAuditInput,
+    signal?: AbortSignal,
+  ): Promise<ImpressionAudit> {
+    return requestData(`${base(merchantId)}/impression-audit`, ImpressionAuditSchema, {
       method: "POST",
       body,
       signal,
