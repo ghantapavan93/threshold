@@ -54,6 +54,19 @@ poster still, dropped in this folder, then added to `manifest.json`. Chapters:
 > brand marks**; seamless loop; no camera cuts; hold the same mood start to end; 16:9;
 > about 10 seconds; leave the centre calmer/darker so overlaid text stays legible.
 
+### Google Veo / Flow — run settings (do this once)
+
+- **Aspect ratio:** 16:9. **Duration:** 8s (Veo 3 default; we loop it in the player).
+- **Audio:** none needed — the loops play muted. If Veo insists, ask for *"ambient
+  silence, no music, no dialogue"* and strip audio in encode (`-an`, see File specs).
+- **Negative prompt** (paste into Flow's negative field, or append "avoid:" to the prompt):
+  `text, letters, numbers, words, captions, subtitles, logos, watermark, UI, interface,
+  screens, buttons, people, faces, hands, brand names`
+- **Style tail** — append to any prompt for batch consistency: *"Shot on a cinema camera,
+  anamorphic, volumetric haze, film grain, shallow depth of field, extremely slow
+  deliberate motion, seamless loop, no camera cuts, calm dark centre for text overlay."*
+- Generate one clip per prompt; if a fake letter/screen appears, re-roll — do not keep it.
+
 ## ② The ten prompts (each inherits the preamble)
 
 **kc-moment** — *00 · The Moment.* A premium, empty movie theatre at rest, seen wide from
