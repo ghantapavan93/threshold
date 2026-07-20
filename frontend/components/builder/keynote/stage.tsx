@@ -66,13 +66,13 @@ export function Pill({ children, accent = "teal" }: { children: ReactNode; accen
 }
 
 // ── Chapter rail — sticky left dot-nav with scroll-spy ──────────────────────
-export function ChapterRail() {
+export function ChapterRail({ chapters = CHAPTERS }: { chapters?: ChapterDef[] }) {
   const [active, setActive] = useState(0);
   useEffect(() => {
     const onScroll = () => {
       let idx = 0;
-      for (let i = 0; i < CHAPTERS.length; i++) {
-        const c = CHAPTERS[i];
+      for (let i = 0; i < chapters.length; i++) {
+        const c = chapters[i];
         if (!c) continue;
         const el = document.getElementById(c.anchor);
         if (!el) continue;
@@ -83,14 +83,14 @@ export function ChapterRail() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [chapters]);
   return (
     <nav
       aria-label="Keynote chapters"
       className="pointer-events-none fixed left-4 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
     >
       <ol className="pointer-events-auto flex flex-col gap-3 rounded-full border border-border/70 bg-base/50 px-3 py-4 backdrop-blur-xl">
-        {CHAPTERS.map((c, i) => {
+        {chapters.map((c, i) => {
           const isActive = i === active;
           return (
             <li key={c.anchor} className="group relative">

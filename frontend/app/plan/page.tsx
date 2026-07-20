@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { PlanPage } from "@/components/plan/PlanPage";
+import { PlanKeynote } from "@/components/plan/PlanKeynote";
 
 export const metadata: Metadata = {
   title: "Threshold · Audit & First 90 Days",
   description:
-    "An outside-in audit of Rokt's public operator surface, grounded in their docs, feeding a concrete first-90-days plan — the second proof-of-work, distinct from Threshold.",
+    "An outside-in audit of Rokt's public operator surface, grounded in their docs, feeding a first-90-days plan — the second proof-of-work, given the full keynote treatment.",
 };
 
 export default function PlanRoute() {
-  return <PlanPage />;
+  return <PlanKeynote />;
 }
