@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "@/app/providers";
 import { FilmGrain } from "@/components/moment-forge/garnish";
+import { MeasurementLive } from "@/components/plan/MeasurementLive";
 import {
   ChapterRail,
   Pill,
@@ -445,7 +446,14 @@ export function PlanKeynote() {
         </Scene>
 
         {/* 06 · Measurement */}
-        <Scene id="pk-measure" n="06" label="Measurement" accent="offer-blue" environment={<GridEnv accent="offer-blue" />}>
+        <Scene
+          id="pk-measure"
+          n="06"
+          label="Measurement"
+          accent="offer-blue"
+          environment={<GridEnv accent="offer-blue" />}
+          live={<MeasurementLive />}
+        >
           <div className="max-w-3xl">
             <Pill accent="offer-blue">How I&apos;d measure success</Pill>
             <SceneHeadline className="mt-6">A launch isn&apos;t a win. A moved number is.</SceneHeadline>
