@@ -8,6 +8,13 @@ import { ChapterRail } from "./stage";
 import { ChapterMoment } from "./ChapterMoment";
 import { ChapterChange } from "./ChapterChange";
 import { ChapterCustomers } from "./ChapterCustomers";
+import { ChapterFailure } from "./ChapterFailure";
+import { ChapterMachine } from "./ChapterMachine";
+import { ChapterEvidence } from "./ChapterEvidence";
+import { ChapterExperiment } from "./ChapterExperiment";
+import { ChapterFrontier } from "./ChapterFrontier";
+import { ChapterHandoff } from "./ChapterHandoff";
+import { ChapterAfterglow } from "./ChapterAfterglow";
 
 /* /builder/keynote — the Builder role as a cinematic product film.
    One transaction, told as chapters, with the REAL Threshold engine living
@@ -54,42 +61,6 @@ function KeynoteNav() {
   );
 }
 
-/* A temporary end-cap while chapters 03–09 are in production — honest about
-   what is built and pointing into the real app (the "hand-off" in miniature). */
-function KeynoteEndCap() {
-  return (
-    <section className="relative border-t border-border/40 bg-base/80 px-5 py-24 text-center sm:px-8">
-      <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-teal">The story continues</p>
-      <h2 className="mx-auto mt-4 max-w-2xl text-[clamp(24px,4vw,40px)] font-semibold tracking-tightest text-text" style={{ fontFamily: "var(--font-display)" }}>
-        Chapters 03–09 are in production. The engine underneath is already real.
-      </h2>
-      <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
-        The Failure, the Machine, the Evidence, the Experiment, the Frontier, the Hand-off, the Afterglow —
-        each will wrap a live Threshold surface in its own cinematic scene. Until then, operate the real thing.
-      </p>
-      <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted">
-        Built beside Brain v4, not inside it — a deterministic gate for the 10B+ transactions Rokt runs in 2026,
-        where a wrong change reaches a real customer only after it is proven safe.
-      </p>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link
-          href="/"
-          className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-          style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-        >
-          <span aria-hidden>▶</span> Operate Threshold
-        </Link>
-        <Link
-          href="/moment-forge"
-          className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
-        >
-          Inspect Moment Forge
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 export function KeynotePage() {
   return (
     <div className="relative min-h-screen bg-base text-text">
@@ -100,7 +71,13 @@ export function KeynotePage() {
         <ChapterMoment />
         <ChapterChange />
         <ChapterCustomers />
-        <KeynoteEndCap />
+        <ChapterFailure />
+        <ChapterMachine />
+        <ChapterEvidence />
+        <ChapterExperiment />
+        <ChapterFrontier />
+        <ChapterHandoff />
+        <ChapterAfterglow />
       </main>
       <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
         THRESHOLD · Builder Keynote — a cinematic product film. The environments are composed; the engine,

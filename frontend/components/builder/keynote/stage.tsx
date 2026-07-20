@@ -37,6 +37,13 @@ export const CHAPTERS: ChapterDef[] = [
   { n: "00", label: "The Moment", anchor: "kc-moment" },
   { n: "01", label: "The Change", anchor: "kc-change" },
   { n: "02", label: "The Customers", anchor: "kc-customers" },
+  { n: "03", label: "The Failure", anchor: "kc-failure" },
+  { n: "04", label: "The Machine", anchor: "kc-machine" },
+  { n: "05", label: "The Evidence", anchor: "kc-evidence" },
+  { n: "06", label: "The Experiment", anchor: "kc-experiment" },
+  { n: "07", label: "The Frontier", anchor: "kc-frontier" },
+  { n: "08", label: "The Hand-off", anchor: "kc-handoff" },
+  { n: "09", label: "The Afterglow", anchor: "kc-afterglow" },
 ];
 
 // ── Pill ────────────────────────────────────────────────────────────────────
@@ -260,6 +267,57 @@ export function RoktEcho({
         {source}
       </figcaption>
     </motion.figure>
+  );
+}
+
+// ── Before / After — a draggable split reveal ───────────────────────────────
+// Both layers occupy the same box; the "after" is clipped from the left and the
+// handle wipes between them. A visually-hidden range input carries keyboard +
+// screen-reader control. Under reduced motion the handle simply jumps.
+export function BeforeAfter({
+  before,
+  after,
+  labelBefore,
+  labelAfter,
+}: {
+  before: ReactNode;
+  after: ReactNode;
+  labelBefore: string;
+  labelAfter: string;
+}) {
+  const [pct, setPct] = useState(50);
+  return (
+    <div className="relative select-none overflow-hidden rounded-2xl border border-border/70">
+      {/* before sets the height */}
+      <div className="relative">{before}</div>
+      {/* after, clipped to the right of the handle */}
+      <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pct}%)` }} aria-hidden>
+        {after}
+      </div>
+      {/* labels */}
+      <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-crimson/40 bg-base/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-crimson backdrop-blur">
+        {labelBefore}
+      </span>
+      <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-teal/40 bg-base/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-teal backdrop-blur">
+        {labelAfter}
+      </span>
+      {/* the handle */}
+      <div className="pointer-events-none absolute inset-y-0" style={{ left: `${pct}%` }}>
+        <div className="absolute inset-y-0 -ml-px w-0.5 bg-text/70" />
+        <div className="absolute top-1/2 -ml-4 -mt-4 flex h-8 w-8 -translate-y-0 items-center justify-center rounded-full border border-text/40 bg-base/90 font-mono text-xs text-text backdrop-blur">
+          ⇄
+        </div>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={pct}
+        onChange={(e) => setPct(Number(e.target.value))}
+        aria-label={`Drag to reveal ${labelAfter} over ${labelBefore}`}
+        className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
+      />
+    </div>
   );
 }
 
