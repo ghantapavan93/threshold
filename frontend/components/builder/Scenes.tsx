@@ -19,6 +19,7 @@ import {
   ScalingPipelineScene,
   ToolConstellationScene,
 } from "./illustrations";
+import { SceneMedia } from "@/components/visual/SceneMedia";
 
 /* ────────────────────────────────────────────────────────────────────────────
    The six "What You'll Do" scenes. Each: a poetic one-liner (masked reveal), a
@@ -136,6 +137,37 @@ type SceneData = {
   depth?: ReactNode;
 };
 
+// ── Scene media manifest ─────────────────────────────────────────────────────
+// Real screen recordings of the running app, dropped into /public/media (specs
+// + capture list in frontend/public/media/README.md). Until a file exists the
+// scene renders its illustration exactly as before — never a broken slot.
+const SCENE_MEDIA: Record<string, { src: string; poster?: string; label: string }> = {
+  "scene-design": {
+    src: "/media/scene-design.webm",
+    poster: "/media/scene-design.jpg",
+    label:
+      "Screen recording: the Threshold console plays the story — V17 to V18 is BLOCKED, the safe fix is eligible for holdout",
+  },
+  "scene-ai": {
+    src: "/media/scene-ai.webm",
+    poster: "/media/scene-ai.jpg",
+    label:
+      "Screen recording: Moment Forge compiles a policy change into its semantic delta and flags the missing-attribute inversion",
+  },
+  "scene-collab": {
+    src: "/media/scene-collab.webm",
+    poster: "/media/scene-collab.jpg",
+    label:
+      "Screen recording: the Reconciliation Lane — dual-write diverges silently, the transactional outbox keeps every failure visible",
+  },
+  "scene-scale": {
+    src: "/media/scene-scale.webm",
+    poster: "/media/scene-scale.jpg",
+    label:
+      "Screen recording: the decision-diff replay reveals two hundred sessions mark by mark, changed decisions flashing as they land",
+  },
+};
+
 // ── One split scene (text + illustration) ────────────────────────────────────
 function SplitScene({ s }: { s: SceneData }) {
   const text = (
@@ -152,9 +184,22 @@ function SplitScene({ s }: { s: SceneData }) {
       <ToolRow label={s.tools.label} tools={s.tools.items} />
     </div>
   );
+  const media = SCENE_MEDIA[s.id];
   const art = (
     <ClipReveal>
-      <IllustrationFrame>{s.illustration}</IllustrationFrame>
+      <IllustrationFrame>
+        {media ? (
+          <SceneMedia
+            src={media.src}
+            poster={media.poster}
+            label={media.label}
+            variant="panel"
+            fallback={s.illustration}
+          />
+        ) : (
+          s.illustration
+        )}
+      </IllustrationFrame>
     </ClipReveal>
   );
   return (

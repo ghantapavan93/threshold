@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Eyebrow, MaskText, prefersReducedMotion, useIsoLayoutEffect } from "./anim";
+import { SceneMedia } from "@/components/visual/SceneMedia";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Hero scene.
@@ -76,6 +77,14 @@ export function BuilderHero() {
 
   return (
     <section ref={sectionRef} aria-label="Introduction" className="relative overflow-hidden">
+      {/* Ambient loop (clip A, "The Transaction Moment") — dimmed + scrimmed;
+          renders nothing until /public/media/ambient-moment.webm exists. */}
+      <SceneMedia
+        variant="backdrop"
+        src="/media/ambient-moment.webm"
+        poster="/media/ambient-moment.jpg"
+        label=""
+      />
       <div
         ref={decorRef}
         aria-hidden
@@ -91,7 +100,7 @@ export function BuilderHero() {
         />
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+      <div className="relative z-[1] mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
         <div ref={eyebrowRef}>
           <Eyebrow>Junior SWE · Builder · Proof of work over credentials</Eyebrow>
         </div>

@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
 import { Reveal } from "@/components/visual/Reveal";
 import { Parallax } from "@/components/visual/Parallax";
+import { SceneMedia } from "@/components/visual/SceneMedia";
 import {
   TransactionMomentMotif,
   SilentWideningDiagram,
@@ -163,6 +164,14 @@ function Hero() {
 
   return (
     <section ref={ref} aria-label="Vision overview" className="relative overflow-hidden">
+      {/* Ambient loop (clip A, "The Transaction Moment") — dimmed + scrimmed;
+          renders nothing until /public/media/ambient-moment.webm exists. */}
+      <SceneMedia
+        variant="backdrop"
+        src="/media/ambient-moment.webm"
+        poster="/media/ambient-moment.jpg"
+        label=""
+      />
       {/* decorative depth layers (desktop) */}
       <div
         aria-hidden
@@ -183,7 +192,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+      <div className="relative z-[1] mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
         <div data-hero-fade>
           <Eyebrow>Keynote · Future Vision · Grounded in Rokt&apos;s public direction</Eyebrow>
         </div>
