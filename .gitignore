@@ -1,16 +1,32 @@
-# python
+# ── Python ──────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
+.venv/
 backend/.venv/
 backend/*.db
 backend/test_*.db
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
 
-# node / next
+# ── Node / Next ─────────────────────────────────────────────────────────
 node_modules/
 frontend/.next/
 frontend/out/
+frontend/build/
+*.tsbuildinfo
+
+# ── Environment / secrets (never commit real ones — .example files are ok) ──
+.env
+.env.*
+!.env.example
+!.env*.example
 frontend/.env.local
 
-# misc
+# ── Editor / OS ─────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
 *.log
