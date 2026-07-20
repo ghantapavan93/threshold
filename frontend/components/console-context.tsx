@@ -32,7 +32,10 @@ type ConsoleContextValue = {
   /** The current completed replay job, if any. Set by the Replay section. */
   job: ReplayJob | null;
   jobRequestId: string | null;
-  setJob: (job: ReplayJob | null, requestId: string | null) => void;
+  /** True when `job` came from a recorded fixture (API unreachable), not a
+      live run — surfaced as a "recorded" banner so it is never mistaken for one. */
+  recorded: boolean;
+  setJob: (job: ReplayJob | null, requestId: string | null, recorded?: boolean) => void;
 
   /** Session selected in the decision-diff timeline → right drawer. */
   selectedEvaluation: Evaluation | null;
@@ -65,16 +68,21 @@ export function ConsoleProvider({
   );
   const [job, setJobState] = useState<ReplayJob | null>(null);
   const [jobRequestId, setJobRequestId] = useState<string | null>(null);
+  const [recorded, setRecorded] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(
     null,
   );
   const [evidence, setEvidence] = useState<EvidenceTarget>(null);
   const [auditLines, setAuditLines] = useState<string[]>([]);
 
-  const setJob = useCallback((next: ReplayJob | null, requestId: string | null) => {
-    setJobState(next);
-    setJobRequestId(requestId);
-  }, []);
+  const setJob = useCallback(
+    (next: ReplayJob | null, requestId: string | null, isRecorded = false) => {
+      setJobState(next);
+      setJobRequestId(requestId);
+      setRecorded(isRecorded);
+    },
+    [],
+  );
 
   const appendAuditLine = useCallback((line: string) => {
     setAuditLines((prev) => [...prev, line]);
@@ -90,6 +98,7 @@ export function ConsoleProvider({
       setProposedVersion,
       job,
       jobRequestId,
+      recorded,
       setJob,
       selectedEvaluation,
       selectEvaluation: setSelectedEvaluation,
@@ -104,6 +113,7 @@ export function ConsoleProvider({
       proposedVersion,
       job,
       jobRequestId,
+      recorded,
       setJob,
       selectedEvaluation,
       evidence,

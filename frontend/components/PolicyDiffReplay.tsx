@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { prefersReducedMotion } from "@/components/builder/anim";
 import { useReplayJob, type ReplayJobInput } from "@/lib/hooks";
+import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import { useConsole } from "./console-context";
 import { Button, Card, Chip, EmptyState, ErrorState, Section } from "./ui/primitives";
 import { SessionDrawer } from "./SessionDrawer";
@@ -186,7 +187,19 @@ export function PolicyDiffReplay() {
     mutation.mutate(
       { base_version: baseVersion, proposed_version: proposedVersion, ...input },
       {
-        onSuccess: ({ job: nextJob, requestId }) => setJob(nextJob, requestId),
+        onSuccess: ({ job: nextJob, requestId }) => setJob(nextJob, requestId, false),
+        onError: async (e) => {
+          // Unreachable API → recorded run so the panels still populate; the
+          // banner makes clear it is a captured V17 → V18 replay, not this run.
+          if (e instanceof ApiError && e.isUnreachable) {
+            try {
+              const job = await loadRecordedJob(proposedVersion);
+              setJob(job, RECORDED_REQUEST_ID, true);
+            } catch {
+              /* fixture missing — leave the error state as-is */
+            }
+          }
+        },
       },
     );
   };

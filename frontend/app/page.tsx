@@ -2,7 +2,8 @@
 
 import { API_BASE } from "@/lib/api";
 import { useHealth } from "@/lib/hooks";
-import { ConsoleProvider } from "@/components/console-context";
+import { RECORDED_DESCRIPTION } from "@/lib/replay-fixture";
+import { ConsoleProvider, useConsole } from "@/components/console-context";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ScenarioLibrary } from "@/components/ScenarioLibrary";
@@ -17,23 +18,41 @@ import { EvidenceSection } from "@/components/EvidenceSection";
 import { Reveal } from "@/components/visual/Reveal";
 
 /**
- * A single, honest global banner. If /health cannot be reached the whole app
- * is degraded, so we say so explicitly and never fabricate data downstream.
+ * A single, honest global banner. When /health can't be reached the Console
+ * runs on a recorded replay instead of a live one — so the page is never an
+ * empty flagship — and this banner states plainly that the data is recorded,
+ * never a live run. Nothing downstream is fabricated: the recording is a real
+ * captured engine payload.
  */
 function BackendBanner() {
   const health = useHealth();
-  if (!health.isError) return null;
+  const { recorded } = useConsole();
+  // Show once we're certainly on recorded data (the fallback fired), or as an
+  // early warning the moment the health probe reports the API is down.
+  if (!recorded && !health.isError) return null;
   return (
     <div
-      role="alert"
-      className="border-b border-crimson/50 bg-crimson/15 px-4 py-2 text-center text-sm text-crimson sm:px-6"
+      role="status"
+      className="border-b border-amber/50 bg-amber/15 px-4 py-2 text-center text-sm text-amber sm:px-6"
     >
       <span aria-hidden className="mr-2 font-bold">
-        ✕
+        ◆
       </span>
-      Backend unreachable at{" "}
-      <span className="font-mono">{API_BASE}</span>. Start the Threshold backend
-      on :8000, then retry. No data is shown until the API responds.
+      The Threshold API isn&apos;t reachable at{" "}
+      <span className="font-mono">{API_BASE}</span>.{" "}
+      {recorded ? (
+        <>
+          Showing a <strong className="font-semibold">recorded</strong> run (
+          {RECORDED_DESCRIPTION}) — not live. Start the backend on :8000 for a
+          live replay.
+        </>
+      ) : (
+        <>
+          A run here will replay a <strong className="font-semibold">recorded</strong>{" "}
+          capture ({RECORDED_DESCRIPTION}). Start the backend on :8000 for a live
+          replay.
+        </>
+      )}
     </div>
   );
 }

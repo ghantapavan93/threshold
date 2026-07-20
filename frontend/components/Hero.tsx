@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ApiError } from "@/lib/api";
 import { useReplayJob } from "@/lib/hooks";
+import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import type { Injection } from "@/lib/schemas";
 import { useConsole } from "./console-context";
 import { Parallax } from "./visual/Parallax";
@@ -35,15 +36,27 @@ export function Hero() {
   const runVersion = useCallback(
     async (proposed: string) => {
       setProposedVersion(proposed);
-      const res = await replay.mutateAsync({
-        base_version: "V17",
-        proposed_version: proposed,
-        session_seed: 42,
-        session_count: 200,
-        injections: INJECTIONS,
-      });
-      setJob(res.job, res.requestId);
-      return res.job;
+      try {
+        const res = await replay.mutateAsync({
+          base_version: "V17",
+          proposed_version: proposed,
+          session_seed: 42,
+          session_count: 200,
+          injections: INJECTIONS,
+        });
+        setJob(res.job, res.requestId, false);
+        return res.job;
+      } catch (e) {
+        // API unreachable (static deploy / cold start / offline) → fall back to
+        // the recorded run so the page is never an empty flagship. Any other
+        // error is a real failure and still surfaces.
+        if (e instanceof ApiError && e.isUnreachable) {
+          const job = await loadRecordedJob(proposed);
+          setJob(job, RECORDED_REQUEST_ID, true);
+          return job;
+        }
+        throw e;
+      }
     },
     [replay, setJob, setProposedVersion],
   );

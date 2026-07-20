@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useReplayJob, useScenarios } from "@/lib/hooks";
+import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import type { Injection, Scenario, VerdictValue } from "@/lib/schemas";
 import { useConsole } from "./console-context";
 import {
@@ -135,15 +136,22 @@ export function ScenarioLibrary() {
           session_count: 200,
           injections: INJECTIONS,
         });
-        setJob(res.job, res.requestId);
+        setJob(res.job, res.requestId, false);
         scrollToId("verdict");
         setStatus(`Verdict: ${res.job.verdict.value} — ${s.teaches}`);
       } catch (e) {
-        setStatus(
-          e instanceof ApiError && e.isUnreachable
-            ? "Backend unreachable — start the Threshold API on :8000, then run the scenario again."
-            : "Scenario run failed. Is the API on :8000?",
-        );
+        if (e instanceof ApiError && e.isUnreachable) {
+          try {
+            const job = await loadRecordedJob(s.proposed);
+            setJob(job, RECORDED_REQUEST_ID, true);
+            scrollToId("verdict");
+            setStatus(`Recorded verdict: ${job.verdict.value} — ${s.teaches}`);
+          } catch {
+            setStatus("Backend unreachable and the recorded run couldn't load — start the API on :8000.");
+          }
+        } else {
+          setStatus("Scenario run failed. Is the API on :8000?");
+        }
       } finally {
         setRunningId(null);
       }
