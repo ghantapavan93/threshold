@@ -78,6 +78,7 @@ export function MomentNav({ volume = "I" }: { volume?: "I" | "II" }) {
             <Link href="/" className={NAV_LINK}>Console</Link>
             <Link href="/vision" className={NAV_LINK}>Vision</Link>
             <Link href="/builder" className={NAV_LINK}>Builder</Link>
+            <Link href="/plan" className={NAV_LINK}>Audit &amp; Plan</Link>
             <span
               aria-current="page"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-teal/40 bg-teal/10 px-3 py-1 text-xs font-semibold text-teal sm:min-h-0"

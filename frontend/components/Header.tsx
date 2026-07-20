@@ -184,6 +184,12 @@ export function Header() {
             Builder
           </Link>
           <Link
+            href="/plan"
+            className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
+          >
+            Audit &amp; Plan
+          </Link>
+          <Link
             href="/moment-forge"
             className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
           >
