@@ -67,6 +67,10 @@ export function SceneMedia({
   const [listed, setListed] = useState<boolean | null>(null);
   const [posterListed, setPosterListed] = useState(false);
 
+  // Every effect below keeps a fixed-arity dependency array — no conditional
+  // elements, no spreads. React requires the count to stay constant between
+  // renders; a variable-size array trips the "final argument changed size"
+  // warning (and can silently drop dependencies). Keep it that way when editing.
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
