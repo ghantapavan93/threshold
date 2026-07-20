@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "@/app/providers";
 import { FilmGrain } from "@/components/moment-forge/garnish";
 import { ChapterRail } from "./stage";
@@ -61,10 +62,25 @@ function KeynoteNav() {
   );
 }
 
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
+  return (
+    <motion.div
+      aria-hidden
+      style={{ scaleX }}
+      className="fixed inset-x-0 top-0 z-[55] h-0.5 origin-left"
+    >
+      <div className="h-full w-full" style={{ background: "linear-gradient(to right, var(--c-teal), var(--c-offer-blue), var(--c-amber))" }} />
+    </motion.div>
+  );
+}
+
 export function KeynotePage() {
   return (
     <div className="relative min-h-screen bg-base text-text">
       <FilmGrain id="keynote" />
+      <ScrollProgress />
       <KeynoteNav />
       <ChapterRail />
       <main id="main" className="pt-14">

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SceneMedia } from "@/components/visual/SceneMedia";
 
@@ -27,6 +27,13 @@ const ACCENT_TEXT: Record<Accent, string> = {
   crimson: "text-crimson",
   amber: "text-amber",
   "offer-blue": "text-offer-blue",
+};
+// CSS custom-property that holds the accent's "r g b" channels (theme-aware).
+const ACCENT_CHANNELS: Record<Accent, string> = {
+  teal: "--c-teal-c",
+  crimson: "--c-crimson-c",
+  amber: "--c-amber-c",
+  "offer-blue": "--c-offer-blue-c",
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -168,6 +175,98 @@ export function CursorSpotlight({ children, accent = "teal" }: { children: React
   );
 }
 
+// ── Ambient motes — a GPU-light accent-tinted drift layer ───────────────────
+// One rAF loop, ≤44 particles, DPR-aware. Mounts only near the viewport and
+// pauses off-screen; absent entirely under reduced motion (purely atmospheric).
+function AmbientMotes({ accent }: { accent: Accent }) {
+  const reduced = useReducedMotion();
+  const holderRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    const el = holderRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((e) => setNear(e[0]?.isIntersecting ?? false), {
+      rootMargin: "10% 0px",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (reduced || !near) return;
+    const canvas = canvasRef.current;
+    const holder = holderRef.current;
+    if (!canvas || !holder) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const channels = getComputedStyle(document.documentElement)
+      .getPropertyValue(ACCENT_CHANNELS[accent])
+      .trim() || "34 230 200";
+    const [r, g, b] = channels.split(/\s+/).map(Number);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0;
+    let h = 0;
+    const resize = () => {
+      const rect = holder.getBoundingClientRect();
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.max(1, Math.floor(w * dpr));
+      canvas.height = Math.max(1, Math.floor(h * dpr));
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Deterministic-ish spread; motion is slow and calm.
+    const N = 44;
+    const dots = Array.from({ length: N }, (_, i) => ({
+      x: ((i * 97) % 100) / 100,
+      y: ((i * 53) % 100) / 100,
+      r: 0.6 + ((i * 31) % 100) / 100 * 1.6,
+      vy: -(0.04 + ((i * 17) % 100) / 100 * 0.06),
+      vx: (((i * 7) % 100) / 100 - 0.5) * 0.03,
+      a: 0.15 + ((i * 23) % 100) / 100 * 0.35,
+    }));
+
+    let raf = 0;
+    const tick = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (const d of dots) {
+        d.x += d.vx / 100;
+        d.y += d.vy / 100;
+        if (d.y < -0.05) d.y = 1.05;
+        if (d.x < -0.05) d.x = 1.05;
+        if (d.x > 1.05) d.x = -0.05;
+        const px = d.x * w;
+        const py = d.y * h;
+        ctx.beginPath();
+        ctx.arc(px, py, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${d.a})`;
+        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${d.a})`;
+        ctx.shadowBlur = d.r * 4;
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+  }, [accent, near, reduced]);
+
+  return (
+    <div ref={holderRef} aria-hidden className="absolute inset-0">
+      {!reduced && near ? <canvas ref={canvasRef} className="absolute inset-0" /> : null}
+    </div>
+  );
+}
+
 // ── Scene — one full-bleed cinematic chapter ────────────────────────────────
 export function Scene({
   id,
@@ -188,14 +287,48 @@ export function Scene({
   environment: ReactNode;
   children: ReactNode;
 }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  // The environment drifts against the scroll (depth); the accent glow blooms as
+  // the scene passes centre; the ghost numeral counter-drifts. All disabled flat
+  // under reduced motion.
+  const envY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["-9%", "9%"]);
+  const envScale = useTransform(scrollYProgress, [0, 0.5, 1], reduced ? [1, 1, 1] : [1.08, 1.02, 1.08]);
+  const glow = useTransform(scrollYProgress, [0, 0.5, 1], reduced ? [0.5, 0.5, 0.5] : [0.1, 0.85, 0.1]);
+  const numY = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["12%", "-12%"]);
+
   return (
-    <section id={id} className="relative isolate min-h-screen scroll-mt-0 overflow-hidden border-t border-border/40">
+    <section ref={sectionRef} id={id} className="relative isolate min-h-screen scroll-mt-0 overflow-hidden border-t border-border/40">
       {/* environment layer (code-drawn, always) + optional ambient clip on top */}
       <div className="absolute inset-0 -z-10">
-        {environment}
+        <motion.div style={{ y: envY, scale: envScale }} className="absolute inset-0">
+          {environment}
+        </motion.div>
+        <AmbientMotes accent={accent} />
         {clip ? (
           <SceneMedia variant="backdrop" src={`/media/${clip}.webm`} poster={`/media/${clip}.jpg`} label="" />
         ) : null}
+        {/* giant ghosted chapter numeral — cinematic depth marker */}
+        <motion.span
+          aria-hidden
+          style={{ y: numY, color: ACCENT_VAR[accent], fontFamily: "var(--font-display)" }}
+          className="pointer-events-none absolute -right-2 bottom-[-4%] select-none text-[38vw] font-bold leading-none tracking-tightest opacity-[0.04] sm:text-[26vw]"
+        >
+          {n}
+        </motion.span>
+        {/* accent bloom that peaks as the scene centres */}
+        <motion.div
+          aria-hidden
+          style={{
+            opacity: glow,
+            background: `radial-gradient(60% 55% at 50% 45%, color-mix(in srgb, ${ACCENT_VAR[accent]} 16%, transparent), transparent 70%)`,
+          }}
+          className="pointer-events-none absolute inset-0"
+        />
         {/* legibility scrim — copy never depends on the backdrop */}
         <div
           className="absolute inset-0"
@@ -203,6 +336,12 @@ export function Scene({
             background:
               "linear-gradient(to bottom, rgb(var(--c-base-c) / 0.55), rgb(var(--c-base-c) / 0.35) 42%, rgb(var(--c-base-c) / 0.88))",
           }}
+        />
+        {/* cinematic vignette — darkened corners frame the shot */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(var(--c-base-c) / 0.75))" }}
         />
       </div>
       <ChapterMarker n={n} label={label} accent={accent} />
@@ -221,9 +360,9 @@ export function SceneHeadline({ children, className = "" }: { children: ReactNod
   return (
     <motion.h2
       ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.8, ease: EASE }}
+      initial={reduced ? false : { opacity: 0, y: 24, filter: "blur(10px)" }}
+      animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined}
+      transition={{ duration: 0.9, ease: EASE }}
       className={`max-w-3xl text-[clamp(30px,5vw,60px)] font-semibold leading-[1.04] tracking-tightest text-text ${className}`}
       style={{ fontFamily: "var(--font-display)" }}
     >
