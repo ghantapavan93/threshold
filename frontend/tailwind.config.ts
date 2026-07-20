@@ -16,7 +16,10 @@ const config: Config = {
     extend: {
       colors: {
         // Channel-triplet form so Tailwind's /alpha modifiers work with theming.
-        base: "rgb(var(--c-base-c) / <alpha-value>)",
+        // NOTE: `base` is intentionally NOT here — its name collides with the
+        // built-in `text-base` font-size utility, which would turn every
+        // `text-base` element's color into the dark background (invisible text).
+        // It lives under backgroundColor below so `bg-base` still works.
         surface: "rgb(var(--c-surface-c) / <alpha-value>)",
         "surface-2": "rgb(var(--c-surface-2-c) / <alpha-value>)",
         border: "rgb(var(--c-border-c) / <alpha-value>)",
@@ -27,6 +30,10 @@ const config: Config = {
         amber: "rgb(var(--c-amber-c) / <alpha-value>)",
         crimson: "rgb(var(--c-crimson-c) / <alpha-value>)",
         "offer-blue": "rgb(var(--c-offer-blue-c) / <alpha-value>)",
+      },
+      backgroundColor: {
+        // `base` is a background-only token (see note in colors above).
+        base: "rgb(var(--c-base-c) / <alpha-value>)",
       },
       fontFamily: {
         sans: [
