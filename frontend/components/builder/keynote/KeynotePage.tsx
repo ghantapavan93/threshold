@@ -67,6 +67,10 @@ function KeynoteEndCap() {
         The Failure, the Machine, the Evidence, the Experiment, the Frontier, the Hand-off, the Afterglow —
         each will wrap a live Threshold surface in its own cinematic scene. Until then, operate the real thing.
       </p>
+      <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted">
+        Built beside Brain v4, not inside it — a deterministic gate for the 10B+ transactions Rokt runs in 2026,
+        where a wrong change reaches a real customer only after it is proven safe.
+      </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link
           href="/"

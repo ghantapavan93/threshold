@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Pill, Scene, SceneHeadline, EASE } from "./stage";
+import { Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
 
 /* 00 · The Moment — a premium movie-theater confirmation environment. The
    business world first, software second. Code-drawn: a glowing screen, raked
@@ -90,6 +90,19 @@ export function ChapterMoment() {
             The customer chose. The merchant earned trust. One optional experience is waiting to enter the
             moment — and it must never put the purchase at risk.
           </motion.p>
+          <motion.div
+            initial={reduced ? false : { opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20% 0px" }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.22 }}
+            className="mt-7"
+          >
+            <RoktEcho
+              accent="teal"
+              quote="Checkout is where intent is confirmed, not assumed."
+              source="Rokt · 2026 Commerce Outlook · public"
+            />
+          </motion.div>
           <motion.a
             href="#kc-change"
             initial={reduced ? false : { opacity: 0, y: 16 }}

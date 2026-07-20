@@ -7,7 +7,7 @@ import { useSimulation } from "@/lib/hooks";
 import type { Evaluation, SimulationResult } from "@/lib/schemas";
 import { CHANGE_KIND_COLOR, CHANGE_KIND_LABEL } from "@/lib/utils";
 import { simulateFixture } from "@/components/moment-forge/fixtures";
-import { Pill, Scene, SceneHeadline } from "./stage";
+import { Pill, RoktEcho, Scene, SceneHeadline } from "./stage";
 
 /* 02 · The Customers — the iconic scene. Every customer session is a seat in an
    enormous audience. A REAL policy replay (V17 → V18) sweeps across them; the
@@ -133,6 +133,20 @@ export function ChapterCustomers() {
             </span>
           ) : null}
         </p>
+        {status === "ok" ? (
+          <div className="mt-7">
+            <RoktEcho
+              accent="offer-blue"
+              quote="Show the right content, or show nothing."
+              source="Rokt · Claire Southey, Chief AI Officer, 2026 · public"
+            />
+            <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-muted">
+              Each lit seat is a shopper V17 would have shown nothing — now shown an offer. A silent widening is
+              the opposite of &ldquo;show the right content.&rdquo; This is the exact drift a change-safety gate
+              catches before it reaches a customer.
+            </p>
+          </div>
+        ) : null}
         {status !== "ok" ? (
           <button
             type="button"

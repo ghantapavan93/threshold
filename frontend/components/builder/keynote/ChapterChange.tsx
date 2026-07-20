@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { CursorSpotlight, Pill, Scene, SceneHeadline, EASE } from "./stage";
+import { CursorSpotlight, Pill, RoktEcho, Scene, SceneHeadline, EASE } from "./stage";
 
 /* 01 · The Change — a dark decision chamber. The current and proposed policy
    hang in the scene as physical slabs, not dashboard panels. One rule flips a
@@ -81,6 +81,30 @@ export function ChapterChange() {
           >
             V17 to V18 changes a single operator on one rule. It passes every type check, every test, every
             review. And it silently widens who is eligible.
+          </motion.p>
+          <motion.div
+            initial={reduced ? false : { opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20% 0px" }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
+            className="mx-auto mt-8 flex justify-center"
+          >
+            <RoktEcho
+              accent="crimson"
+              quote="A unified, AI-driven software platform."
+              source="Rokt · Sam Dozor, CTO, 2026 · public"
+            />
+          </motion.div>
+          <motion.p
+            initial={reduced ? false : { opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20% 0px" }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.28 }}
+            className="mx-auto mt-5 max-w-[52ch] text-sm leading-relaxed text-muted"
+          >
+            As Rokt unifies Brain v4 and the mParticle data platform into one system, every change crosses more
+            seams — and more seams is exactly where a change like this hides. Threshold sits <em>beside</em> the
+            Brain, guarding changes to the rules around the decision, never the decision itself.
           </motion.p>
         </div>
 

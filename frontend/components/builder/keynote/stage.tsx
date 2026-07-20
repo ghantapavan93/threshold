@@ -225,4 +225,42 @@ export function SceneHeadline({ children, className = "" }: { children: ReactNod
   );
 }
 
+// ── Rokt echo — an attributed, dated, public quote from Rokt's own messaging ──
+// Threads the company's current stance into the film. Always carries its source
+// so it reads as "grounded in what Rokt shipped," never as our own claim.
+export function RoktEcho({
+  quote,
+  source,
+  accent = "teal",
+}: {
+  quote: string;
+  source: string;
+  accent?: Accent;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-20% 0px" });
+  const reduced = useReducedMotion();
+  return (
+    <motion.figure
+      ref={ref}
+      initial={reduced ? false : { opacity: 0, x: -12 }}
+      animate={inView ? { opacity: 1, x: 0 } : undefined}
+      transition={{ duration: 0.7, ease: EASE }}
+      className="max-w-[46ch] border-l-2 pl-4"
+      style={{ borderColor: `color-mix(in srgb, ${ACCENT_VAR[accent]} 55%, transparent)` }}
+    >
+      <blockquote className="text-base leading-relaxed text-text">
+        <span aria-hidden className="mr-0.5 font-semibold" style={{ color: ACCENT_VAR[accent] }}>
+          &ldquo;
+        </span>
+        {quote}
+        <span aria-hidden style={{ color: ACCENT_VAR[accent] }}>&rdquo;</span>
+      </blockquote>
+      <figcaption className={`mt-2 font-mono text-[10px] uppercase tracking-[0.2em] ${ACCENT_TEXT[accent]}`}>
+        {source}
+      </figcaption>
+    </motion.figure>
+  );
+}
+
 export { ACCENT_VAR, EASE };
