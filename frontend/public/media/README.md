@@ -47,6 +47,9 @@ poster still, dropped in this folder, then added to `manifest.json`. Chapters:
 > • crimson **#FF4D6A** = blocked, failure, leak
 > • amber **#F5B84B** = a visible, honest warning
 > • soft blue **#5B8CFF** = offers, customers, value
+> The feel to match is our product's own: **museum-grade, editorial, Awwwards-caliber —
+> restrained, precise, expensive, confident, never busy or gamer-flashy.** Think a
+> high-end film title sequence for a serious engineering product, not a tech demo.
 > Style for EVERY clip: cinematic macro/wide abstraction, volumetric haze, shallow depth
 > of field, film grain, gentle bokeh, extremely slow and deliberate motion, elegant and
 > restrained. HARD RULES (obey on every clip — this saves credits): **no text, no
@@ -139,6 +142,33 @@ by: *"A single static cinematic frame, photographic quality —"*, save as `kc-<
   "kc-handoff.webm","kc-handoff.jpg","kc-afterglow.webm","kc-afterglow.jpg"
 ] }
 ```
+
+---
+
+# Real app recordings — the TRUE colors + fonts + premium feel
+
+AI video cannot render our real UI (it garbles fonts and text). For anything that must
+look like the actual product — real Space Grotesk headings, Inter body, real teal
+buttons, real live numbers — **screen-record the running app**. It is pixel-perfect
+because it *is* the app. Our ground-truth identity (already rendered live by the app):
+
+- **Display font:** Space Grotesk (600/700) · **Body:** Inter · **Mono:** the code voice.
+- **Palette:** base #0B0F19 · text #E6EAF2 · teal #22E6C8 · crimson #FF4D6A · amber
+  #F5B84B · offer-blue #5B8CFF. Dark theme is the hero look.
+
+**Capture recipe for a premium result:**
+1. Run backend (:8000) + frontend (:3000); use the **dark** theme; full-screen the browser,
+   hide bookmarks, 1920×1080, 100% zoom, cursor visible.
+2. Record with OBS / ScreenToGif / Win+G at 60fps, then trim to 5–10s per action.
+3. **One deliberate action per clip**, paused ~1s on the end state so it loops clean.
+4. Keep motion slow and intentional — no frantic scrolling; let the app's own animations
+   (mark-by-mark replay, celebration burst, blur-in headlines) carry it.
+5. Encode like the ambient clips (`-c:v libvpx-vp9 -crf 34 -an`, ≤4 MB) + a `.jpg` poster.
+
+The keynote already embeds the LIVE components, so it doesn't *need* recordings — but the
+same captures make a killer 30–60s demo reel for LinkedIn / outreach. Strongest shots:
+Console "Play the story" → BLOCKED; the 480-seat audience lighting up; the Reconciliation
+toggle 33 → 0; the Unit Wall raising UnitMismatchError live.
 
 ---
 
