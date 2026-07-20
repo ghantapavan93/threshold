@@ -162,9 +162,9 @@ export function CompilerConsole({ offline }: { offline: boolean }) {
 
         {status === "ok" && result && (
           <div className="space-y-4">
-            {usedFixture ? null : (
-              <p className="font-mono text-[11px] text-teal">✓ live · {result.base_version} → {result.proposed_version}</p>
-            )}
+            <p className="font-mono text-[11px] text-teal">
+              {usedFixture ? "recorded" : "✓ live"} · {result.base_version} → {result.proposed_version}
+            </p>
 
             {/* inversion banner — the signature catch */}
             {inv?.detected ? (
