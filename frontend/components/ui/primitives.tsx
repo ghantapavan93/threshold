@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { cx } from "@/lib/utils";
+import { WordReveal } from "@/components/visual/WordReveal";
 
 // ---- Button ----------------------------------------------------------------
 type ButtonVariant = "primary" | "ghost" | "danger" | "subtle";
@@ -98,17 +99,21 @@ export function Section({
             >
               {index}
             </span>
-            <h2
+            <WordReveal
+              as="h2"
+              text={title}
               id={`${id}-title`}
               className="text-xl font-semibold tracking-tight sm:text-2xl"
-            >
-              {title}
-            </h2>
+            />
           </div>
           {subtitle ? (
-            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted">
-              {subtitle}
-            </p>
+            <WordReveal
+              as="p"
+              text={subtitle}
+              blur={false}
+              stagger={0.012}
+              className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted"
+            />
           ) : null}
         </div>
         {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
