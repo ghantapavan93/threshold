@@ -185,11 +185,16 @@ export function LanguageLens() {
                   type="button"
                   onClick={() => setPos(i)}
                   aria-label={`Move term to ${m.context}`}
-                  className={
-                    "h-2.5 w-2.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal " +
-                    (i === clampedPos ? "bg-teal" : "bg-border-strong hover:bg-muted")
-                  }
-                />
+                  className="flex h-8 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+                >
+                  <span
+                    aria-hidden
+                    className={
+                      "h-2.5 w-2.5 rounded-full transition-colors " +
+                      (i === clampedPos ? "bg-teal" : "bg-border-strong hover:bg-muted")
+                    }
+                  />
+                </button>
               ))}
             </div>
           </div>

@@ -57,8 +57,8 @@
   --c-muted-c: 86 96 121;
   --c-teal: #067f6d;
   --c-teal-c: 6 127 109;
-  --c-amber: #9a6a00;
-  --c-amber-c: 154 106 0;
+  --c-amber: #7a5600; /* AA: ≥4.5:1 on light surfaces incl. amber-tinted panels */
+  --c-amber-c: 122 86 0;
   --c-crimson: #c81e40;
   --c-crimson-c: 200 30 64;
   --c-offer-blue: #2f5fd0;
@@ -84,8 +84,8 @@
     --c-muted-c: 86 96 121;
     --c-teal: #067f6d;
     --c-teal-c: 6 127 109;
-    --c-amber: #9a6a00;
-    --c-amber-c: 154 106 0;
+    --c-amber: #7a5600; /* AA: ≥4.5:1 on light surfaces incl. amber-tinted panels */
+    --c-amber-c: 122 86 0;
     --c-crimson: #c81e40;
     --c-crimson-c: 200 30 64;
     --c-offer-blue: #2f5fd0;
@@ -431,6 +431,46 @@ p {
 /* Refined scrollbar accent on hover. */
 ::-webkit-scrollbar-thumb:hover {
   background: var(--c-teal);
+}
+
+/* ── Decision-diff timeline: mark-by-mark reveal (Policy Diff Replay) ─────────
+   Each session mark pops in as the playhead reaches it. Changed marks (the story)
+   pop harder and flash a ring in their own color via currentColor. Both collapse
+   to the instant final frame under the reduced-motion freeze below. */
+@keyframes mark-pop {
+  0% {
+    transform: scale(0.4) translateY(3px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.22) translateY(0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.mark-pop {
+  animation: mark-pop 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes mark-pop-changed {
+  0% {
+    transform: scale(0.4) translateY(3px);
+    opacity: 0;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  55% {
+    transform: scale(1.5) translateY(0);
+    box-shadow: 0 0 0 5px transparent;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.mark-pop-changed {
+  animation: mark-pop-changed 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 /* ── Non-negotiable: freeze ALL cinematic motion under reduced-motion ──────── */

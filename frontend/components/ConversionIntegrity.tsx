@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useCancellation, useConversion } from "@/lib/hooks";
 import { uuid } from "@/lib/utils";
@@ -21,8 +21,11 @@ function ConversionPanel() {
   const [currency] = useState("USD");
   const [log, setLog] = useState<ConversionLog[]>([]);
   // Reuse the same Idempotency-Key across both sends so the dedup is on the
-  // verified fields, exactly as the contract models it.
-  const [idemKey, setIdemKey] = useState(uuid());
+  // verified fields, exactly as the contract models it. Generated after mount:
+  // a random value in the initial state renders differently on server vs
+  // client and breaks hydration for the whole page.
+  const [idemKey, setIdemKey] = useState("");
+  useEffect(() => setIdemKey(uuid()), []);
   const mutation = useConversion();
 
   const send = () => {

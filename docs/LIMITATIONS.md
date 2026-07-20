@@ -23,5 +23,5 @@ Other tools (and earlier drafts) produced confident-sounding fabrications. We ve
 
 ## Known smaller gaps
 - Auth is a demo header (`X-Threshold-User`); real deployment needs proper auth + per-tenant authorization.
-- Next.js is pinned at 14.2.15 which carries a later-patched advisory; bump to a patched 14.2.x before any real hosting.
+- Next.js is at **14.2.35** — the final patch of the 14.x line (bumped from 14.2.15 on 2026-07-19). `npm audit` still reports advisories whose only fix is the breaking Next 16 major. We reviewed each: they target middleware, `next/image` optimization, i18n routing, WebSocket upgrades, CSP nonces, and `beforeInteractive` scripts — **none of which this app uses**, and every route is statically prerendered. Acceptable for a demo; a real deployment should do the Next 15/16 migration rather than accept the residual.
 - The frontend "compare outcomes / self-driving demo" polish is an enhancement layer on top of the verified golden path.

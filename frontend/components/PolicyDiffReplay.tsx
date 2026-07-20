@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { prefersReducedMotion } from "@/components/builder/anim";
 import { useReplayJob, type ReplayJobInput } from "@/lib/hooks";
 import { useConsole } from "./console-context";
 import { Button, Card, Chip, EmptyState, ErrorState, Section } from "./ui/primitives";
@@ -137,9 +138,14 @@ export function PolicyDiffReplay() {
   const mutation = useReplayJob();
 
   // Playback state: how many marks are revealed, and whether it is playing.
+  // `revealing` is true only during a user-triggered mark-by-mark replay, so the
+  // pop animation never fires on plain job load (all marks shown at once).
   const [revealed, setRevealed] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+  const [reduced, setReduced] = useState(false);
   const timer = useRef<number | null>(null);
+  useEffect(() => setReduced(prefersReducedMotion()), []);
 
   const evaluations = useMemo(() => job?.evaluations ?? [], [job]);
 
@@ -148,6 +154,7 @@ export function PolicyDiffReplay() {
     if (job) {
       setRevealed(job.evaluations.length);
       setPlaying(false);
+      setRevealing(false);
     }
   }, [job]);
 
@@ -155,14 +162,18 @@ export function PolicyDiffReplay() {
     if (!playing) return;
     if (revealed >= evaluations.length) {
       setPlaying(false);
+      setRevealing(false);
       return;
     }
     timer.current = window.setInterval(() => {
       setRevealed((r) => {
         if (r >= evaluations.length) return r;
-        return r + Math.max(1, Math.round(evaluations.length / 60));
+        return Math.min(
+          evaluations.length,
+          r + Math.max(1, Math.round(evaluations.length / 80)),
+        );
       });
-    }, 60);
+    }, 40);
     return () => {
       if (timer.current) window.clearInterval(timer.current);
     };
@@ -229,20 +240,28 @@ export function PolicyDiffReplay() {
                   size="sm"
                   variant="subtle"
                   onClick={() => {
+                    if (reduced) {
+                      // Reduced motion: no timed reveal — everything, instantly.
+                      setRevealed(evaluations.length);
+                      return;
+                    }
                     setRevealed(0);
+                    setRevealing(true);
                     setPlaying(true);
                   }}
                 >
                   ↻ Replay marks
                 </Button>
-                <Button
-                  size="sm"
-                  variant="subtle"
-                  onClick={() => setPlaying((p) => !p)}
-                  aria-pressed={playing}
-                >
-                  {playing ? "❚❚ Pause" : "▸ Play"}
-                </Button>
+                {!reduced ? (
+                  <Button
+                    size="sm"
+                    variant="subtle"
+                    onClick={() => setPlaying((p) => !p)}
+                    aria-pressed={playing}
+                  >
+                    {playing ? "❚❚ Pause" : "▸ Play"}
+                  </Button>
+                ) : null}
                 <Button
                   size="sm"
                   variant="subtle"
@@ -265,6 +284,12 @@ export function PolicyDiffReplay() {
                 {evaluations.map((e, i) => {
                   const shown = i < revealed;
                   const isSelected = selectedEvaluation?.session_id === e.session_id;
+                  const changed = e.change_kind !== "unchanged";
+                  // During a mark-by-mark replay each mark pops as the playhead
+                  // reaches it; changed marks (the story) pop harder and flash a
+                  // ring in their own color (currentColor). On plain job load no
+                  // pop fires — the timeline just IS.
+                  const pop = shown && revealing ? (changed ? " mark-pop-changed" : " mark-pop") : "";
                   return (
                     <button
                       key={e.session_id}
@@ -274,9 +299,13 @@ export function PolicyDiffReplay() {
                       className={
                         "h-4 w-4 rounded-[3px] transition-all duration-300 hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal " +
                         (shown ? "scale-100 opacity-100" : "scale-90 opacity-10") +
+                        pop +
                         (isSelected ? " ring-2 ring-text" : "")
                       }
-                      style={{ backgroundColor: CHANGE_KIND_COLOR[e.change_kind] }}
+                      style={{
+                        backgroundColor: CHANGE_KIND_COLOR[e.change_kind],
+                        color: CHANGE_KIND_COLOR[e.change_kind],
+                      }}
                     />
                   );
                 })}
