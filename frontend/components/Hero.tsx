@@ -182,19 +182,27 @@ export function Hero() {
         </motion.p>
 
         <motion.h1
-          initial={reduced ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+          initial={reduced ? false : { opacity: 0, y: 16, filter: "blur(14px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
           className="max-w-4xl text-4xl font-bold leading-[1.02] tracking-tightest text-text sm:text-5xl lg:text-[3.6rem]"
         >
           Prove a checkout-policy change is safe{" "}
-          <span className="gradient-text">before a single customer sees it.</span>
+          {/* the payoff clause resolves out of the blur a beat later */}
+          <motion.span
+            initial={reduced ? false : { opacity: 0, filter: "blur(14px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.55 }}
+            className="gradient-text"
+          >
+            before a single customer sees it.
+          </motion.span>
         </motion.h1>
 
         <motion.p
-          initial={reduced ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.14 }}
+          initial={reduced ? false : { opacity: 0, y: 16, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           className="mt-5 max-w-3xl text-sm leading-relaxed text-muted sm:text-base"
         >
           Threshold replays a proposed policy change over event-time sessions and proves it{" "}
