@@ -245,18 +245,20 @@ p {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(48% 40% at 82% 4%, rgba(34, 230, 200, 0.16), transparent 60%),
-    radial-gradient(44% 38% at 8% 14%, rgba(91, 140, 255, 0.15), transparent 58%),
-    radial-gradient(60% 55% at 50% 116%, rgba(255, 77, 106, 0.08), transparent 60%);
-  background-size: 140% 140%;
-  animation: thr-aurora-drift 30s ease-in-out infinite alternate;
+    radial-gradient(48% 42% at 82% 2%, rgba(34, 230, 200, 0.24), transparent 60%),
+    radial-gradient(46% 40% at 6% 12%, rgba(91, 140, 255, 0.21), transparent 58%),
+    radial-gradient(64% 58% at 50% 118%, rgba(255, 77, 106, 0.12), transparent 62%),
+    radial-gradient(42% 42% at 62% 52%, rgba(34, 230, 200, 0.07), transparent 70%);
+  background-size: 165% 165%;
+  animation: thr-aurora-drift 24s ease-in-out infinite alternate;
 }
 :root[data-theme="light"] .aurora-threshold {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 @keyframes thr-aurora-drift {
-  0% { background-position: 0% 0%, 0% 0%, 50% 100%; }
-  100% { background-position: 12% 8%, 8% 6%, 44% 90%; }
+  0%   { background-position: 0% 0%, 0% 0%, 50% 100%, 42% 58%; }
+  50%  { background-position: 9% 10%, 11% 4%, 46% 92%, 56% 44%; }
+  100% { background-position: 14% 6%, 6% 11%, 42% 96%, 46% 56%; }
 }
 
 /* Teal-forward gradient text with a slow shimmer.
