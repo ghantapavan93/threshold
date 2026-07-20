@@ -14,6 +14,7 @@ import {
   Plate,
   PlateRail,
 } from "./chassis";
+import { SceneMedia } from "@/components/visual/SceneMedia";
 import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
 import { TranslationMap } from "./TranslationMap";
@@ -50,6 +51,24 @@ function Section({
   );
 }
 
+/* A section intro that becomes cinematic the moment its ambient loop lands in
+   /public/media (manifest-gated; see public/media/README.md for the prompt
+   pack). Until then it renders the plain intro exactly as before — the media
+   layer and its scrim only exist once the clip is present and loaded. */
+function CinemaIntro({ clip, children }: { clip: string; children: React.ReactNode }) {
+  return (
+    <div className="relative mb-2 overflow-hidden rounded-2xl">
+      <SceneMedia
+        variant="backdrop"
+        src={`/media/${clip}.webm`}
+        poster={`/media/${clip}.jpg`}
+        label=""
+      />
+      <div className="relative z-[1] p-4 sm:p-5">{children}</div>
+    </div>
+  );
+}
+
 export function MomentForge() {
   const health = useHealth();
   const offline = health.isError ? health.error.isUnreachable : false;
@@ -81,11 +100,12 @@ export function MomentForge() {
             />
             <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
               <div className="max-w-[62ch]">
-                <blockquote className="border-l-2 border-teal/60 pl-4 text-lg leading-relaxed text-text">
-                  &ldquo;Total unification of the domain model for a large system will not be feasible.&rdquo;
-                  Eric Evans built strategic DDD to name exactly where meaning diverges — and to govern the
-                  translation across each seam.
-                </blockquote>
+                <p className="border-l-2 border-teal/60 pl-4 text-lg leading-relaxed text-text">
+                  No system this large speaks one language. The same words — conversion, reward,
+                  impression — mean different things in different rooms, and the seams between those
+                  rooms are exactly where money and trust leak. This page maps the seams, then makes
+                  them executable.
+                </p>
                 <p className="mt-5 text-base leading-relaxed text-muted">
                   Rokt&apos;s{" "}
                   <DomainTerm definition="The differentiator you must build and must not outsource. Here: deciding, per transaction and in real time, whether and which offer is incrementally valuable at that specific moment — and being able to prove it.">
@@ -145,6 +165,7 @@ export function MomentForge() {
 
           {/* ── 3b · Translation Map [LIVE] — the honest self-critique closed ─── */}
           <Section id="sec-translation" label="Translation Map — conversion across an anticorruption layer">
+            <CinemaIntro clip="mf-translation">
             <Reveal>
               <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
                 An honest self-critique: the missing-attribute inversion never actually <em>crosses</em> a
@@ -154,6 +175,7 @@ export function MomentForge() {
                 a real number inflates at the wall — the leak the ACL exists to stop.
               </p>
             </Reveal>
+            </CinemaIntro>
             <Plate
               figure="03b"
               title="The Translation Map"
@@ -166,6 +188,7 @@ export function MomentForge() {
 
           {/* ── 3c · Reconciliation Lane [LIVE] — the cross-aggregate invariant closed ── */}
           <Section id="sec-reconciliation" label="Reconciliation Lane — the cross-aggregate invariant closed">
+            <CinemaIntro clip="mf-reconciliation">
             <Reveal>
               <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
                 The second honest gap: <span className="text-text">earned ⇒ issued</span> spans two aggregates
@@ -176,6 +199,7 @@ export function MomentForge() {
                 it&apos;s that <em>none of them are silent</em>.
               </p>
             </Reveal>
+            </CinemaIntro>
             <Plate
               figure="03c"
               title="The Reconciliation Lane"
@@ -188,6 +212,7 @@ export function MomentForge() {
 
           {/* ── 3d · The Unit Wall [LIVE] — whole values close the disease class ── */}
           <Section id="sec-unitwall" label="The Unit Wall — whole values at every seam">
+            <CinemaIntro clip="mf-unitwall">
             <Reveal>
               <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
                 The root cause of the whole disease class: the polysemic terms were{" "}
@@ -198,6 +223,7 @@ export function MomentForge() {
                 <em>refused</em> at the measurement seam rather than blended into the count.
               </p>
             </Reveal>
+            </CinemaIntro>
             <Plate
               figure="03d"
               title="The Unit Wall"
@@ -210,6 +236,7 @@ export function MomentForge() {
 
           {/* ── 4 · Semantic Change Compiler [LIVE] ─────────────────────────── */}
           <Section id="sec-compiler" label="Semantic Change Compiler">
+            <CinemaIntro clip="mf-compiler">
             <Reveal>
               <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
                 Threshold reframed: a <span className="text-text">Semantic Change Compiler</span>. It
@@ -218,6 +245,7 @@ export function MomentForge() {
                 renders only real output.
               </p>
             </Reveal>
+            </CinemaIntro>
             <Plate
               figure="04"
               title="Semantic Change Compiler"
@@ -255,6 +283,7 @@ export function MomentForge() {
 
           {/* ── 7 · Domain Evolution Simulator [LIVE] ───────────────────────── */}
           <Section id="sec-sim" label="Domain Evolution Simulator">
+            <CinemaIntro clip="mf-sim">
             <Reveal>
               <p className="mb-4 max-w-[62ch] text-base leading-relaxed text-muted">
                 Run the same change <em>forward</em> through real event-time replay and watch its impact
@@ -262,6 +291,7 @@ export function MomentForge() {
                 drops its rules — on the trap, that removes the operator flip and the inversion disappears.
               </p>
             </Reveal>
+            </CinemaIntro>
             <Plate
               figure="07"
               title="Domain Evolution Simulator"

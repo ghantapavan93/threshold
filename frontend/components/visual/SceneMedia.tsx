@@ -135,14 +135,18 @@ export function SceneMedia({
             onError={() => setStatus("missing")}
           />
         ) : null}
-        {/* Scrim: legibility never depends on what the video is doing. */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgb(var(--c-base-c) / 0.55), rgb(var(--c-base-c) / 0.35) 40%, rgb(var(--c-base-c) / 0.9))",
-          }}
-        />
+        {/* Scrim: legibility never depends on what the video is doing. Rendered
+            only while media is actually visible, so a pending slot changes
+            nothing about the page. */}
+        {status === "ready" || (reduced === true && !!poster && listed === true) ? (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgb(var(--c-base-c) / 0.55), rgb(var(--c-base-c) / 0.35) 40%, rgb(var(--c-base-c) / 0.9))",
+            }}
+          />
+        ) : null}
       </div>
     );
   }
