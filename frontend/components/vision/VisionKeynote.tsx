@@ -477,6 +477,39 @@ function Roadmap() {
           .from(node, { scale: 0, autoAlpha: 0, duration: 0.5, ease: "back.out(2)" })
           .from(card, { autoAlpha: 0, x: 28, duration: 0.7, ease: "power3.out" }, "-=0.25");
       });
+
+      // Backstop: the milestones start at autoAlpha:0 and rely on ScrollTrigger
+      // to reveal them. If a trigger never fires (registration or refresh
+      // hiccup, an anchor jump past the start), the content would stay hidden.
+      // An IntersectionObserver force-reveals any card still invisible ~1s after
+      // it enters view — long enough that a working GSAP reveal has already run,
+      // so this only acts when the animation genuinely failed.
+      const timers = new Set<number>();
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            const li = e.target;
+            io.unobserve(li);
+            const t = window.setTimeout(() => {
+              timers.delete(t);
+              const card = li.querySelector("[data-card]");
+              const node = li.querySelector("[data-node]");
+              if (card && Number(getComputedStyle(card).opacity) < 0.05) {
+                gsap.set([node, card], { autoAlpha: 1, scale: 1, x: 0 });
+              }
+            }, 1000);
+            timers.add(t);
+          }
+        },
+        { rootMargin: "0px 0px -8% 0px" },
+      );
+      q("[data-milestone]").forEach((li) => io.observe(li));
+
+      return () => {
+        io.disconnect();
+        timers.forEach((t) => window.clearTimeout(t));
+      };
     });
   });
 
