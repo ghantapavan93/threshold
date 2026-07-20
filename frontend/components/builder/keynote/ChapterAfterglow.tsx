@@ -69,7 +69,7 @@ export function ChapterAfterglow() {
             <span aria-hidden>▶</span> Challenge the build
           </Link>
           <Link
-            href="/builder"
+            href="/builder/case"
             className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
           >
             Start a ten-minute review

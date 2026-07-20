@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import { KeynotePage } from "@/components/builder/keynote/KeynotePage";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Threshold · Builder Keynote",
-  description:
-    "One transaction, told as a cinematic product film — with the real Threshold engine living inside every scene. Proof of work over credentials.",
-};
-
+// The keynote was promoted to the primary Builder page. Preserve this URL by
+// redirecting any existing links to /builder.
 export default function BuilderKeynoteRoute() {
-  return <KeynotePage />;
+  redirect("/builder");
 }

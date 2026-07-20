@@ -13,7 +13,7 @@ const ACTIONS: { href: string; label: string; sub: string }[] = [
   { href: "/", label: "Operate Threshold", sub: "the live console — replay, inject, verdict" },
   { href: "/moment-forge", label: "Inspect Moment Forge", sub: "the domain model, run against the real engine" },
   { href: "/moment-forge/system", label: "Open engineering evidence", sub: "the system architecture volume" },
-  { href: "/builder", label: "Read the role case", sub: "how I'd own the Builder role, in prose" },
+  { href: "/builder/case", label: "Read the role case", sub: "how I'd own the Builder role, in prose" },
 ];
 
 export function ChapterHandoff() {

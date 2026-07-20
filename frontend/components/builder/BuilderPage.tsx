@@ -53,9 +53,9 @@ function BuilderNav() {
           </div>
           <div>
             <p className="text-sm font-semibold tracking-tight sm:text-base">
-              THRESHOLD <span className="text-muted">· Builder</span>
+              THRESHOLD <span className="text-muted">· Builder · Role case</span>
             </p>
-            <p className="text-xs text-muted">How I&apos;d own the work</p>
+            <p className="text-xs text-muted">The prose behind the keynote</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -67,16 +67,16 @@ function BuilderNav() {
               Console
             </Link>
             <Link
-              href="/vision"
+              href="/builder"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
-              Vision
+              Keynote
             </Link>
             <span
               aria-current="page"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-teal/40 bg-teal/10 px-3 py-1 text-xs font-semibold text-teal sm:min-h-0"
             >
-              Builder
+              Role case
             </span>
             <Link
               href="/moment-forge"
