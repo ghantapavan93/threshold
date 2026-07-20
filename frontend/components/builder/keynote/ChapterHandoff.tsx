@@ -12,7 +12,7 @@ import { Pill, Scene, SceneHeadline, EASE } from "./stage";
 const ACTIONS: { href: string; label: string; sub: string }[] = [
   { href: "/", label: "Operate Threshold", sub: "the live console — replay, inject, verdict" },
   { href: "/moment-forge", label: "Inspect Moment Forge", sub: "the domain model, run against the real engine" },
-  { href: "/moment-forge/system", label: "Open engineering evidence", sub: "the system architecture volume" },
+  { href: "/plan", label: "See the audit & 90-day plan", sub: "the second proof — outside-in audit + first-90-days" },
   { href: "/builder/case", label: "Read the role case", sub: "how I'd own the Builder role, in prose" },
 ];
 
