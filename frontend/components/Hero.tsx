@@ -106,18 +106,33 @@ export function Hero() {
 
   const busy = phase === "running";
 
-  const seg = (v: string, label: string, on: string, fg: string) => (
-    <button
-      type="button"
-      onClick={() => setProposedVersion(v)}
-      aria-pressed={active === v}
-      disabled={busy}
-      className="inline-flex min-h-[44px] flex-1 items-center justify-center px-3 py-2 text-center text-xs font-medium leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50 sm:px-4 sm:text-sm"
-      style={active === v ? { backgroundColor: on, color: fg } : { color: "var(--c-muted)" }}
-    >
-      {label}
-    </button>
-  );
+  // A selector, not an action: it only chooses which change "Play the story"
+  // compares against V17. Styled as a selected tab (tinted, ringed) rather than
+  // a filled button so it never reads as "press me to run the edit."
+  const seg = (v: string, label: string, tint: string) => {
+    const isOn = active === v;
+    return (
+      <button
+        type="button"
+        onClick={() => setProposedVersion(v)}
+        role="radio"
+        aria-checked={isOn}
+        disabled={busy}
+        className="inline-flex min-h-[40px] flex-1 items-center justify-center px-3 py-1.5 text-center text-xs font-medium leading-tight transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50 sm:px-3.5"
+        style={
+          isOn
+            ? {
+                backgroundColor: `color-mix(in srgb, ${tint} 15%, transparent)`,
+                color: tint,
+                boxShadow: `inset 0 0 0 1px ${tint}`,
+              }
+            : { color: "var(--c-muted)" }
+        }
+      >
+        {label}
+      </button>
+    );
+  };
 
   const captionColor =
     phase === "blocked" || phase === "error"
@@ -209,14 +224,19 @@ export function Hero() {
             </button>
           ) : null}
 
-          <div
-            role="group"
-            aria-label="Compare outcomes"
-            className="thr-edge flex overflow-hidden rounded-lg sm:inline-flex"
-          >
-            {seg(DANGEROUS, "⚠ Dangerous edit · V18", "var(--c-crimson)", "#fff")}
-            <span aria-hidden className="w-px self-stretch bg-border" />
-            {seg(SAFE, "✓ Safe fix · V18-safe", "var(--c-teal)", "#04110d")}
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
+              Play compares
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Which change Play the story compares against V17"
+              className="thr-edge flex overflow-hidden rounded-lg"
+            >
+              {seg(DANGEROUS, "⚠ Dangerous · V18", "var(--c-crimson)")}
+              <span aria-hidden className="w-px self-stretch bg-border" />
+              {seg(SAFE, "✓ Safe · V18-safe", "var(--c-teal)")}
+            </div>
           </div>
         </motion.div>
 
