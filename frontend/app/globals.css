@@ -261,6 +261,48 @@ p {
   100% { background-position: 14% 6%, 6% 11%, 42% 96%, 46% 56%; }
 }
 
+/* Hero motif reactions — driven by data-phase set from the story state in
+   Hero.tsx. On play: sessions flow into the gate and it lights; once BLOCKED
+   lands the failing lane's X pulses with a crimson bloom. All of this is
+   collapsed to one frame by the reduced-motion safety net below. */
+.tm-motif-xglow {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+[data-phase="blocked"] .tm-motif-xglow {
+  opacity: 1;
+  animation: tm-pulse 1.6s ease-in-out infinite;
+}
+[data-phase="running"] .tm-motif-glow,
+[data-phase="blocked"] .tm-motif-glow {
+  animation: tm-pulse 2.4s ease-in-out infinite;
+}
+.tm-motif-stream {
+  animation: tm-flow 1.1s linear infinite;
+}
+[data-phase="running"] .tm-motif-gate,
+[data-phase="blocked"] .tm-motif-gate {
+  animation: tm-gate-live 1.8s ease-in-out infinite;
+}
+[data-phase="blocked"] .tm-motif-x {
+  animation: tm-alarm 1.2s ease-in-out infinite;
+}
+@keyframes tm-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes tm-flow {
+  to { stroke-dashoffset: -20; }
+}
+@keyframes tm-gate-live {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(34, 230, 200, 0.4)); }
+  50% { filter: drop-shadow(0 0 9px rgba(34, 230, 200, 0.85)); }
+}
+@keyframes tm-alarm {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
 /* Teal-forward gradient text with a slow shimmer.
    CRITICAL: a solid, high-contrast color is set FIRST as the fallback, so the
    text is always visible even where background-clip:text is unsupported. The

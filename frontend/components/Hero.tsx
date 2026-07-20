@@ -74,6 +74,9 @@ export function Hero() {
     try {
       setPhase("running");
       setCaption("A one-operator edit — replaying V17 → V18 across 200 event-time sessions…");
+      // Let the reaction land in the hero first — sessions flow into the gate,
+      // it lights up — before we move the viewer down the page.
+      await delay(1300);
       scrollToId("diff");
       const job = await runVersion(DANGEROUS);
       await delay(900);
@@ -160,7 +163,10 @@ export function Hero() {
           }}
         />
         <Parallax speed={8} className="relative">
-          <TransactionMomentMotif className="w-full" />
+          <TransactionMomentMotif
+            className="w-full"
+            phase={phase === "running" ? "running" : phase === "blocked" ? "blocked" : "idle"}
+          />
         </Parallax>
       </div>
 

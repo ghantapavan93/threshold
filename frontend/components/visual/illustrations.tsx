@@ -15,11 +15,21 @@ const BORDER = "var(--c-border-strong)";
 /** Hero motif — the Transaction Moment as a decision gate. Sessions stream in
  *  from the left; the gate lets safe ones through (teal) and stops the silently
  *  dangerous one (crimson). */
-export function TransactionMomentMotif({ className }: { className?: string }) {
+export function TransactionMomentMotif({
+  className,
+  phase = "idle",
+}: {
+  className?: string;
+  /** Drives the in-hero reaction when the story plays: streams flow, the gate
+      lights, and — once BLOCKED lands — the failing lane's X pulses. */
+  phase?: "idle" | "running" | "blocked";
+}) {
   const rows = [40, 78, 116, 154, 192];
+  const live = phase === "running" || phase === "blocked";
   return (
     <svg
       aria-hidden
+      data-phase={phase}
       viewBox="0 0 360 240"
       className={className}
       fill="none"
@@ -34,10 +44,16 @@ export function TransactionMomentMotif({ className }: { className?: string }) {
           <stop offset="0" stopColor={TEAL} stopOpacity="0.35" />
           <stop offset="1" stopColor={TEAL} stopOpacity="0" />
         </radialGradient>
+        <radialGradient id="tm-glow-x" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor={CRIMSON} stopOpacity="0.4" />
+          <stop offset="1" stopColor={CRIMSON} stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       {/* ambient glow behind the gate */}
-      <ellipse cx="196" cy="120" rx="120" ry="120" fill="url(#tm-glow)" />
+      <ellipse className="tm-motif-glow" cx="196" cy="120" rx="120" ry="120" fill="url(#tm-glow)" />
+      {/* crimson bloom behind the failing lane — only meaningful once blocked */}
+      <ellipse className="tm-motif-xglow" cx="246" cy="116" rx="54" ry="54" fill="url(#tm-glow-x)" />
 
       {/* incoming session streams */}
       {rows.map((y, i) => {
@@ -46,6 +62,7 @@ export function TransactionMomentMotif({ className }: { className?: string }) {
         return (
           <g key={y}>
             <line
+              className={live ? "tm-motif-stream" : undefined}
               x1="8"
               y1={y}
               x2="176"
@@ -63,7 +80,7 @@ export function TransactionMomentMotif({ className }: { className?: string }) {
       })}
 
       {/* the gate */}
-      <rect x="188" y="24" width="16" height="192" rx="8" fill="url(#tm-gate)" />
+      <rect className="tm-motif-gate" x="188" y="24" width="16" height="192" rx="8" fill="url(#tm-gate)" />
       <rect x="188" y="24" width="16" height="192" rx="8" stroke={TEAL} strokeOpacity="0.5" />
 
       {/* outcomes on the right */}
@@ -71,7 +88,7 @@ export function TransactionMomentMotif({ className }: { className?: string }) {
         const danger = i === 2;
         if (danger) {
           return (
-            <g key={y}>
+            <g key={y} className="tm-motif-x" style={{ transformOrigin: "246px 116px" }}>
               <line x1="204" y1={y} x2="236" y2={y} stroke={CRIMSON} strokeWidth="2" />
               <circle cx="246" cy={y} r="9" fill="none" stroke={CRIMSON} strokeWidth="2" />
               <line x1="242" y1={y - 4} x2="250" y2={y + 4} stroke={CRIMSON} strokeWidth="2" />
