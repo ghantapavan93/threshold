@@ -30,3 +30,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.log
+
+# Hypothesis property-testing example database (local cache)
+.hypothesis/
