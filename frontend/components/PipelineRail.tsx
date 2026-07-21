@@ -39,7 +39,10 @@ export function PipelineRail() {
   const currentShort = stages[activeIndex]?.short ?? "";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-base/90 backdrop-blur-xl">
+    <div
+      data-pipeline-rail
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-base/90 backdrop-blur-xl"
+    >
       <div className="mx-auto max-w-7xl px-2 py-2 sm:px-6 sm:py-2.5">
         {/* stepper — dots on mobile, dots + labels on desktop */}
         <div className="scroll-x flex items-center gap-0.5 overflow-x-auto pb-1 sm:gap-1">
