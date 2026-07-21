@@ -13,7 +13,7 @@ const AMBER = "var(--c-amber)";
 const OFFER = "var(--c-offer-blue)";
 
 const mono = { fontFamily: "var(--font-mono, monospace)", fontSize: 6.5 } as const;
-const cls = "h-10 w-full";
+const cls = "h-16 w-full";
 
 /** 02 — several bounded contexts, one moment. */
 function MapGlyph() {
@@ -152,7 +152,7 @@ export function MomentGlyph({ figure }: { figure: string }) {
   const G = GLYPHS[figure];
   if (!G) return null;
   return (
-    <div className="hidden w-40 shrink-0 rounded-lg border border-border/40 bg-base/40 px-2 py-1 sm:block">
+    <div className="hidden w-56 shrink-0 self-center rounded-xl border border-border/60 bg-base/50 px-3 py-2 shadow-panel sm:block lg:w-72">
       <G />
     </div>
   );

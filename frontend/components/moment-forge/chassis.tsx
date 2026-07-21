@@ -184,7 +184,7 @@ export function Plate({
         className="relative overflow-hidden rounded-2xl border bg-surface/60 backdrop-blur-sm"
         style={{ borderColor: toneColor }}
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border/70 px-5 py-3 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/70 px-5 py-3 sm:px-6">
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal">
               Fig. {figure}
