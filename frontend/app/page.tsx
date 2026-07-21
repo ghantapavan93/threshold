@@ -6,6 +6,7 @@ import { RECORDED_DESCRIPTION } from "@/lib/replay-fixture";
 import { ConsoleProvider, useConsole } from "@/components/console-context";
 import { WalkthroughProvider } from "@/components/walkthrough";
 import { PipelineRail } from "@/components/PipelineRail";
+import { StageSpotlight } from "@/components/StageSpotlight";
 import { Intro } from "@/components/Intro";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
@@ -79,42 +80,62 @@ export default function Page() {
             className="mx-auto max-w-7xl space-y-14 px-4 py-10 sm:px-6 lg:py-14"
           >
             <Reveal>
-              <ScenarioLibrary />
+              <StageSpotlight id="scenario-library">
+                <ScenarioLibrary />
+              </StageSpotlight>
             </Reveal>
             <Reveal className="scroll-mt-24">
               <div id="diff">
-                <PolicyDiffSection />
+                <StageSpotlight id="policy-diff">
+                  <PolicyDiffSection />
+                </StageSpotlight>
               </div>
             </Reveal>
             <Reveal className="scroll-mt-24">
               <div id="heatmap">
-                <ConstraintHeatmap />
+                <StageSpotlight id="constraint-heatmap">
+                  <ConstraintHeatmap />
+                </StageSpotlight>
               </div>
             </Reveal>
             <Reveal className="scroll-mt-24">
               <div id="replay">
-                <PolicyDiffReplay />
+                <StageSpotlight id="policy-diff-replay">
+                  <PolicyDiffReplay />
+                </StageSpotlight>
               </div>
             </Reveal>
             <Reveal>
-              <FailClosedProofSection />
+              <StageSpotlight id="fail-closed-proof">
+                <FailClosedProofSection />
+              </StageSpotlight>
             </Reveal>
             <Reveal>
-              <ConversionIntegrity />
+              <StageSpotlight id="conversion-integrity">
+                <ConversionIntegrity />
+              </StageSpotlight>
             </Reveal>
             <Reveal>
-              <FanoutOutbox />
+              <StageSpotlight id="fanout-outbox">
+                <FanoutOutbox />
+              </StageSpotlight>
             </Reveal>
             <Reveal className="scroll-mt-24">
               <div id="verdict">
-                <ReleaseVerdict />
+                <StageSpotlight id="release-verdict">
+                  <ReleaseVerdict />
+                </StageSpotlight>
               </div>
             </Reveal>
             <Reveal>
-              <EvidenceSection />
+              <StageSpotlight id="evidence">
+                <EvidenceSection />
+              </StageSpotlight>
             </Reveal>
             <Reveal>
-              <BringYourOwnData />
+              <StageSpotlight id="byod">
+                <BringYourOwnData />
+              </StageSpotlight>
             </Reveal>
             <Reveal>
               <OffPolicyEstimate />
