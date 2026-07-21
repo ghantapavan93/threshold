@@ -107,6 +107,16 @@ def offpolicy_estimate(
             "ci95": None, "se": None, "min_ess": ess_floor,
             "note": _HOLDOUT_NOTE,
         }
+    # Propensities are probabilities: refuse impossible values rather than emit a
+    # confident-but-garbage estimate (target > 1, negatives, logging > 1).
+    if any(l > 1.0 for l in logging_p) or any(not (0.0 <= t <= 1.0) for t in target_p):
+        return {
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "reason": "a propensity is outside a valid probability range — logging must be in (0, 1], target in [0, 1]",
+            "n": n, "ess": 0.0, "estimate": None, "method": None,
+            "ci95": None, "se": None, "min_ess": ess_floor,
+            "note": _HOLDOUT_NOTE,
+        }
 
     w = _weights(target_p, logging_p)
     if clip is not None:

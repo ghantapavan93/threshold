@@ -78,3 +78,15 @@ def test_snips_and_dr_helpers_are_consistent():
     w = [1.0] * len(r)
     assert abs(snips(r, w) - (sum(r) / len(r))) < 1e-9
     assert abs(doubly_robust(r, w, list(r)) - (sum(r) / len(r))) < 1e-9
+
+
+def test_refuses_impossible_propensities():
+    # Propensities are probabilities; impossible values must be refused, not
+    # silently turned into a confident estimate.
+    n = 40
+    r = [1.0] * n
+    assert offpolicy_estimate(r, [1.5] * n, [0.4] * n)["verdict"] == "INSUFFICIENT_EVIDENCE"
+    assert offpolicy_estimate(r, [-0.2] * n, [0.4] * n)["verdict"] == "INSUFFICIENT_EVIDENCE"
+    assert offpolicy_estimate(r, [0.4] * n, [1.5] * n)["verdict"] == "INSUFFICIENT_EVIDENCE"
+    # a valid boundary (target=1.0, logging=1.0) still estimates
+    assert offpolicy_estimate(r, [1.0] * n, [1.0] * n)["verdict"] == "ESTIMATED"
