@@ -20,6 +20,10 @@ import {
   useGsapScene,
   MOTION_OK,
 } from "@/components/vision/motion";
+import { FrontierBand } from "@/components/FrontierBand";
+import { CounterexampleForge } from "@/components/CounterexampleForge";
+import { TrustBudget } from "@/components/TrustBudget";
+import { PassportGate } from "@/components/PassportGate";
 
 /* ────────────────────────────────────────────────────────────────────────────
    /vision — Threshold cinematic keynote (GSAP + ScrollTrigger).
@@ -959,6 +963,31 @@ function ClosingCta() {
   );
 }
 
+// ── Frontier — the interactive coda: three built prototypes you can run here ──
+// This is Future Vision's home. The three deterministic-core prototypes live on
+// the Vision page (not the verified console), so the speculative future can be
+// explored without contaminating Threshold's verified thesis.
+function Frontier() {
+  return (
+    <section id="frontier-home" className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <div className="space-y-14">
+        <Reveal>
+          <FrontierBand />
+        </Reveal>
+        <Reveal>
+          <CounterexampleForge />
+        </Reveal>
+        <Reveal>
+          <TrustBudget />
+        </Reveal>
+        <Reveal>
+          <PassportGate />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 export function VisionKeynote() {
   return (
@@ -976,6 +1005,7 @@ export function VisionKeynote() {
           <Compounds />
           <ChangeTable />
           <NorthStar />
+          <Frontier />
           <ClosingCta />
         </main>
         <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
