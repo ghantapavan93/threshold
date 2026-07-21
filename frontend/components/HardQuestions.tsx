@@ -16,41 +16,48 @@ const TONE: Record<Tag, string> = {
   "HONEST LIMIT": "var(--c-amber)",
 };
 
-const QA: { q: string; a: string; tag: Tag }[] = [
+const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
   {
     tag: "CORE",
     q: "Replay is off-policy — the sessions were logged under V17. Doesn't that invalidate testing V18?",
     a: "It would, if we claimed lift. We don't. Replay proves STRUCTURAL safety — does the change widen eligibility or break a hard constraint — a property of the policy function on fixed inputs, so it holds regardless of how behavior might shift. And “on fixed inputs” is itself a proven law: a property test shows the decision reads only the attributes the policy references, so replaying a point-in-time snapshot can't leak future or extra data into a past decision. Behavioral lift is a different question, and only the Would-Have-Seen holdout answers it — a positive verdict here is eligibility for that holdout, never “it will win.”",
+    proof: "backend/tests/test_invariants.py::test_law_reads_only_referenced_attributes",
   },
   {
     tag: "ENFORCED",
     q: "“Same input, bit-identical output” — really?",
     a: "The decision path has no wall-clock, no RNG, no network, no LLM (evaluator.py). Iteration is sorted; the single synthetic input is seeded and labelled. This isn't asserted on a few examples — it's a PROPERTY checked over generated inputs with Hypothesis: for any attributes and any policy, evaluate returns the same Decision twice and never raises.",
+    proof: "backend/tests/test_invariants.py::test_law_deterministic · test_law_evaluate_is_total",
   },
   {
     tag: "ENFORCED",
     q: "Independent per-record HMACs miss deletion and reordering.",
     a: "Correct — which is why the log is hash-chained: each record's HMAC commits the prior record's. Reorder or delete an interior record and the chain breaks — both checked as properties over generated event sequences. Truncation is closed by the signed head seal (next card). It is still not tamper-PROOF against a key-holder, who can forge a fresh chain and seal — and we say exactly that.",
+    proof: "backend/tests/test_invariants.py::test_law_audit_chain_integrity",
   },
   {
     tag: "ENFORCED",
     q: "Then just truncate it — drop the last few records.",
     a: "Caught — and this one is built, not described. A plain chain can't see truncation (dropping the tail leaves a valid shorter chain), so the log ships with a SEAL: a key-signed commitment to (record count, head HMAC). Drop the tail and the count no longer matches the seal; forging a seal for a shorter log needs the secret. Prove it live in the Evidence drawer — “✂ Drop the last record” makes verify fail with “log truncated… the sealed head commits N”. A property test asserts both halves: chain alone misses it, the seal catches it.",
+    proof: "backend/app/domain/audit.py::compute_seal · tests/test_invariants.py::test_law_truncation_caught_by_seal",
   },
   {
     tag: "CORE",
     q: "A “missing attribute” might just mean the field postdates the event.",
     a: "Yes — conflating “didn't exist yet” with “genuinely absent” would fabricate a widening signal. We replay as-of a point-in-time snapshot and read only the fields the schema had then; a field introduced later is not a widening. And the safety direction is a proven law: under every operator but the one dangerous flip, eligibility REQUIRES the attribute present — so losing data can only narrow, never widen. The trap (exclude_is_in) is precisely the operator that violates it.",
+    proof: "backend/tests/test_invariants.py::test_law_conservative_eligibility_requires_presence · test_law_missing_fails_closed",
   },
   {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",
+    proof: "backend/tests/test_api.py::test_conversion_dedup · test_outbox.py::test_replay_enqueues_outbox_atomically",
   },
   {
     tag: "ENFORCED",
     q: "Consent — you exclude “revoked”, but what about missing consent?",
     a: "Absent or unknown consent fails closed to excluded. Absence isn't permission; the gate never defaults to allow on an unknown consent state. Only an affirmative grant proceeds.",
+    proof: "frontend/components/BringYourOwnData.tsx::classify (consent · fail-closed)",
   },
   {
     tag: "HONEST LIMIT",
@@ -60,7 +67,8 @@ const QA: { q: string; a: string; tag: Tag }[] = [
   {
     tag: "HONEST LIMIT",
     q: "Holdout rigor — sample-ratio mismatch, power, peeking, interference?",
-    a: "That's the causal read, and it isn't ours to claim — it's the external Would-Have-Seen holdout (Haus-style). Threshold's job is upstream: prove the change is structurally safe before it reaches the holdout, and flag premature calls. We don't own the statistics and don't pretend to.",
+    a: "That's the causal read, and it isn't ours to claim — it's the external Would-Have-Seen holdout (Haus-style). Threshold's job is upstream: prove the change is structurally safe before it reaches the holdout, and flag premature calls. We flag thin support and refuse to estimate; the causal statistics stay with the holdout.",
+    proof: "backend/tests/test_ope.py::test_refuses_on_skewed_weights (the refusal we DO own)",
   },
 ];
 
@@ -70,7 +78,7 @@ export function HardQuestions() {
       id="hard-questions"
       index={11}
       title="The hard questions"
-      subtitle="The deepest things a staff engineer asks — off-policy validity, determinism, tamper-evidence, exactly-once, consent, units, causal rigor — answered before they're asked. Each is labelled by what the code actually does: enforced and tested, stated precisely, or an honest limit we won't paper over."
+      subtitle="The deepest things a staff engineer asks — answered, and each answer points at the file and test that proves it, not just prose. Enforced and tested, stated precisely, or an honest limit we won't paper over. Every proof below is a real path in this repo."
     >
       <div className="grid gap-4 md:grid-cols-2">
         {QA.map((item, i) => {
@@ -90,6 +98,19 @@ export function HardQuestions() {
                 </span>
               </div>
               <p className="mt-2.5 text-sm leading-relaxed text-muted">{item.a}</p>
+              {item.proof ? (
+                <div className="mt-auto pt-3">
+                  <div className="scroll-x overflow-x-auto rounded-md border border-border/60 bg-base/60 px-2.5 py-1.5">
+                    <code className="whitespace-nowrap font-mono text-[10px] text-muted">
+                      <span className="text-teal">proof ▸</span> {item.proof}
+                    </code>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-auto pt-3 font-mono text-[10px] text-amber/80">
+                  ▸ no claim to prove — an open limit, stated above
+                </p>
+              )}
             </article>
           );
         })}
