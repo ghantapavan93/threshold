@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Card, EmptyState, Section } from "./ui/primitives";
 import { TruthLabel } from "./ui/TruthLabel";
+import { ConceptSpec, type Concept } from "./ui/ConceptSpec";
 import { usePassport } from "@/lib/hooks";
 import type { PassportStatus } from "@/lib/schemas";
 
@@ -42,6 +43,20 @@ const SCENARIO_ORDER = [
   "clean", "prompt_injection", "unconfirmed", "expired",
   "tampered", "sensitive_no_consent", "sensitive_with_consent", "out_of_range",
 ];
+
+const CONCEPT: Concept = {
+  user: "A customer shopping through an AI agent, and the transaction platform receiving that agent's intent.",
+  problem: "The agent's language isn't the transaction's, and the agent is untrusted — it can be prompt-injected, stale, or over-scoped.",
+  boundedContext: "The seam between the agent and the transaction — an anti-corruption layer.",
+  data: "A customer-approved subset of intent (party size, spend ceiling, time, location, dietary), minimized to a fixed schema.",
+  aiRole: "The agent AUTHORS the claimed passport (untrusted input). It never decides what is admitted.",
+  enforcement: "A pure ACL admits only supported ∧ valid ∧ customer-confirmed ∧ in-window ∧ consented fields; HMAC provenance over the whole passport.",
+  privacy: "Only schema-supported, customer-confirmed fields; sensitive fields need consent; the passport is short-lived and expiring.",
+  guardrail: "Explicit per-field confirmation — nothing the customer didn't approve reaches the transaction.",
+  businessHypothesis: "Safe agent context → stronger relevance at the agentic frontier → incremental conversion.",
+  experiment: "Measure relevance/conversion with passport context vs. without, under a holdout; watch that unconfirmed-field leakage stays zero.",
+  failure: "Fail-closed: expired, tampered, unconfirmed, or unsupported fields are not admitted; the transaction proceeds with less context, never corrupted.",
+};
 
 export function PassportGate() {
   const pg = usePassport();
@@ -182,6 +197,9 @@ export function PassportGate() {
           <p className="max-w-[70ch] text-xs leading-relaxed text-muted">{data.note}</p>
         </div>
       )}
+      <div className="mt-4">
+        <ConceptSpec spec={CONCEPT} />
+      </div>
     </Section>
   );
 }

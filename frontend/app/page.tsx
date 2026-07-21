@@ -18,6 +18,7 @@ import { ReleaseVerdict } from "@/components/ReleaseVerdict";
 import { EvidenceSection } from "@/components/EvidenceSection";
 import { BringYourOwnData } from "@/components/BringYourOwnData";
 import { OffPolicyEstimate } from "@/components/OffPolicyEstimate";
+import { FrontierBand } from "@/components/FrontierBand";
 import { CounterexampleForge } from "@/components/CounterexampleForge";
 import { TrustBudget } from "@/components/TrustBudget";
 import { PassportGate } from "@/components/PassportGate";
@@ -118,6 +119,9 @@ export default function Page() {
             </Reveal>
             <Reveal>
               <OffPolicyEstimate />
+            </Reveal>
+            <Reveal>
+              <FrontierBand />
             </Reveal>
             <Reveal>
               <CounterexampleForge />

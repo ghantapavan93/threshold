@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Card, EmptyState, Section } from "./ui/primitives";
 import { TruthLabel } from "./ui/TruthLabel";
+import { ConceptSpec, type Concept } from "./ui/ConceptSpec";
 import { useTrustBudget } from "@/lib/hooks";
 import type { TrustAction, TrustStep } from "@/lib/schemas";
 
@@ -78,6 +79,20 @@ function StepRow({ step, max }: { step: TrustStep; max: number }) {
 }
 
 const SCENARIO_ORDER = ["healthy", "serial_dismisser", "category_spam", "sensitive_checkout", "recovery"];
+
+const CONCEPT: Concept = {
+  user: "The customer (protected) and the layer that decides whether an optional experience appears.",
+  problem: "An offer relevant in isolation turns irritating after repeated exposure and rejection; 'show nothing' is usually an accident, not a decision.",
+  boundedContext: "Placement / experience selection — downstream of eligibility, not a gate on it.",
+  data: "Interaction counts and timings inside a bounded window. No offer content, no PII.",
+  aiRole: "An LLM could RANK which candidate is most relevant (hypothesis). It never decides whether attention may be spent.",
+  enforcement: "A pure SHOW / DEFER / SUPPRESS from history — monotonic in frustration, budget-conserving, total.",
+  privacy: "Window-bounded, self-expiring interaction counts. Data minimization is the window, not a promise.",
+  guardrail: "Attention is scarce; recent rejection withdraws it. 'No experience' is intentional and reversible.",
+  businessHypothesis: "Fewer, better-timed experiences → higher-quality exposure and less fatigue → sustained engagement.",
+  experiment: "A/B the budget gate vs. always-show on dismissal rate and downstream conversion, under a holdout.",
+  failure: "Fail-closed to SUPPRESS — when in doubt, don't spend attention.",
+};
 
 export function TrustBudget() {
   const tb = useTrustBudget();
@@ -175,6 +190,9 @@ export function TrustBudget() {
           <p className="max-w-[70ch] text-xs leading-relaxed text-muted">{data.note}</p>
         </div>
       )}
+      <div className="mt-4">
+        <ConceptSpec spec={CONCEPT} />
+      </div>
     </Section>
   );
 }

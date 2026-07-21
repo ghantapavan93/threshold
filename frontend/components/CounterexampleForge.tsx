@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Card, EmptyState, Section } from "./ui/primitives";
 import { TruthLabel } from "./ui/TruthLabel";
+import { ConceptSpec, type Concept } from "./ui/ConceptSpec";
 import { useCounterexamples } from "@/lib/hooks";
 import type { ForgeCandidate, ForgeOutcome } from "@/lib/schemas";
 
@@ -33,6 +34,20 @@ const OUTCOME_BLURB: Record<ForgeOutcome, string> = {
 };
 
 const ORDER: ForgeOutcome[] = ["GAP", "CONTAINED", "SURFACED", "SAFE"];
+
+const CONCEPT: Concept = {
+  user: "Threshold's own release reviewers — a standing red-team over the gate.",
+  problem: "You only test the failure modes you imagined; production breaks on the ones nobody enumerated.",
+  boundedContext: "The policy-change safety gate — the context that owns eligibility.",
+  data: "The existing policy plus synthetic event-time sessions. No customer data.",
+  aiRole: "PROPOSE adversarial fixtures. Today a reproducible enumerator; an LLM proposer is the hypothesis. It never judges.",
+  enforcement: "The real deterministic engine judges every fixture; an independent oracle detects silent widening even if a guard regresses.",
+  privacy: "Synthetic sessions only — no PII ever enters the harness.",
+  guardrail: "It protects customers indirectly: silent eligibility widenings are caught before a single one ships.",
+  businessHypothesis: "Fewer escaped policy regressions → fewer bad exposures → protected conversion and trust.",
+  experiment: "The harness is the test. A regression flips a green board to a GAP — no separate experiment needed.",
+  failure: "Fail-loud: if the engine regresses, a GAP appears. The harness never silently passes.",
+};
 
 function OutcomeBadge({ outcome }: { outcome: ForgeOutcome }) {
   const tone = OUTCOME_TONE[outcome];
@@ -163,6 +178,9 @@ export function CounterexampleForge() {
           <p className="max-w-[70ch] text-xs leading-relaxed text-muted">{data.note}</p>
         </div>
       )}
+      <div className="mt-4">
+        <ConceptSpec spec={CONCEPT} />
+      </div>
     </Section>
   );
 }
