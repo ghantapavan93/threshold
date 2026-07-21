@@ -3,6 +3,7 @@ import {
   AuditLogSchema,
   AuditVerifySchema,
   OpeEstimateSchema,
+  ForgeResultSchema,
   CancellationResponseSchema,
   ConversionResponseSchema,
   ErrorEnvelopeSchema,
@@ -24,6 +25,7 @@ import type {
   AuditRecord,
   AuditVerify,
   OpeEstimate,
+  ForgeResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -460,6 +462,18 @@ export const api = {
     return requestData(
       `${base(merchantId)}/ope-estimate`,
       OpeEstimateSchema,
+      { method: "POST", body, signal },
+    );
+  },
+
+  counterexamples(
+    merchantId: string,
+    body: { base_version?: string; session_seed?: number; session_count?: number } = {},
+    signal?: AbortSignal,
+  ): Promise<ForgeResult> {
+    return requestData(
+      `${base(merchantId)}/counterexamples`,
+      ForgeResultSchema,
       { method: "POST", body, signal },
     );
   },

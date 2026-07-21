@@ -20,6 +20,7 @@ import { uuid } from "./utils";
 import type {
   AuditVerify,
   OpeEstimate,
+  ForgeResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -239,6 +240,17 @@ export function useOpeEstimate(
   return useMutation<OpeEstimate, ApiError, OpeInput>({
     mutationKey: ["ope-estimate", merchantId],
     mutationFn: (body) => api.opeEstimate(merchantId, body),
+  });
+}
+
+type ForgeInput = { base_version?: string; session_seed?: number; session_count?: number };
+
+export function useCounterexamples(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<ForgeResult, ApiError, ForgeInput> {
+  return useMutation<ForgeResult, ApiError, ForgeInput>({
+    mutationKey: ["counterexamples", merchantId],
+    mutationFn: (body) => api.counterexamples(merchantId, body),
   });
 }
 

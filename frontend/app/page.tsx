@@ -18,6 +18,7 @@ import { ReleaseVerdict } from "@/components/ReleaseVerdict";
 import { EvidenceSection } from "@/components/EvidenceSection";
 import { BringYourOwnData } from "@/components/BringYourOwnData";
 import { OffPolicyEstimate } from "@/components/OffPolicyEstimate";
+import { CounterexampleForge } from "@/components/CounterexampleForge";
 import { HardQuestions } from "@/components/HardQuestions";
 import { Reveal } from "@/components/visual/Reveal";
 
@@ -115,6 +116,9 @@ export default function Page() {
             </Reveal>
             <Reveal>
               <OffPolicyEstimate />
+            </Reveal>
+            <Reveal>
+              <CounterexampleForge />
             </Reveal>
             <Reveal>
               <HardQuestions />

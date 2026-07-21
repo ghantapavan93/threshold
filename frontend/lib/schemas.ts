@@ -316,6 +316,40 @@ export const OpeEstimateSchema = z.object({
 });
 export type OpeEstimate = z.infer<typeof OpeEstimateSchema>;
 
+// ---- Counterexample Forge --------------------------------------------------
+export const ForgeOutcomeSchema = z.enum(["CONTAINED", "SURFACED", "SAFE", "GAP"]);
+export type ForgeOutcome = z.infer<typeof ForgeOutcomeSchema>;
+
+export const ForgeCandidateSchema = z.object({
+  id: z.string(),
+  category: z.string(),
+  target: z.string(),
+  rationale: z.string(),
+  outcome: ForgeOutcomeSchema,
+  guard: z.string().nullable(),
+  evidence: z.string(),
+});
+export type ForgeCandidate = z.infer<typeof ForgeCandidateSchema>;
+
+export const ForgeResultSchema = z.object({
+  merchant_id: z.string().optional(),
+  base_version: z.string(),
+  session_seed: z.number(),
+  session_count: z.number(),
+  candidates: z.array(ForgeCandidateSchema),
+  summary: z.object({
+    total: z.number(),
+    contained: z.number(),
+    surfaced: z.number(),
+    safe: z.number(),
+    gap: z.number(),
+    no_gaps: z.boolean(),
+  }),
+  proposer: z.string(),
+  note: z.string(),
+});
+export type ForgeResult = z.infer<typeof ForgeResultSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({

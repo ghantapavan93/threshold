@@ -60,6 +60,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     proof: "backend/tests/test_domain.py::test_constraints_safe_surfaces_widening_without_blocking",
   },
   {
+    tag: "ENFORCED",
+    q: "You test the cases you imagined. Production breaks on the ones you didn't. How do you find those?",
+    a: "A standing adversarial harness — the Counterexample Forge. A proposer enumerates adversarial fixtures across every invariant class (the missing-attribute flip spelled three ways, consent gaps, brand-safety, immutable edits, fat-fingers, fault injections, poisoned types, and a point-in-time control), and the REAL deterministic engine judges each one: CONTAINED, SURFACED, SAFE, or GAP. The proposer only suggests what to try — an LLM could write these, but here it's a reproducible enumerator so the harness stays CI-safe and no model touches the critical path. The GAP verdict isn't decorative: an independent ground-truth oracle detects silent widening even if a guard regresses, so the moment the rename-evasion fix (or any guard) breaks, a GAP appears. On the current engine the GAP set is empty — 16 fixtures, 0 gaps. Run it live on the Console.",
+    proof: "backend/tests/test_counterexample.py::test_forge_finds_no_gaps_on_the_current_engine · test_gap_branch_is_reachable_the_detector_is_not_rigged",
+  },
+  {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",

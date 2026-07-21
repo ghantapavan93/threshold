@@ -35,6 +35,7 @@ from sqlalchemy.orm import Session
 from ..config import settings
 from ..db import get_db
 from ..domain import failclosed
+from ..domain.counterexample import forge
 from ..domain.ope import offpolicy_estimate
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
@@ -575,3 +576,38 @@ def ope_estimate(
         out["n"], out["ess"],
     )
     return {"merchant_id": merchant_id, **out}
+
+
+class CounterexampleRequest(BaseModel):
+    """Run the adversarial harness over the merchant's live policy. The proposer
+    enumerates adversarial fixtures deterministically; the engine judges them."""
+    base_version: str = "V17"
+    session_seed: int = Field(default=42, ge=0, le=1_000_000)
+    session_count: int = Field(default=200, ge=1, le=5_000)
+
+
+@router.post("/counterexamples")
+def counterexamples(
+    merchant_id: str,
+    req: CounterexampleRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Counterexample Forge — a proposer enumerates adversarial candidate fixtures,
+    each probing one invariant class, and the real deterministic engine judges every
+    one (CONTAINED / SURFACED / SAFE / GAP). Read-only and non-persisting; the LLM is
+    never in the critical path. On a correct engine the GAP set is empty."""
+    base = load_policy(db, merchant_id, req.base_version)  # 404 (F2)
+    with tracer.start_as_current_span("momentforge.counterexamples") as span:
+        result = forge(base, req.session_seed, req.session_count)
+        span.set_attribute("threshold.base_version", req.base_version)
+        span.set_attribute("forge.total", result["summary"]["total"])
+        span.set_attribute("forge.gaps", result["summary"]["gap"])
+        span.set_attribute("forge.no_gaps", result["summary"]["no_gaps"])
+    log.info(
+        'counterexamples merchant=%s rid=%s base=%s total=%d contained=%d surfaced=%d safe=%d gaps=%d',
+        merchant_id, _rid(request), req.base_version, result["summary"]["total"],
+        result["summary"]["contained"], result["summary"]["surfaced"],
+        result["summary"]["safe"], result["summary"]["gap"],
+    )
+    return {"merchant_id": merchant_id, **result}
