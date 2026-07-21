@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   AuditLogSchema,
   AuditVerifySchema,
+  OpeEstimateSchema,
   CancellationResponseSchema,
   ConversionResponseSchema,
   ErrorEnvelopeSchema,
@@ -22,6 +23,7 @@ import {
 import type {
   AuditRecord,
   AuditVerify,
+  OpeEstimate,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -441,6 +443,24 @@ export const api = {
       `${base(merchantId)}/replay-jobs/${jobId}/audit`,
       AuditLogSchema,
       { signal },
+    );
+  },
+
+  opeEstimate(
+    merchantId: string,
+    body: {
+      rewards: number[];
+      target_p: number[];
+      logging_p: number[];
+      reward_hat?: number[] | null;
+      ess_floor?: number;
+    },
+    signal?: AbortSignal,
+  ): Promise<OpeEstimate> {
+    return requestData(
+      `${base(merchantId)}/ope-estimate`,
+      OpeEstimateSchema,
+      { method: "POST", body, signal },
     );
   },
 

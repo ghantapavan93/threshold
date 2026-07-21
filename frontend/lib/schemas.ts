@@ -296,6 +296,21 @@ export const AuditVerifySchema = z.object({
 });
 export type AuditVerify = z.infer<typeof AuditVerifySchema>;
 
+export const OpeEstimateSchema = z.object({
+  verdict: z.enum(["ESTIMATED", "INSUFFICIENT_EVIDENCE"]),
+  reason: z.string().nullable().optional(),
+  method: z.string().nullable().optional(),
+  estimate: z.number().nullable().optional(),
+  ci95: z.tuple([z.number(), z.number()]).nullable().optional(),
+  se: z.number().nullable().optional(),
+  ess: z.number(),
+  n: z.number(),
+  min_ess: z.number().optional(),
+  note: z.string().optional(),
+  merchant_id: z.string().optional(),
+});
+export type OpeEstimate = z.infer<typeof OpeEstimateSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({

@@ -19,6 +19,7 @@ import {
 import { uuid } from "./utils";
 import type {
   AuditVerify,
+  OpeEstimate,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -221,6 +222,23 @@ export function useCancellation(
   return useMutation<CancellationResponse, ApiError, { itemReservationId: string }>({
     mutationKey: ["cancellation", merchantId],
     mutationFn: (body) => api.createCancellation(merchantId, body),
+  });
+}
+
+type OpeInput = {
+  rewards: number[];
+  target_p: number[];
+  logging_p: number[];
+  reward_hat?: number[] | null;
+  ess_floor?: number;
+};
+
+export function useOpeEstimate(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<OpeEstimate, ApiError, OpeInput> {
+  return useMutation<OpeEstimate, ApiError, OpeInput>({
+    mutationKey: ["ope-estimate", merchantId],
+    mutationFn: (body) => api.opeEstimate(merchantId, body),
   });
 }
 

@@ -35,6 +35,7 @@ from sqlalchemy.orm import Session
 from ..config import settings
 from ..db import get_db
 from ..domain import failclosed
+from ..domain.ope import offpolicy_estimate
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
@@ -538,3 +539,39 @@ def reconciliation_proof(
     )
 
     return {"merchant_id": merchant_id, **result}
+
+
+class OpeEstimateRequest(BaseModel):
+    """Logged decisions for an off-policy value estimate. One entry per session:
+    the observed reward, the NEW policy's action probability (target), the OLD
+    policy's logged probability (logging), and an optional reward-model prediction
+    for the doubly-robust estimator."""
+    rewards: list[float] = Field(min_length=0, max_length=100_000)
+    target_p: list[float]
+    logging_p: list[float]
+    reward_hat: list[float] | None = None
+    ess_floor: int = Field(default=30, ge=1, le=100_000)
+
+
+@router.post("/ope-estimate")
+def ope_estimate(
+    merchant_id: str,
+    req: OpeEstimateRequest,
+    request: Request,
+) -> dict:
+    """Pre-holdout off-policy value estimate (SNIPS / doubly-robust) with an
+    effective-sample-size gate. Refuses (INSUFFICIENT_EVIDENCE) when support is
+    thin — and never replaces the mandatory holdout."""
+    if not (len(req.target_p) == len(req.logging_p) == len(req.rewards)):
+        raise _reject("length_mismatch",
+                      "rewards, target_p and logging_p must be the same length")
+    out = offpolicy_estimate(
+        req.rewards, req.target_p, req.logging_p,
+        reward_hat=req.reward_hat, ess_floor=req.ess_floor,
+    )
+    log.info(
+        'ope_estimate merchant=%s rid=%s verdict=%s method=%s n=%d ess=%.2f',
+        merchant_id, _rid(request), out["verdict"], out.get("method"),
+        out["n"], out["ess"],
+    )
+    return {"merchant_id": merchant_id, **out}
