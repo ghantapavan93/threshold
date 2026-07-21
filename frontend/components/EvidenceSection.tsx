@@ -35,17 +35,28 @@ export function EvidenceSection() {
       id="evidence"
       index={9}
       title="Evidence Drawer"
-      subtitle="Append-only, tamper-evident audit log. Each record is hash-chained — its HMAC commits the prior record's — so deletion or reordering is detectable, not just per-record edits. Click any row for the full record and verify its integrity."
+      subtitle="Append-only, tamper-evident audit log. Each record is hash-chained — its HMAC commits the prior record's — and the whole log is sealed with a key-signed head, so edits, reordering, interior deletion, AND suffix truncation all break verification. Click any row for the full record; verify the log, or try to truncate it."
       actions={
         job ? (
-          <Button
-            size="sm"
-            variant="subtle"
-            onClick={() => verify.mutate({ jobId: job.id })}
-            disabled={verify.isPending}
-          >
-            {verify.isPending ? "Verifying…" : "Verify whole log"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="subtle"
+              onClick={() => verify.mutate({ jobId: job.id })}
+              disabled={verify.isPending}
+            >
+              {verify.isPending ? "Verifying…" : "Verify whole log"}
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => verify.mutate({ jobId: job.id, dropLast: 1 })}
+              disabled={verify.isPending}
+              title="Verify a copy with the last record dropped — the signed head seal catches it"
+            >
+              ✂ Drop the last record
+            </Button>
+          </div>
         ) : undefined
       }
     >
@@ -78,6 +89,9 @@ export function EvidenceSection() {
               >
                 first_tampered_seq {String(verify.data.first_tampered_seq)}
               </Chip>
+              {verify.data.reason ? (
+                <p className="w-full text-[11px] text-crimson">{verify.data.reason}</p>
+              ) : null}
             </div>
           ) : null}
 
