@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useReplayJob, useScenarios } from "@/lib/hooks";
 import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
@@ -15,7 +15,7 @@ import {
 } from "./ui/primitives";
 import { VERDICT_COLOR, VERDICT_LABEL } from "@/lib/utils";
 import { ScenarioGlyph } from "./ScenarioGlyph";
-import { scrollToId } from "@/lib/scroll";
+import { prefersReducedMotion, scrollToId } from "@/lib/scroll";
 
 // Same replay parameters the Hero's self-driving demo uses — identical real path.
 const INJECTIONS: Injection[] = ["timeout", "invalid_output", "stale_identity"];
@@ -63,17 +63,22 @@ function VerdictChip({ value }: { value: VerdictValue }) {
   );
 }
 
+const SPOTLIGHT_SHADOW =
+  "0 0 0 1.5px color-mix(in srgb, var(--c-teal) 55%, transparent), 0 14px 46px -14px color-mix(in srgb, var(--c-teal) 45%, transparent)";
+
 function ScenarioCard({
   scenario,
   selected,
   running,
   disabled,
+  spotlight,
   onRun,
 }: {
   scenario: Scenario;
   selected: boolean;
   running: boolean;
   disabled: boolean;
+  spotlight: boolean;
   onRun: (s: Scenario) => void;
 }) {
   return (
@@ -83,10 +88,16 @@ function ScenarioCard({
       disabled={disabled}
       onClick={() => onRun(scenario)}
       className={
-        "holo-card flex h-full flex-col rounded-2xl p-5 text-left active:scale-[0.985] disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:cursor-not-allowed disabled:opacity-60 " +
-        (selected ? "border-teal " : "")
+        "holo-card flex h-full flex-col rounded-2xl p-5 text-left transition-all duration-500 active:scale-[0.985] disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal disabled:cursor-not-allowed disabled:opacity-60 " +
+        (selected ? "border-teal " : "") +
+        (spotlight ? "scn-live " : "")
       }
-      style={selected ? { borderColor: "var(--c-teal)" } : undefined}
+      style={{
+        ...(selected ? { borderColor: "var(--c-teal)" } : {}),
+        ...(spotlight
+          ? { boxShadow: SPOTLIGHT_SHADOW, transform: "translateY(-3px)" }
+          : {}),
+      }}
     >
       <ScenarioGlyph id={scenario.id} />
       <div className="flex items-start justify-between gap-2">
@@ -136,6 +147,42 @@ export function ScenarioLibrary() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [runningId, setRunningId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
+
+  // Ambient auto-cycle: a teal spotlight steps card→card so the library reads as a
+  // live, inviting set rather than a static grid. It pauses the moment the viewer
+  // engages — a run, a hover, once a scenario is chosen — is off-screen, or has
+  // reduced motion. The spotlight only *invites*; the click still does the work.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [cycle, setCycle] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [inView, setInView] = useState(true);
+  const cardCount = (scenarios.data?.length ?? 0) + 1; // +1 for the agent card
+  const busyRun = runningId !== null;
+  const cyclePaused =
+    busyRun ||
+    selectedId !== null ||
+    hovering ||
+    !inView ||
+    !scenarios.data ||
+    cardCount <= 1 ||
+    (typeof window !== "undefined" && prefersReducedMotion());
+
+  useEffect(() => {
+    if (cyclePaused) return;
+    const t = setInterval(() => setCycle((c) => (c + 1) % cardCount), 2200);
+    return () => clearInterval(t);
+  }, [cyclePaused, cardCount]);
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? true),
+      { threshold: 0.2 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const run = useCallback(
     async (s: Scenario) => {
@@ -250,14 +297,20 @@ export function ScenarioLibrary() {
         <EmptyState title="No scenarios are available for this merchant." />
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {scenarios.data?.map((s) => (
+          <div
+            ref={gridRef}
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {scenarios.data?.map((s, i) => (
               <ScenarioCard
                 key={s.id}
                 scenario={s}
                 selected={selectedId === s.id}
                 running={runningId === s.id}
                 disabled={busy && runningId !== s.id}
+                spotlight={!cyclePaused && cycle === i}
                 onRun={run}
               />
             ))}
@@ -267,6 +320,7 @@ export function ScenarioLibrary() {
               selected={selectedId === AGENT_SCENARIO.id}
               running={runningId === AGENT_SCENARIO.id}
               disabled={busy && runningId !== AGENT_SCENARIO.id}
+              spotlight={!cyclePaused && cycle === (scenarios.data?.length ?? 0)}
               onRun={runAgent}
             />
           </div>
