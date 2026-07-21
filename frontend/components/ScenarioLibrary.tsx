@@ -19,6 +19,21 @@ import { scrollToId } from "@/lib/scroll";
 // Same replay parameters the Hero's self-driving demo uses — identical real path.
 const INJECTIONS: Injection[] = ["timeout", "invalid_output", "stale_identity"];
 
+/* A sixth card, grounded in Rokt's current direction: AI-referred / agent
+   traffic (GEO) lands pre-checkout with thinner data, so the missing-attribute
+   change widens THAT cohort most — the segment a mean hides. It runs the same
+   real V17→V18 replay, then jumps to the by-traffic-source cohort breakdown. */
+const AGENT_SCENARIO: Scenario = {
+  id: "agent",
+  base: "V17",
+  proposed: "V18",
+  title: "AI-referred widening (GEO / agent)",
+  teaches:
+    "Half of AI-referred sessions begin on product pages, pre-checkout — thin data. This change reads safe in aggregate yet quietly widens the AI-referred cohort. See which segment below.",
+  expected_verdict: "BLOCKED",
+  signature: false,
+};
+
 /** Verdict glow: crimson for BLOCKED, teal for ELIGIBLE_FOR_HOLDOUT. */
 const VERDICT_GLOW: Record<VerdictValue, string> = {
   BLOCKED: "glow-crimson",
@@ -161,6 +176,44 @@ export function ScenarioLibrary() {
     [replay, setBaseVersion, setProposedVersion, setJob],
   );
 
+  // The agent card runs the same real replay, then drives the by-traffic-source
+  // cohort breakdown so the viewer sees which segment the change widens.
+  const runAgent = useCallback(
+    async (s: Scenario) => {
+      setSelectedId(s.id);
+      setRunningId(s.id);
+      setStatus("Running AI-referred widening…");
+      setBaseVersion(s.base);
+      setProposedVersion(s.proposed);
+      try {
+        const res = await replay.mutateAsync({
+          base_version: s.base,
+          proposed_version: s.proposed,
+          session_seed: 42,
+          session_count: 200,
+          injections: INJECTIONS,
+        });
+        setJob(res.job, res.requestId, false);
+      } catch (e) {
+        if (e instanceof ApiError && e.isUnreachable) {
+          try {
+            const job = await loadRecordedJob(s.proposed);
+            setJob(job, RECORDED_REQUEST_ID, true);
+          } catch {
+            /* fixture missing — the cohort demo below is still self-contained */
+          }
+        }
+      } finally {
+        setRunningId(null);
+        // demonstrate the cohort concentration in Bring-your-own-data
+        window.dispatchEvent(new CustomEvent("threshold:run-byod"));
+        scrollToId("byod");
+        setStatus("BLOCKED in aggregate — the cohort breakdown below shows which segment it widens.");
+      }
+    },
+    [replay, setBaseVersion, setProposedVersion, setJob],
+  );
+
   const busy = runningId !== null;
   const statusIsError = status.startsWith("Backend unreachable") || status.startsWith("Scenario run failed");
 
@@ -169,7 +222,7 @@ export function ScenarioLibrary() {
       id="scenario-library"
       index={1}
       title="Scenario Library"
-      subtitle="Five curated policy changes, each teaching one failure mode. Click any card to run it end-to-end through the real replay — the constraints, fail-closed proofs, and verdict below update from live API data."
+      subtitle="Six curated policy changes, each teaching one failure mode — including one grounded in Rokt's AI-referred traffic. Click any card to run it end-to-end through the real replay; the constraints, fail-closed proofs, and verdict below update from live API data."
     >
       {scenarios.isPending ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -205,6 +258,14 @@ export function ScenarioLibrary() {
                 onRun={run}
               />
             ))}
+            <ScenarioCard
+              key={AGENT_SCENARIO.id}
+              scenario={AGENT_SCENARIO}
+              selected={selectedId === AGENT_SCENARIO.id}
+              running={runningId === AGENT_SCENARIO.id}
+              disabled={busy && runningId !== AGENT_SCENARIO.id}
+              onRun={runAgent}
+            />
           </div>
 
           <div

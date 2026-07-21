@@ -7,6 +7,7 @@ const CRIMSON = "var(--c-crimson)";
 const TEAL = "var(--c-teal)";
 const MUTED = "var(--c-muted)";
 const AMBER = "var(--c-amber)";
+const OFFER = "var(--c-offer-blue)";
 
 const wrap = "h-10 w-full";
 const label = { fontFamily: "var(--font-mono, monospace)", fontSize: 7 } as const;
@@ -88,12 +89,32 @@ function ImmutableGlyph() {
   );
 }
 
+/** agent — an AI referral arrives pre-checkout with thin data; the missing
+ *  attribute widens that cohort most. */
+function AgentGlyph() {
+  return (
+    <svg viewBox="0 0 140 46" className={wrap} aria-hidden fill="none">
+      {/* the AI referrer */}
+      <circle className="sg-pulse" cx={18} cy={18} r={10} fill={OFFER} fillOpacity={0.14} stroke={OFFER} strokeOpacity={0.8} />
+      <path d="M18 11 l1.6 4 l4 1.6 l-4 1.6 l-1.6 4 l-1.6 -4 l-4 -1.6 l4 -1.6 z" fill={OFFER} />
+      {/* arrives at a product-page session with thin data */}
+      <path d="M30 18 h16 l-4 -3 m4 3 l-4 3" stroke={MUTED} strokeOpacity={0.6} />
+      {[60, 74].map((x) => <circle key={x} cx={x} cy={18} r={3.2} fill={MUTED} fillOpacity={0.5} />)}
+      {/* the missing attribute — dashed hole, then flips crimson (widened) */}
+      <circle cx={90} cy={18} r={3.4} fill="none" stroke={CRIMSON} strokeWidth={1.4} strokeDasharray="2 2" />
+      <circle className="sg-flip" cx={108} cy={18} r={3.6} fill={CRIMSON} />
+      <text x={4} y={41} fill={MUTED} style={label}>AI-referred · thin data widens</text>
+    </svg>
+  );
+}
+
 const GLYPHS: Record<string, () => React.ReactElement> = {
   trap: TrapGlyph,
   safe: SafeGlyph,
   fatfinger: FatfingerGlyph,
   consent: ConsentGlyph,
   immutable: ImmutableGlyph,
+  agent: AgentGlyph,
 };
 
 export function ScenarioGlyph({ id }: { id: string }) {

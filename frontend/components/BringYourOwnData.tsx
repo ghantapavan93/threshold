@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Section } from "./ui/primitives";
 
 /* Bring your own data — the depth a senior engineer asks for.
@@ -108,6 +108,19 @@ function parse(csv: string): { rows: Record<string, string>[]; error: string | n
 export function BringYourOwnData() {
   const [text, setText] = useState(SAMPLE);
   const [ran, setRan] = useState(false);
+
+  // The AI-referred scenario card (Scenario Library) drives this panel: run the
+  // gate over the sample and bring the cohort breakdown into view.
+  useEffect(() => {
+    const onRun = () => {
+      setRan(true);
+      requestAnimationFrame(() => {
+        document.getElementById("byod")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    };
+    window.addEventListener("threshold:run-byod", onRun);
+    return () => window.removeEventListener("threshold:run-byod", onRun);
+  }, []);
 
   const result = useMemo(() => {
     if (!ran) return null;
