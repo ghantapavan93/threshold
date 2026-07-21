@@ -139,6 +139,8 @@ export function SilentWideningDiagram({ className }: { className?: string }) {
           return (
             <rect
               key={`${r}-${c}`}
+              className={widened ? "sg-flip" : undefined}
+              style={widened ? { animationDelay: `${(c - 4) * 0.14}s` } : undefined}
               x={x}
               y={y}
               width="16"
@@ -153,6 +155,7 @@ export function SilentWideningDiagram({ className }: { className?: string }) {
         }),
       )}
       <path
+        className="sg-dash"
         d="M8 64 h284"
         stroke={CRIMSON}
         strokeOpacity="0.5"
@@ -181,10 +184,12 @@ export function FailClosedLaneMotif({ className }: { className?: string }) {
           <circle key={x} cx={x} cy="38" r="5" fill={MUTED} fillOpacity="0.55" />
         ))}
         <path d="M208 38 q22 0 22 26" stroke={CRIMSON} strokeWidth="2" fill="none" />
-        <rect x="196" y="70" width="112" height="26" rx="8" fill={CRIMSON} fillOpacity="0.14" stroke={CRIMSON} />
-        <text x="252" y="87" textAnchor="middle" fontSize="11" fontFamily="var(--font-sans)" fill={CRIMSON}>
-          No Offer Rendered
-        </text>
+        <g className="sg-pulse">
+          <rect x="196" y="70" width="112" height="26" rx="8" fill={CRIMSON} fillOpacity="0.14" stroke={CRIMSON} />
+          <text x="252" y="87" textAnchor="middle" fontSize="11" fontFamily="var(--font-sans)" fill={CRIMSON}>
+            No Offer Rendered
+          </text>
+        </g>
       </g>
       {/* checkout lane */}
       <g>
