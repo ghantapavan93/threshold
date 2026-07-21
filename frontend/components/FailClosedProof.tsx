@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useConsole } from "./console-context";
+import { useStageActive } from "./walkthrough";
 import { Button, Card, EmptyState, Section } from "./ui/primitives";
 import { formatTime } from "@/lib/utils";
+import { prefersReducedMotion } from "@/lib/scroll";
 import { FailClosedLaneMotif } from "./visual/illustrations";
 import type { FailClosedProof, Injection } from "@/lib/schemas";
 
@@ -23,12 +25,14 @@ function Lane({
   terminalLabel,
   terminalColor,
   green,
+  pulseKey,
 }: {
   title: string;
   stages: readonly string[];
   terminalLabel: string;
   terminalColor: string;
   green: boolean;
+  pulseKey?: string;
 }) {
   return (
     <div>
@@ -62,7 +66,7 @@ function Lane({
           →
         </span>
         <motion.span
-          key={terminalLabel}
+          key={pulseKey ?? terminalLabel}
           initial={{ scale: 0.9, opacity: 0.4 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.2 }}
@@ -99,6 +103,48 @@ export function FailClosedProofSection() {
       );
     }
   };
+
+  // When the walkthrough lands here, auto-cycle every injected failure: each one
+  // drops the decision lane to No Offer Rendered in turn while the checkout stays
+  // green — so "every failure is contained" plays out, not just one on a click.
+  // Audit lines append once per injection per session (deduped) so the log builds
+  // without spamming on repeat visits.
+  const { visits } = useStageActive("fail-closed-proof");
+  const logged = useRef<Set<Injection>>(new Set());
+  useEffect(() => {
+    if (visits === 0 || proofs.length === 0) return;
+    const order = proofs.map((p) => p.injection);
+    if (prefersReducedMotion()) {
+      setActive(order[order.length - 1] ?? null);
+      return;
+    }
+    let cancelled = false;
+    const timers: number[] = [];
+    setActive(null);
+    order.forEach((inj, i) => {
+      timers.push(
+        window.setTimeout(() => {
+          if (cancelled) return;
+          setActive(inj);
+          if (!logged.current.has(inj)) {
+            const proof = proofs.find((p) => p.injection === inj);
+            if (proof) {
+              appendAuditLine(
+                `FAILCLOSED_PROVEN · ${inj} → ${proof.decision} (${proof.fallback_reason ?? "n/a"}) · checkout_preserved=${proof.checkout_preserved} · ${formatTime(new Date().toISOString())}`,
+              );
+              logged.current.add(inj);
+            }
+          }
+        }, 400 + i * 1150),
+      );
+    });
+    return () => {
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+    // Replay the sequence each time the spotlight lands (visits changes).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visits]);
 
   return (
     <Section
@@ -152,6 +198,7 @@ export function FailClosedProofSection() {
                 title="Decision pipeline"
                 stages={PIPELINE_STAGES}
                 green={!selectedProof}
+                pulseKey={active ?? "idle"}
                 terminalLabel={
                   selectedProof ? "No Offer Rendered" : "Awaiting injection"
                 }
