@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useConsole } from "./console-context";
+import { useStageActive } from "./walkthrough";
 import { Button, Card, Chip, EmptyState, Section } from "./ui/primitives";
 import { VERDICT_COLOR, VERDICT_LABEL } from "@/lib/utils";
 import type { HoldoutConfig } from "@/lib/schemas";
@@ -30,6 +31,11 @@ const VERDICT_GLOW: Record<string, string> = {
 export function ReleaseVerdict() {
   const { job } = useConsole();
   const verdict = job?.verdict ?? null;
+  // The final beat: re-stamp the emblem each time the walkthrough lands here (and
+  // on every new verdict). Keying the block on this remounts it, replaying the
+  // CSS stamp animation.
+  const { visits } = useStageActive("release-verdict");
+  const stampKey = `${verdict?.value ?? "none"}-${visits}`;
 
   return (
     <Section
@@ -60,7 +66,7 @@ export function ReleaseVerdict() {
                 background: `linear-gradient(180deg, color-mix(in srgb, ${VERDICT_COLOR[verdict.value]} 12%, transparent), transparent)`,
               }}
             >
-              <div className="flex items-center gap-4">
+              <div key={stampKey} className="verdict-stamp flex items-center gap-4">
                 <span
                   aria-hidden
                   className="flex h-14 w-14 items-center justify-center rounded-xl border text-2xl font-bold"
