@@ -1,10 +1,16 @@
-"""Append-only, tamper-EVIDENT audit trail.
+"""Append-only, tamper-EVIDENT audit trail — hash-chained.
 
-Each record carries an HMAC-SHA256 over its canonical-JSON payload keyed by a
-server secret. This detects modification of a stored record by a party WITHOUT the
-key. It is explicitly NOT tamper-PROOF (a holder of the key, or a full app
-compromise, can forge records) and it does NOT prove semantic truth — only that a
-stored record's content was not altered after write. See docs/THREAT_MODEL.md.
+Each record's HMAC-SHA256 covers its own identity and payload AND the previous
+record's HMAC, keyed by a server secret. Chaining is the point: independent
+per-record HMACs detect modification of a stored record, but NOT deletion or
+reordering. By committing the prior record's hash into each record, removing or
+moving a record breaks the link to the next one, so a truncated or reshuffled
+log fails verification too.
+
+It is still explicitly NOT tamper-PROOF: a holder of the key (or a full app
+compromise) can forge a fresh, internally-valid chain, and it does not prove
+semantic truth — only that the stored sequence was not altered, truncated, or
+reordered after write. See docs/THREAT_MODEL.md.
 """
 from __future__ import annotations
 
@@ -13,13 +19,21 @@ import hmac
 import json
 from dataclasses import dataclass, field
 
+# The prev-hash of the very first record — a fixed, well-known anchor so the
+# genesis link is itself verifiable.
+GENESIS = "0" * 64
+
 
 def canonical(payload: dict) -> str:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
 
 
-def content_hmac(secret: str, payload: dict) -> str:
-    return hmac.new(secret.encode(), canonical(payload).encode(), hashlib.sha256).hexdigest()
+def record_hmac(secret: str, seq: int, event_type: str, payload: dict, prev_hmac: str) -> str:
+    """HMAC over the record's identity + content + the link to the prior record."""
+    material = canonical(
+        {"seq": seq, "event_type": event_type, "payload": payload, "prev_hmac": prev_hmac}
+    )
+    return hmac.new(secret.encode(), material.encode(), hashlib.sha256).hexdigest()
 
 
 @dataclass
@@ -27,6 +41,7 @@ class AuditRecord:
     seq: int
     event_type: str
     payload: dict
+    prev_hmac: str
     content_hmac: str
 
 
@@ -37,19 +52,52 @@ class AuditTrail:
 
     def append(self, event_type: str, payload: dict) -> AuditRecord:
         seq = len(self.records)
-        rec = AuditRecord(seq, event_type, payload, content_hmac(self.secret, payload))
+        prev = self.records[-1].content_hmac if self.records else GENESIS
+        h = record_hmac(self.secret, seq, event_type, payload, prev)
+        rec = AuditRecord(seq, event_type, payload, prev, h)
         self.records.append(rec)
         return rec
 
     def as_list(self) -> list[dict]:
-        return [{"seq": r.seq, "event_type": r.event_type, "payload": r.payload,
-                 "content_hmac": r.content_hmac} for r in self.records]
+        return [
+            {
+                "seq": r.seq,
+                "event_type": r.event_type,
+                "payload": r.payload,
+                "prev_hmac": r.prev_hmac,
+                "content_hmac": r.content_hmac,
+            }
+            for r in self.records
+        ]
 
 
 def verify(records: list[dict], secret: str) -> dict:
-    """Recompute each HMAC; report the first record whose content was altered."""
-    for r in records:
-        expected = content_hmac(secret, r["payload"])
+    """Walk the chain. Catches content edits, deletion, and reordering; reports
+    the first record where the chain breaks and why."""
+    prev = GENESIS
+    for i, r in enumerate(records):
+        seq = r.get("seq")
+        if seq != i:
+            return {
+                "verified": False,
+                "records": len(records),
+                "first_tampered_seq": seq,
+                "reason": "sequence gap — a record was deleted or reordered",
+            }
+        if r.get("prev_hmac") != prev:
+            return {
+                "verified": False,
+                "records": len(records),
+                "first_tampered_seq": seq,
+                "reason": "broken chain link — a record was deleted or reordered",
+            }
+        expected = record_hmac(secret, seq, r["event_type"], r["payload"], prev)
         if not hmac.compare_digest(expected, r.get("content_hmac", "")):
-            return {"verified": False, "records": len(records), "first_tampered_seq": r["seq"]}
-    return {"verified": True, "records": len(records), "first_tampered_seq": None}
+            return {
+                "verified": False,
+                "records": len(records),
+                "first_tampered_seq": seq,
+                "reason": "record content was altered after write",
+            }
+        prev = r["content_hmac"]
+    return {"verified": True, "records": len(records), "first_tampered_seq": None, "reason": None}

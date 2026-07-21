@@ -66,9 +66,15 @@ function classify(row: Record<string, string>, seen: Set<string>): Verdict {
     return { id, status: "reject", label: "Future leakage", tone: CRIMSON, concept: "point-in-time correctness",
       why: "Event-time is after the feature snapshot we replay as-of — including it would leak the future into a past decision." };
   }
-  if ((row.consent ?? "").match(/revoked|false|^0$|^no$/i)) {
-    return { id, status: "excluded", label: "Consent excluded", tone: MUTED, concept: "mParticle consent state",
-      why: "Consent revoked — the replay excludes it, so no decision is made on data that isn't legally usable." };
+  const consent = (row.consent ?? "").trim().toLowerCase();
+  const affirmative = ["granted", "true", "1", "yes", "opt_in", "opt-in"].includes(consent);
+  if (!affirmative) {
+    return {
+      id, status: "excluded", label: "Consent excluded", tone: MUTED, concept: "consent · fail-closed",
+      why: consent === ""
+        ? "No consent on record — excluded. Absence isn't permission; the gate fails closed on consent, it never defaults to allow."
+        : `Consent is "${row.consent}", not an affirmative grant — excluded. Only explicit consent proceeds.`,
+    };
   }
   if (!row.cc_bin?.trim()) {
     return { id, status: "flag", label: "Missing attribute", tone: AMBER, concept: "the signature trap",

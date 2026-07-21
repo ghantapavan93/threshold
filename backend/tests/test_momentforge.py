@@ -157,8 +157,10 @@ def test_simulate_trap_blocked_with_inversion(client):
                for c in body["constraint_results"])
     assert body["replay_summary"]["constraint_violation"] > 0
     # inline audit matches audit.as_list() shape exactly (no created_at, R1).
+    # prev_hmac is part of the shape now — the log is hash-chained, not just
+    # per-record HMAC'd, so deletion/reorder is detectable.
     assert body["audit"] and set(body["audit"][0].keys()) == {
-        "seq", "event_type", "payload", "content_hmac"}
+        "seq", "event_type", "payload", "prev_hmac", "content_hmac"}
 
 
 def test_simulate_safe_eligible(client):

@@ -35,7 +35,7 @@ export function EvidenceSection() {
       id="evidence"
       index={9}
       title="Evidence Drawer"
-      subtitle="Append-only, tamper-evident audit log. Each record carries a per-record HMAC. Click any row for the full record and verify its integrity."
+      subtitle="Append-only, tamper-evident audit log. Each record is hash-chained — its HMAC commits the prior record's — so deletion or reordering is detectable, not just per-record edits. Click any row for the full record and verify its integrity."
       actions={
         job ? (
           <Button
@@ -53,7 +53,7 @@ export function EvidenceSection() {
         <EmptyState
           icon={<IntegrityShield className="w-16" />}
           title="No audit trail yet"
-          hint="Run a Policy Diff Replay to generate the append-only, tamper-evident audit log. Each record carries a per-record HMAC."
+          hint="Run a Policy Diff Replay to generate the append-only, tamper-evident audit log. Each record is hash-chained to the one before it."
         />
       ) : (
         <div className="space-y-3">

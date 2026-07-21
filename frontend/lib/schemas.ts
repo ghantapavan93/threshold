@@ -276,6 +276,9 @@ export const AuditRecordSchema = z.object({
   seq: z.number(),
   event_type: AuditEventTypeSchema,
   payload: z.unknown(),
+  // The prior record's HMAC, committed into this record — the chain link that
+  // makes deletion/reordering detectable, not just per-record edits.
+  prev_hmac: z.string().optional(),
   content_hmac: z.string(),
   // Backend audit is deterministic/seq-based and emits no created_at; optional so
   // both the /audit GET and the ephemeral simulation audit validate.
@@ -288,6 +291,8 @@ export const AuditVerifySchema = z.object({
   verified: z.boolean(),
   records: z.number(),
   first_tampered_seq: z.number().nullable(),
+  // Why the chain failed (content edit vs deletion/reorder), null when verified.
+  reason: z.string().nullable().optional(),
 });
 export type AuditVerify = z.infer<typeof AuditVerifySchema>;
 

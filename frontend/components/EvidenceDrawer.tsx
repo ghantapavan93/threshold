@@ -204,7 +204,7 @@ function VerifyPanel({
           </div>
         ) : (
           <p className="text-[11px] text-muted">
-            Tamper-evident: each record carries a per-record HMAC.
+            Tamper-evident: records are hash-chained — each HMAC commits the prior — so edits, deletion, and reordering all break verification.
           </p>
         )}
       </div>

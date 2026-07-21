@@ -195,6 +195,23 @@ def test_audit_verify_and_tamper_detection():
     assert out["verified"] is False and out["first_tampered_seq"] == 1
 
 
+def test_audit_chain_detects_deletion_and_reorder():
+    t = AuditTrail(secret=SECRET)
+    for i in range(4):
+        t.append("E", {"i": i})
+    recs = t.as_list()
+    assert verify(recs, SECRET)["verified"] is True
+
+    # Deleting a middle record breaks the chain (a per-record HMAC scheme misses this).
+    deleted = [copy.deepcopy(recs[j]) for j in (0, 1, 3)]
+    assert verify(deleted, SECRET)["verified"] is False
+
+    # Reordering two records breaks the chain too.
+    reordered = copy.deepcopy(recs)
+    reordered[1], reordered[2] = reordered[2], reordered[1]
+    assert verify(reordered, SECRET)["verified"] is False
+
+
 # ---------- replay determinism (end-to-end pure) ----------
 
 def test_replay_deterministic():
