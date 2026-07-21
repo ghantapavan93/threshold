@@ -30,12 +30,12 @@ const QA: { q: string; a: string; tag: Tag }[] = [
   {
     tag: "ENFORCED",
     q: "Independent per-record HMACs miss deletion and reordering.",
-    a: "Correct — which is why the log is hash-chained: each record's HMAC commits the prior record's. Reorder or delete an interior record and the chain breaks — both are checked as properties over generated event sequences, not single examples. It is still not tamper-PROOF: a key-holder can forge a fresh chain, and — see the next card — suffix truncation is its own limit.",
+    a: "Correct — which is why the log is hash-chained: each record's HMAC commits the prior record's. Reorder or delete an interior record and the chain breaks — both checked as properties over generated event sequences. Truncation is closed by the signed head seal (next card). It is still not tamper-PROOF against a key-holder, who can forge a fresh chain and seal — and we say exactly that.",
   },
   {
-    tag: "HONEST LIMIT",
+    tag: "ENFORCED",
     q: "Then just truncate it — drop the last few records.",
-    a: "That's the one thing a plain hash chain can't see: editing, reordering, and interior deletion all break a link, but dropping the SUFFIX leaves a valid shorter chain. Detecting truncation needs an external anchor — a separately-signed head hash and record count. We assert this gap in a test rather than let the chain imply it's covered. It's the honest next step.",
+    a: "Caught — and this one is built, not described. A plain chain can't see truncation (dropping the tail leaves a valid shorter chain), so the log ships with a SEAL: a key-signed commitment to (record count, head HMAC). Drop the tail and the count no longer matches the seal; forging a seal for a shorter log needs the secret. Prove it live in the Evidence drawer — “✂ Drop the last record” makes verify fail with “log truncated… the sealed head commits N”. A property test asserts both halves: chain alone misses it, the seal catches it.",
   },
   {
     tag: "CORE",

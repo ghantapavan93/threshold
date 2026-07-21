@@ -226,10 +226,10 @@ export function useCancellation(
 
 export function useAuditVerify(
   merchantId: string = MERCHANT_ID,
-): UseMutationResult<AuditVerify, ApiError, { jobId: string }> {
-  return useMutation<AuditVerify, ApiError, { jobId: string }>({
+): UseMutationResult<AuditVerify, ApiError, { jobId: string; dropLast?: number }> {
+  return useMutation<AuditVerify, ApiError, { jobId: string; dropLast?: number }>({
     mutationKey: ["audit-verify", merchantId],
-    mutationFn: ({ jobId }) => api.verifyAudit(merchantId, jobId),
+    mutationFn: ({ jobId, dropLast }) => api.verifyAudit(merchantId, jobId, dropLast ?? 0),
   });
 }
 

@@ -447,10 +447,12 @@ export const api = {
   verifyAudit(
     merchantId: string,
     jobId: string,
+    dropLast = 0,
     signal?: AbortSignal,
   ): Promise<AuditVerify> {
+    const q = dropLast > 0 ? `?drop_last=${dropLast}` : "";
     return requestData(
-      `${base(merchantId)}/replay-jobs/${jobId}/audit/verify`,
+      `${base(merchantId)}/replay-jobs/${jobId}/audit/verify${q}`,
       AuditVerifySchema,
       { method: "POST", signal },
     );

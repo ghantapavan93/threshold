@@ -7,16 +7,17 @@ reordering. By committing the prior record's hash into each record, removing or
 moving a record breaks the link to the next one, so a truncated or reshuffled
 log fails verification too.
 
-It is still explicitly NOT tamper-PROOF on two axes, and we name both rather than
-imply coverage:
-  1. A holder of the key (or a full app compromise) can forge a fresh,
-     internally-valid chain.
-  2. SUFFIX TRUNCATION — dropping the tail — leaves a valid shorter chain, so a
-     plain chain cannot detect it on its own. Detecting truncation needs an
-     external anchor: a separately-signed head hash + record count. (Interior
-     deletion and reordering ARE detected, because they break a link or the
-     seq/position match — see tests/test_invariants.py.)
-See docs/THREAT_MODEL.md.
+Suffix truncation — dropping the tail — would leave a valid shorter chain, so
+the chain alone can't see it. That gap is closed by a SEAL: a key-signed
+commitment to the log's head (its record count + final HMAC), stored alongside
+the log. Drop the tail and the count/head no longer match the seal, and forging
+a seal for a shorter log needs the secret. So verification now catches content
+edits, reordering, interior deletion, AND truncation.
+
+It is still explicitly NOT tamper-PROOF against a holder of the key (or a full
+app compromise), who can forge a fresh chain and a matching seal — and it does
+not prove semantic truth, only that the stored sequence is intact. See
+docs/THREAT_MODEL.md.
 """
 from __future__ import annotations
 
@@ -40,6 +41,17 @@ def record_hmac(secret: str, seq: int, event_type: str, payload: dict, prev_hmac
         {"seq": seq, "event_type": event_type, "payload": payload, "prev_hmac": prev_hmac}
     )
     return hmac.new(secret.encode(), material.encode(), hashlib.sha256).hexdigest()
+
+
+def compute_seal(secret: str, records: list[dict]) -> dict:
+    """A key-signed commitment to the log's HEAD — its record count and final
+    HMAC. Stored beside the log, it is the external anchor that makes SUFFIX
+    TRUNCATION detectable: drop the tail and count/head stop matching the seal,
+    and re-signing a shorter log needs the secret."""
+    count = len(records)
+    head = records[-1]["content_hmac"] if records else GENESIS
+    sig = hmac.new(secret.encode(), f"{count}:{head}".encode(), hashlib.sha256).hexdigest()
+    return {"count": count, "head": head, "sig": sig}
 
 
 @dataclass
@@ -76,10 +88,15 @@ class AuditTrail:
             for r in self.records
         ]
 
+    def seal(self) -> dict:
+        """The signed head anchor for this log — store it beside the records."""
+        return compute_seal(self.secret, self.as_list())
 
-def verify(records: list[dict], secret: str) -> dict:
-    """Walk the chain. Catches content edits, deletion, and reordering; reports
-    the first record where the chain breaks and why."""
+
+def verify(records: list[dict], secret: str, seal: dict | None = None) -> dict:
+    """Walk the chain, then check the signed head anchor if one is supplied.
+    Catches content edits, reordering, interior deletion, AND — via the seal —
+    suffix truncation. Reports the first place integrity breaks and why."""
     prev = GENESIS
     for i, r in enumerate(records):
         seq = r.get("seq")
@@ -106,4 +123,26 @@ def verify(records: list[dict], secret: str) -> dict:
                 "reason": "record content was altered after write",
             }
         prev = r["content_hmac"]
+
+    # The signed head anchor: catches truncation/extension the chain can't see.
+    if seal is not None:
+        expected_sig = hmac.new(
+            secret.encode(), f"{seal['count']}:{seal['head']}".encode(), hashlib.sha256
+        ).hexdigest()
+        if not hmac.compare_digest(expected_sig, seal.get("sig", "")):
+            return {
+                "verified": False,
+                "records": len(records),
+                "first_tampered_seq": None,
+                "reason": "audit seal signature is invalid — the anchor itself was tampered",
+            }
+        head = records[-1]["content_hmac"] if records else GENESIS
+        if len(records) != seal["count"] or head != seal["head"]:
+            return {
+                "verified": False,
+                "records": len(records),
+                "first_tampered_seq": max(len(records) - 1, 0),
+                "reason": f"log truncated or extended — {len(records)} records present, the sealed head commits {seal['count']}",
+            }
+
     return {"verified": True, "records": len(records), "first_tampered_seq": None, "reason": None}

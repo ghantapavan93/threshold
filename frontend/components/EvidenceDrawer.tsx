@@ -142,8 +142,12 @@ export function EvidenceDrawer() {
               if (!job) return;
               verify.mutate({ jobId: job.id });
             }}
+            onTruncate={() => {
+              if (!job) return;
+              verify.mutate({ jobId: job.id, dropLast: 1 });
+            }}
             verify={verify}
-            note="Verifies the whole run's tamper-evident audit log."
+            note="Verifies the whole run's tamper-evident audit log against its signed head seal."
           />
         </div>
       ) : null}
@@ -153,27 +157,36 @@ export function EvidenceDrawer() {
 
 function VerifyPanel({
   onVerify,
+  onTruncate,
   verify,
   note,
 }: {
   onVerify: () => void;
+  onTruncate?: () => void;
   verify: ReturnType<typeof useAuditVerify>;
   note?: string;
 }) {
   return (
     <div className="rounded-lg border border-border p-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">Integrity</p>
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={onVerify}
-          disabled={verify.isPending}
-        >
-          {verify.isPending ? "Verifying…" : "Verify integrity"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="primary" onClick={onVerify} disabled={verify.isPending}>
+            {verify.isPending ? "Verifying…" : "Verify integrity"}
+          </Button>
+          {onTruncate ? (
+            <Button size="sm" variant="danger" onClick={onTruncate} disabled={verify.isPending}>
+              ✂ Drop the last record
+            </Button>
+          ) : null}
+        </div>
       </div>
       {note ? <p className="mt-1 text-[11px] text-muted">{note}</p> : null}
+      {onTruncate ? (
+        <p className="mt-1 text-[11px] text-muted">
+          Try the attack: dropping the tail leaves a valid shorter chain — but the signed head seal commits the count, so truncation is caught.
+        </p>
+      ) : null}
 
       <div aria-live="polite" className="mt-3">
         {verify.isError ? (
@@ -184,27 +197,32 @@ function VerifyPanel({
               : verify.error.message}
           </p>
         ) : verify.data ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <Chip
-              color={verify.data.verified ? "var(--c-teal)" : "var(--c-crimson)"}
-              icon={<span aria-hidden>{verify.data.verified ? "✓" : "✕"}</span>}
-            >
-              {verify.data.verified ? "verified: true" : "verified: false"}
-            </Chip>
-            <Chip color="var(--c-muted)">records {verify.data.records}</Chip>
-            <Chip
-              color={
-                verify.data.first_tampered_seq === null
-                  ? "var(--c-muted)"
-                  : "var(--c-crimson)"
-              }
-            >
-              first_tampered_seq {String(verify.data.first_tampered_seq)}
-            </Chip>
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Chip
+                color={verify.data.verified ? "var(--c-teal)" : "var(--c-crimson)"}
+                icon={<span aria-hidden>{verify.data.verified ? "✓" : "✕"}</span>}
+              >
+                {verify.data.verified ? "verified: true" : "verified: false"}
+              </Chip>
+              <Chip color="var(--c-muted)">records {verify.data.records}</Chip>
+              <Chip
+                color={
+                  verify.data.first_tampered_seq === null
+                    ? "var(--c-muted)"
+                    : "var(--c-crimson)"
+                }
+              >
+                first_tampered_seq {String(verify.data.first_tampered_seq)}
+              </Chip>
+            </div>
+            {verify.data.reason ? (
+              <p className="text-[11px] text-crimson">{verify.data.reason}</p>
+            ) : null}
           </div>
         ) : (
           <p className="text-[11px] text-muted">
-            Tamper-evident: records are hash-chained — each HMAC commits the prior — so edits, deletion, and reordering all break verification.
+            Tamper-evident: records are hash-chained and sealed with a signed head — edits, deletion, reordering, and truncation all break verification.
           </p>
         )}
       </div>

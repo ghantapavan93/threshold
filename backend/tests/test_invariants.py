@@ -126,9 +126,10 @@ def test_law_audit_chain_integrity(events):
     assert verify(swapped, SECRET)["verified"] is False
 
 
-# LAW 5b — the HONEST edge: a plain hash chain CANNOT detect suffix truncation.
-# Dropping the tail leaves a valid shorter chain. We assert the gap explicitly so
-# the claim stays precise — detecting truncation needs an external signed head.
+# LAW 5b — SUFFIX TRUNCATION is caught by the signed head seal. A plain chain
+# can't see a dropped tail (it leaves a valid shorter chain); the seal — a
+# key-signed commitment to (count, head) — closes that gap. We prove both halves:
+# without the seal truncation slips through, WITH it truncation fails verify.
 @settings(max_examples=40)
 @given(
     events=st.lists(
@@ -140,12 +141,17 @@ def test_law_audit_chain_integrity(events):
         max_size=8,
     )
 )
-def test_law_truncation_is_the_limit(events):
+def test_law_truncation_caught_by_seal(events):
     t = AuditTrail(secret=SECRET)
     for et, pl in events:
         t.append(et, pl)
     recs = t.as_list()
+    s = t.seal()
     truncated = [copy.deepcopy(r) for r in recs[:-1]]  # drop the last record
-    # This VERIFIES — which is exactly why truncation is a documented limit, not a
-    # claimed protection.
+
+    # Chain alone: truncation slips through (this is why the seal exists).
     assert verify(truncated, SECRET)["verified"] is True
+    # With the signed head seal: truncation is caught.
+    assert verify(truncated, SECRET, s)["verified"] is False
+    # And the intact log still verifies against its seal.
+    assert verify(recs, SECRET, s)["verified"] is True

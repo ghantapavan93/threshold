@@ -109,4 +109,5 @@ def run_replay(
         "ope_prescreen": ope_prescreen,
         "verdict": verdict,
         "_audit": audit.as_list(),
+        "_audit_seal": audit.seal(),
     }

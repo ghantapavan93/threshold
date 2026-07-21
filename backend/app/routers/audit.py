@@ -23,6 +23,18 @@ def get_audit(merchant_id: str, job_id: str, db: Session = Depends(get_db)) -> l
 
 
 @router.post("/replay-jobs/{job_id}/audit/verify")
-def verify_audit(merchant_id: str, job_id: str, db: Session = Depends(get_db)) -> dict:
-    records = _job(db, merchant_id, job_id).result.get("_audit", [])
-    return verify(records, settings.audit_secret)
+def verify_audit(
+    merchant_id: str,
+    job_id: str,
+    drop_last: int = 0,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Verify the stored log against its signed head seal. `drop_last` > 0
+    verifies a copy with that many tail records removed — a live demonstration
+    that suffix truncation is now caught by the seal, not just described."""
+    result = _job(db, merchant_id, job_id).result
+    records = result.get("_audit", [])
+    seal = result.get("_audit_seal")
+    if drop_last > 0:
+        records = records[: max(len(records) - drop_last, 0)]
+    return verify(records, settings.audit_secret, seal)
