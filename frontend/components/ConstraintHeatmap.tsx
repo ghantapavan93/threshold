@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConsole } from "./console-context";
+import { useStageActive } from "./walkthrough";
 import {
   Card,
   Chip,
@@ -11,6 +12,7 @@ import {
   StatusGlyph,
 } from "./ui/primitives";
 import { constraintLabel, CONSTRAINT_COLOR } from "@/lib/utils";
+import { prefersReducedMotion } from "@/lib/scroll";
 import { SilentWideningDiagram } from "./visual/illustrations";
 import type { ConstraintResult } from "@/lib/schemas";
 
@@ -21,25 +23,26 @@ function Tile({
   expanded,
   onToggle,
   star,
+  resolved,
 }: {
   constraint: ConstraintResult;
   expanded: boolean;
   onToggle: () => void;
   star: boolean;
+  resolved: boolean;
 }) {
   const color = CONSTRAINT_COLOR[constraint.result];
-  const isFocal = star && constraint.result === "FAIL";
+  const isFocal = resolved && star && constraint.result === "FAIL";
 
   return (
     <Card
       holo
       className={
-        "flex flex-col " +
-        (isFocal
-          ? "glow-crimson-pulse md:col-span-2 md:row-span-2"
-          : "")
+        "flex flex-col transition-all duration-300 " +
+        (isFocal ? "glow-crimson-pulse md:col-span-2 md:row-span-2 " : "") +
+        (resolved ? "" : "opacity-70")
       }
-      style={{ borderColor: constraint.result === "PASS" ? undefined : color }}
+      style={{ borderColor: !resolved || constraint.result === "PASS" ? undefined : color }}
     >
       <button
         onClick={onToggle}
@@ -59,9 +62,15 @@ function Tile({
               </span>
             ) : null}
           </span>
-          <Chip color={color} icon={<StatusGlyph kind={constraint.result} />}>
-            {constraint.result}
-          </Chip>
+          {resolved ? (
+            <Chip color={color} icon={<StatusGlyph kind={constraint.result} />}>
+              {constraint.result}
+            </Chip>
+          ) : (
+            <Chip color="var(--c-muted)">
+              <span className="animate-pulse">checking…</span>
+            </Chip>
+          )}
         </div>
         <p
           className={
@@ -97,6 +106,29 @@ export function ConstraintHeatmap() {
     return 0;
   });
 
+  // When the walkthrough lands here, the tiles resolve one-by-one — each shows
+  // "checking…" then flips to its real PASS/WARN/FAIL — so the gate visibly does
+  // the work. Absent a walk (plain load / manual scroll) every tile is resolved.
+  const { visits } = useStageActive("constraint-heatmap");
+  const [resolvedCount, setResolvedCount] = useState(Number.POSITIVE_INFINITY);
+  useEffect(() => {
+    if (visits === 0) return; // never walked to → leave all resolved
+    if (prefersReducedMotion() || ordered.length === 0) {
+      setResolvedCount(ordered.length);
+      return;
+    }
+    setResolvedCount(0);
+    let n = 0;
+    const t = window.setInterval(() => {
+      n += 1;
+      setResolvedCount(n);
+      if (n >= ordered.length) window.clearInterval(t);
+    }, 220);
+    return () => window.clearInterval(t);
+    // Replay the resolve each time the spotlight lands (visits changes).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visits]);
+
   return (
     <Section
       id="constraint-heatmap"
@@ -114,11 +146,12 @@ export function ConstraintHeatmap() {
         <EmptyState title="This run returned no constraint results." />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {ordered.map((c) => (
+          {ordered.map((c, i) => (
             <Tile
               key={c.key}
               constraint={c}
               star={c.key === STAR_KEY}
+              resolved={i < resolvedCount}
               expanded={openKey === c.key}
               onToggle={() => setOpenKey((k) => (k === c.key ? null : c.key))}
             />

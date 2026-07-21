@@ -6,6 +6,7 @@ import { prefersReducedMotion } from "@/components/builder/anim";
 import { useReplayJob, type ReplayJobInput } from "@/lib/hooks";
 import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import { useConsole } from "./console-context";
+import { useStageActive } from "./walkthrough";
 import { Button, Card, Chip, EmptyState, ErrorState, Section } from "./ui/primitives";
 import { SessionDrawer } from "./SessionDrawer";
 import {
@@ -159,6 +160,22 @@ export function PolicyDiffReplay() {
     }
   }, [job]);
 
+  // When the walkthrough lands on this stage, auto-play the mark-by-mark reveal so
+  // the sessions visibly count up — the backend "replaying," made legible. Reuses
+  // the same reveal machinery as the "Replay marks" button.
+  const { visits } = useStageActive("policy-diff-replay");
+  useEffect(() => {
+    if (visits === 0 || !job) return;
+    if (reduced) {
+      setRevealed(job.evaluations.length);
+      return;
+    }
+    setRevealed(0);
+    setRevealing(true);
+    setPlaying(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visits]);
+
   useEffect(() => {
     if (!playing) return;
     if (revealed >= evaluations.length) {
@@ -204,6 +221,8 @@ export function PolicyDiffReplay() {
     );
   };
 
+  // Count over the REVEALED marks so the tallies climb during a reveal, then
+  // settle on the true totals once every session is shown.
   const counts = useMemo(() => {
     const c: Record<ChangeKind, number> = {
       unchanged: 0,
@@ -211,9 +230,9 @@ export function PolicyDiffReplay() {
       offer_to_nothing: 0,
       constraint_violation: 0,
     };
-    for (const e of evaluations) c[e.change_kind] += 1;
+    for (const e of evaluations.slice(0, revealed)) c[e.change_kind] += 1;
     return c;
-  }, [evaluations]);
+  }, [evaluations, revealed]);
 
   return (
     <Section

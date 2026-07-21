@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
   type ReactNode,
@@ -200,4 +201,22 @@ export function useWalkthrough(): WalkContext {
   const c = useContext(Ctx);
   if (!c) throw new Error("useWalkthrough must be used within WalkthroughProvider");
   return c;
+}
+
+/* Whether a given stage is the one the walkthrough is on right now, plus a `visits`
+   counter that ticks up every time it BECOMES active. A section keys its internal
+   "work happening" animation (tiles resolving, sessions counting) off `visits`, so
+   it replays each time the spotlight lands — and stays quiet otherwise. Safe to
+   call outside a run: visits stays 0 and the section shows its resting state. */
+export function useStageActive(id: string): { active: boolean; visits: number } {
+  const { stages, activeIndex } = useWalkthrough();
+  const idx = stages.findIndex((s) => s.id === id);
+  const active = idx >= 0 && idx === activeIndex;
+  const [visits, setVisits] = useState(0);
+  const was = useRef(false);
+  useEffect(() => {
+    if (active && !was.current) setVisits((v) => v + 1);
+    was.current = active;
+  }, [active]);
+  return { active, visits };
 }
