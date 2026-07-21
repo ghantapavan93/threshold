@@ -129,13 +129,24 @@ def test_constraints_catch_trap_and_warn():
     assert by["holdout_required"].result == "PASS"
 
 
-def test_constraints_all_pass_for_safe():
+def test_constraints_safe_surfaces_widening_without_blocking():
+    # The "safe fix" (V18-safe) lowers the age gate 25 -> 18: a VISIBLE, deliberate
+    # widening. It must not FAIL/WARN (that's the holdout's job, not a block) — but
+    # it also must not vanish. It surfaces as a non-gating INFO that names the path.
     base, prop = load("aurora_v17.json"), load("aurora_v18_safe.json")
     sessions = generate_sessions(42, 200)
     bd, pd = _decisions(base, prop, sessions)
     results, viol = evaluate_constraints(base, prop, sessions, bd, pd, diff_policies(base, prop))
-    assert viol == {}
-    assert all(c.result == "PASS" for c in results)
+    by = {c.key: c for c in results}
+    assert viol == {}                                 # no SILENT structural widening
+    assert not any(c.result in ("FAIL", "WARN") for c in results)  # nothing gates
+    assert by["eligibility_scope"].result == "INFO"   # the visible widening IS surfaced
+    assert "widens eligibility" in by["eligibility_scope"].detail.lower()
+    # and it does not change the outcome: still eligible for the holdout.
+    v = decide(results, [{"injection": "timeout", "proof_valid": True}],
+               changed_count=5, session_count=200)
+    assert v["value"] == "ELIGIBLE_FOR_HOLDOUT"
+    assert v["holdout_config"]["confirm_scope"]        # widening routed to the holdout
 
 
 def test_only_missing_attribute_sessions_flagged():

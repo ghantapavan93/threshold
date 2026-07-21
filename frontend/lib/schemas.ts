@@ -94,7 +94,9 @@ export const PolicyDiffSchema = z.object({
 export type PolicyDiff = z.infer<typeof PolicyDiffSchema>;
 
 // ---- Constraint results ----------------------------------------------------
-export const ConstraintResultValueSchema = z.enum(["PASS", "WARN", "FAIL"]);
+// INFO surfaces a deliberate, visible eligibility widening — a signal the verdict
+// names and routes to the holdout, without gating on it (never a FAIL/WARN).
+export const ConstraintResultValueSchema = z.enum(["PASS", "INFO", "WARN", "FAIL"]);
 export type ConstraintResultValue = z.infer<typeof ConstraintResultValueSchema>;
 
 export const ConstraintResultSchema = z.object({
@@ -177,6 +179,9 @@ export const HoldoutConfigSchema = z.object({
   primary_metric: z.string(),
   min_uplift_pct: z.number(),
   variant_options: z.array(z.string()),
+  // Present when a deliberate widening was surfaced: the exact scope the control
+  // group must confirm, so a visible widening reaches the holdout named, not blind.
+  confirm_scope: z.array(z.string()).optional(),
 });
 export type HoldoutConfig = z.infer<typeof HoldoutConfigSchema>;
 

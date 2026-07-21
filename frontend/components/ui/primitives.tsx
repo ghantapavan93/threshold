@@ -217,8 +217,9 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 // ---- StatusIcon: color + glyph pairing (never color alone) -----------------
-export function StatusGlyph({ kind }: { kind: "PASS" | "WARN" | "FAIL" }) {
-  const glyph = kind === "PASS" ? "✓" : kind === "WARN" ? "!" : "✕";
+export function StatusGlyph({ kind }: { kind: "PASS" | "INFO" | "WARN" | "FAIL" }) {
+  const glyph =
+    kind === "PASS" ? "✓" : kind === "INFO" ? "▸" : kind === "WARN" ? "!" : "✕";
   return (
     <span aria-hidden className="font-mono font-bold">
       {glyph}

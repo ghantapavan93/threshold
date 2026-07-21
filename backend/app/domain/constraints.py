@@ -33,7 +33,7 @@ _IMMUTABLE_FIELDS = ["objective", "country", "language", "timezone"]
 @dataclass
 class ConstraintResult:
     key: str
-    result: str  # PASS | WARN | FAIL
+    result: str  # PASS | INFO | WARN | FAIL — INFO surfaces without gating the verdict
     detail: str
 
     def as_dict(self) -> dict:
@@ -138,14 +138,25 @@ def evaluate_constraints(
     else:
         results.append(ConstraintResult("plausibility", "PASS", "Policy values within plausible ranges."))
 
-    # NOTE on eligibility widening: a VISIBLE widening (a lowered age gate, a
-    # grown membership list) is tagged in the diff (risk="eligibility_widened")
-    # and is BY DESIGN a holdout question, not a block — ELIGIBLE_FOR_HOLDOUT
-    # exists precisely to test a deliberate widening under a controlled control
-    # group. What the gate BLOCKS is a SILENT/STRUCTURAL widening the operator
-    # didn't intend — the missing-attribute flip below. The diff surfaces the
-    # visible widening; the verdict does not rubber-stamp it away, it routes it to
-    # the holdout.
+    # eligibility_scope — a VISIBLE widening (a lowered age gate, a grown
+    # membership list) is tagged in the diff (risk="eligibility_widened"). This is
+    # BY DESIGN a holdout question, not a block: ELIGIBLE_FOR_HOLDOUT exists
+    # precisely to test a deliberate widening under a controlled control group.
+    # But "not a block" must not mean "unseen" — a widening that reaches the
+    # holdout unnamed is a rubber-stamp. So we surface it as INFO: a first-class
+    # result the verdict does NOT gate on (INFO is neither FAIL nor WARN), but
+    # which names each widened path so the verdict can route it to the holdout as
+    # the scope to confirm. What the gate BLOCKS instead is a SILENT/STRUCTURAL
+    # widening the operator didn't intend — the missing-attribute flip below.
+    widened_paths = [c["path"] for c in diff["changes"] if c.get("risk") == "eligibility_widened"]
+    if widened_paths:
+        results.append(ConstraintResult(
+            "eligibility_scope", "INFO",
+            f"Deliberately widens eligibility on {', '.join(widened_paths)} — visible by design; "
+            f"the holdout must confirm the added cohort pays for itself. Not a block; a scope to measure."))
+    else:
+        results.append(ConstraintResult("eligibility_scope", "PASS",
+                                        "No eligibility-widening change to route to the holdout."))
 
     # missing_attribute_semantics (the star) — ATTRIBUTE-LEVEL, id-independent.
     # A rule "guards" an attribute against MISSING iff its op excludes when the

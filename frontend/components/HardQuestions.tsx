@@ -54,6 +54,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     proof: "backend/tests/test_bughunt_regressions.py::test_rename_evasion_is_caught · test_remove_guard_evasion_is_caught",
   },
   {
+    tag: "CORE",
+    q: "The safe fix lowers the age gate 25→18 — that widens who gets an offer. Why does it pass instead of blocking?",
+    a: "Because a VISIBLE, deliberate widening is exactly what a holdout is for — blocking it would be the gate overreaching. But “not blocked” must never mean “unseen”: a widening that reaches the holdout unnamed is a rubber-stamp. So a widening is neither blocked nor ignored — it surfaces as a first-class INFO result that the verdict does not gate on (INFO is neither FAIL nor WARN), names in its reasons, and routes into the holdout config as confirm_scope: the precise cohort the 5% control must prove pays for itself. What the gate DOES block is the other kind — a SILENT structural widening the operator didn't intend, the missing-attribute flip. Visible-and-measured vs silent-and-blocked is the whole distinction.",
+    proof: "backend/tests/test_domain.py::test_constraints_safe_surfaces_widening_without_blocking",
+  },
+  {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",

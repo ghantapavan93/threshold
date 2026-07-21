@@ -32,6 +32,10 @@ def decide(
     fails = [c for c in constraint_results if c.result == "FAIL"]
     invalid_proofs = [p for p in failclosed_proofs if not p["proof_valid"]]
     warns = [c for c in constraint_results if c.result == "WARN"]
+    # INFO is a surfaced-but-non-gating signal (a deliberate, visible eligibility
+    # widening). It never blocks or downgrades — but a positive verdict must NAME
+    # it so a widening can't reach the holdout unseen.
+    infos = [c for c in constraint_results if c.result == "INFO"]
 
     if fails or invalid_proofs:
         reasons = [f"{c.key} FAIL: {c.detail}" for c in fails]
@@ -45,14 +49,23 @@ def decide(
         return {"value": "INSUFFICIENT_EVIDENCE", "reasons": reasons, "holdout_config": None}
 
     if changed_count > 0:
+        reasons = [
+            "All hard constraints passed.",
+            "Fail-closed proofs validated (every injected failure resolved to No Offer Rendered).",
+            f"{changed_count} decisions changed; online holdout required before rollout.",
+        ]
+        holdout_config = HOLDOUT_CONFIG
+        if infos:
+            reasons += [f"{c.key}: {c.detail}" for c in infos]
+            # Name the widened scope in the holdout config so the control group is
+            # pointed at exactly what changed — a deliberate widening confirmed, not
+            # rubber-stamped. (Copy so the module-level config stays immutable.)
+            holdout_config = {**HOLDOUT_CONFIG,
+                              "confirm_scope": [c.detail for c in infos]}
         return {
             "value": "ELIGIBLE_FOR_HOLDOUT",
-            "reasons": [
-                "All hard constraints passed.",
-                "Fail-closed proofs validated (every injected failure resolved to No Offer Rendered).",
-                f"{changed_count} decisions changed; online holdout required before rollout.",
-            ],
-            "holdout_config": HOLDOUT_CONFIG,
+            "reasons": reasons,
+            "holdout_config": holdout_config,
         }
 
     return {"value": "INSUFFICIENT_EVIDENCE",

@@ -68,6 +68,7 @@ export const CHANGE_KIND_COLOR: Record<ChangeKind, string> = {
 
 export const CONSTRAINT_COLOR: Record<ConstraintResultValue, string> = {
   PASS: "var(--c-teal)",
+  INFO: "var(--c-offer-blue)",
   WARN: "var(--c-amber)",
   FAIL: "var(--c-crimson)",
 };
