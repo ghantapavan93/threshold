@@ -4,6 +4,8 @@ import { API_BASE } from "@/lib/api";
 import { useHealth } from "@/lib/hooks";
 import { RECORDED_DESCRIPTION } from "@/lib/replay-fixture";
 import { ConsoleProvider, useConsole } from "@/components/console-context";
+import { WalkthroughProvider } from "@/components/walkthrough";
+import { PipelineRail } from "@/components/PipelineRail";
 import { Intro } from "@/components/Intro";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
@@ -64,6 +66,7 @@ function BackendBanner() {
 export default function Page() {
   return (
     <ConsoleProvider initialBase="V17" initialProposed="V18">
+     <WalkthroughProvider>
       <Intro />
       <div className="relative min-h-screen text-text">
         <div className="aurora-threshold" aria-hidden />
@@ -120,13 +123,15 @@ export default function Page() {
               <HardQuestions />
             </Reveal>
           </main>
-          <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
+          <footer className="border-t border-border/70 px-4 py-8 pb-28 text-center text-xs text-muted sm:px-6">
             THRESHOLD · Policy Change Safety Gate — a safety tool, not a launch
             approval. A positive verdict is only eligibility for a controlled
             online holdout.
           </footer>
         </div>
       </div>
+      <PipelineRail />
+     </WalkthroughProvider>
     </ConsoleProvider>
   );
 }

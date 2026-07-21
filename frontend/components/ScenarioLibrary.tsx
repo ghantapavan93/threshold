@@ -6,6 +6,7 @@ import { useReplayJob, useScenarios } from "@/lib/hooks";
 import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import type { Injection, Scenario, VerdictValue } from "@/lib/schemas";
 import { useConsole } from "./console-context";
+import { useWalkthrough } from "./walkthrough";
 import {
   EmptyState,
   ErrorState,
@@ -128,6 +129,7 @@ function ScenarioCard({
 
 export function ScenarioLibrary() {
   const { setBaseVersion, setProposedVersion, setJob } = useConsole();
+  const { walk } = useWalkthrough();
   const scenarios = useScenarios();
   const replay = useReplayJob();
 
@@ -154,14 +156,15 @@ export function ScenarioLibrary() {
           injections: INJECTIONS,
         });
         setJob(res.job, res.requestId, false);
-        scrollToId("verdict");
+        setStatus(`Running ${s.title} — walking the pipeline below…`);
+        await walk(res.job);
         setStatus(`Verdict: ${res.job.verdict.value} — ${s.teaches}`);
       } catch (e) {
         if (e instanceof ApiError && e.isUnreachable) {
           try {
             const job = await loadRecordedJob(s.proposed);
             setJob(job, RECORDED_REQUEST_ID, true);
-            scrollToId("verdict");
+            await walk(job);
             setStatus(`Recorded verdict: ${job.verdict.value} — ${s.teaches}`);
           } catch {
             setStatus("Backend unreachable and the recorded run couldn't load — start the API on :8000.");
@@ -173,7 +176,7 @@ export function ScenarioLibrary() {
         setRunningId(null);
       }
     },
-    [replay, setBaseVersion, setProposedVersion, setJob],
+    [replay, walk, setBaseVersion, setProposedVersion, setJob],
   );
 
   // The agent card runs the same real replay, then drives the by-traffic-source

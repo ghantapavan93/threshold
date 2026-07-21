@@ -7,18 +7,15 @@ import { useReplayJob } from "@/lib/hooks";
 import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import type { Injection } from "@/lib/schemas";
 import { useConsole } from "./console-context";
+import { useWalkthrough } from "./walkthrough";
 import { Parallax } from "./visual/Parallax";
 import { TransactionMomentMotif } from "./visual/illustrations";
-import { prefersReducedMotion, scrollToId } from "@/lib/scroll";
 
 const DANGEROUS = "V18";
 const SAFE = "V18-safe";
 const INJECTIONS: Injection[] = ["timeout", "invalid_output", "stale_identity"];
 
 type Phase = "idle" | "running" | "blocked" | "eligible" | "error";
-
-const delay = (ms: number) =>
-  new Promise((r) => setTimeout(r, prefersReducedMotion() ? 0 : ms));
 
 /**
  * Self-driving demo. The Hero orchestrates the REAL replay mutation and writes
@@ -27,6 +24,7 @@ const delay = (ms: number) =>
  */
 export function Hero() {
   const { proposedVersion, setProposedVersion, setJob } = useConsole();
+  const { walk } = useWalkthrough();
   const replay = useReplayJob();
   const [phase, setPhase] = useState<Phase>("idle");
   const [caption, setCaption] = useState<string>("");
@@ -73,39 +71,30 @@ export function Hero() {
   const playStory = useCallback(async () => {
     try {
       setPhase("running");
-      setCaption("A one-operator edit — replaying V17 → V18 across 200 event-time sessions…");
-      // Let the reaction land in the hero first — sessions flow into the gate,
-      // it lights up — before we move the viewer down the page.
-      await delay(1300);
-      scrollToId("diff");
+      setCaption("Running the change on the real backend — then I'll walk you through it, step by step…");
       const job = await runVersion(DANGEROUS);
-      await delay(900);
-      const widened = job.replay_summary.constraint_violation;
-      scrollToId("heatmap");
-      setCaption(`The r4 operator flip (include_is_not_in → exclude_is_in) silently widened ${widened} missing-cc_bin sessions.`);
-      await delay(2200);
-      scrollToId("verdict");
+      // Walk the viewer through all ten pipeline stages, in order, in plain
+      // language — not a jump to the verdict.
+      await walk(job);
       setCaption(`Verdict: ${job.verdict.value}. Caught before a single customer — now watch the fix.`);
       setPhase("blocked");
     } catch (e) {
       fail(e);
     }
-  }, [runVersion, fail]);
+  }, [runVersion, walk, fail]);
 
   const playFix = useCallback(async () => {
     try {
       setPhase("running");
-      setCaption("Reverting just the operator (V18-safe) and re-running…");
-      scrollToId("diff");
+      setCaption("Reverting just the operator (V18-safe) and re-running on the backend…");
       const job = await runVersion(SAFE);
-      await delay(1400);
-      scrollToId("verdict");
+      await walk(job);
       setCaption(`Verdict: ${job.verdict.value} — cleared only for a controlled 5% online holdout, never "safe to launch".`);
       setPhase("eligible");
     } catch (e) {
       fail(e);
     }
-  }, [runVersion, fail]);
+  }, [runVersion, walk, fail]);
 
   const busy = phase === "running";
 
@@ -205,11 +194,12 @@ export function Hero() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           className="mt-5 max-w-3xl text-sm leading-relaxed text-muted sm:text-base"
         >
-          Threshold replays a proposed policy change over event-time sessions and proves it{" "}
-          <strong className="text-text">fails closed</strong> to No Offer Rendered, preserves the
-          merchant&apos;s checkout, respects hard constraints, and is eligible <em>only</em> for a
-          controlled holdout. A one-operator edit that silently widens eligibility — caught in two
-          minutes, with the exact Rokt doc it violates cited inline.
+          A checkout offer changes who&apos;s eligible. Before it ships, Threshold replays the change
+          over real past sessions and checks: does anyone get an offer who shouldn&apos;t? Does
+          checkout stay safe if the offer fails? It ends in one of three verdicts —{" "}
+          <strong className="text-text">Blocked</strong>, <strong className="text-text">Not enough
+          evidence</strong>, or <strong className="text-text">Ready for a controlled test</strong>.
+          Press Play and it walks you through every step.
         </motion.p>
 
         <motion.div
@@ -225,7 +215,7 @@ export function Hero() {
             className="press inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-60"
             style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
           >
-            <span aria-hidden>▶</span> {busy ? "Playing…" : "Play the story"}
+            <span aria-hidden>▶</span> {busy ? "Walking you through it…" : "Play — walk me through it"}
           </button>
 
           {phase === "blocked" ? (
