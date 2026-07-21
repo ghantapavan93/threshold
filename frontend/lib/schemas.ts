@@ -350,6 +350,56 @@ export const ForgeResultSchema = z.object({
 });
 export type ForgeResult = z.infer<typeof ForgeResultSchema>;
 
+// ---- Trust Budget ----------------------------------------------------------
+export const TrustActionSchema = z.enum(["SHOW", "DEFER", "SUPPRESS"]);
+export type TrustAction = z.infer<typeof TrustActionSchema>;
+
+export const TrustDecisionSchema = z.object({
+  action: TrustActionSchema,
+  reason: z.string(),
+  available: z.number(),
+  candidate_cost: z.number(),
+  spent: z.number(),
+  frustration: z.number(),
+  category_recent: z.number(),
+  defer_until: z.number().nullable(),
+});
+
+export const TrustStepSchema = z.object({
+  event_time: z.number(),
+  category: z.string(),
+  confidence: z.number(),
+  urgency: z.number(),
+  reaction: z.string().nullable(),
+  decision: TrustDecisionSchema,
+});
+export type TrustStep = z.infer<typeof TrustStepSchema>;
+
+export const TrustBudgetResultSchema = z.object({
+  merchant_id: z.string().optional(),
+  scenarios: z.array(z.string()),
+  scenario: z.string(),
+  label: z.string(),
+  blurb: z.string(),
+  transaction_sensitivity: z.number(),
+  steps: z.array(TrustStepSchema),
+  summary: z.object({
+    total: z.number(),
+    show: z.number(),
+    defer: z.number(),
+    suppress: z.number(),
+  }),
+  law: z.string(),
+  policy: z.object({
+    max_budget: z.number(),
+    window_seconds: z.number(),
+    frustration_cap: z.number(),
+    category_cap: z.number(),
+  }),
+  note: z.string(),
+});
+export type TrustBudgetResult = z.infer<typeof TrustBudgetResultSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({

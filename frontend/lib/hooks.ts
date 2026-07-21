@@ -21,6 +21,7 @@ import type {
   AuditVerify,
   OpeEstimate,
   ForgeResult,
+  TrustBudgetResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -251,6 +252,15 @@ export function useCounterexamples(
   return useMutation<ForgeResult, ApiError, ForgeInput>({
     mutationKey: ["counterexamples", merchantId],
     mutationFn: (body) => api.counterexamples(merchantId, body),
+  });
+}
+
+export function useTrustBudget(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<TrustBudgetResult, ApiError, { scenario: string }> {
+  return useMutation<TrustBudgetResult, ApiError, { scenario: string }>({
+    mutationKey: ["trust-budget", merchantId],
+    mutationFn: (body) => api.trustBudget(merchantId, body),
   });
 }
 

@@ -4,6 +4,7 @@ import {
   AuditVerifySchema,
   OpeEstimateSchema,
   ForgeResultSchema,
+  TrustBudgetResultSchema,
   CancellationResponseSchema,
   ConversionResponseSchema,
   ErrorEnvelopeSchema,
@@ -26,6 +27,7 @@ import type {
   AuditVerify,
   OpeEstimate,
   ForgeResult,
+  TrustBudgetResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -474,6 +476,18 @@ export const api = {
     return requestData(
       `${base(merchantId)}/counterexamples`,
       ForgeResultSchema,
+      { method: "POST", body, signal },
+    );
+  },
+
+  trustBudget(
+    merchantId: string,
+    body: { scenario: string },
+    signal?: AbortSignal,
+  ): Promise<TrustBudgetResult> {
+    return requestData(
+      `${base(merchantId)}/trust-budget`,
+      TrustBudgetResultSchema,
       { method: "POST", body, signal },
     );
   },

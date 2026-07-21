@@ -66,6 +66,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     proof: "backend/tests/test_counterexample.py::test_forge_finds_no_gaps_on_the_current_engine · test_gap_branch_is_reachable_the_detector_is_not_rigged",
   },
   {
+    tag: "ENFORCED",
+    q: "An offer can be relevant in isolation but irritating on the fifth exposure. How do you make “show nothing” a real decision, not an accident?",
+    a: "Trust Budget treats attention as a scarce budget. Each impression spends it, a dismissal spends much more (rejection signals irritation), engagement earns it back, and it recovers as a bounded window slides. Every arrival is judged SHOW / DEFER / SUPPRESS by a pure function of the interaction history — no LLM in the path, so it’s replayable and testable. The law “an optional experience must earn the right to consume attention” is enforced as invariants: more dismissals can never raise the decision on the SUPPRESS<DEFER<SHOW ladder (monotonicity), SHOW never fires when the candidate costs more than the available budget (conservation), past the frustration cap the answer is never SHOW, and after a long-enough gap the window clears and SHOW returns — so “no experience” is intentional and reversible, never permanent. Privacy falls out of the design: it reads only interaction counts and timings inside a bounded window — no offer content, no PII, self-expiring.",
+    proof: "backend/tests/test_trust_budget.py::test_law_more_frustration_never_increases_showiness · test_law_total_and_budget_conserved · test_recovery_after_a_gap_shows_again",
+  },
+  {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",

@@ -37,6 +37,7 @@ from ..db import get_db
 from ..domain import failclosed
 from ..domain.counterexample import forge
 from ..domain.ope import offpolicy_estimate
+from ..domain.trust_budget import SCENARIOS, run_named_scenario
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
@@ -611,3 +612,30 @@ def counterexamples(
         result["summary"]["safe"], result["summary"]["gap"],
     )
     return {"merchant_id": merchant_id, **result}
+
+
+class TrustBudgetRequest(BaseModel):
+    """Run a named Trust Budget scenario through the deterministic attention gate."""
+    scenario: str = "serial_dismisser"
+
+
+@router.post("/trust-budget")
+def trust_budget(
+    merchant_id: str,
+    req: TrustBudgetRequest,
+    request: Request,
+) -> dict:
+    """Trust Budget — attention as a scarce, deterministic budget. A stream of
+    candidate offers is judged SHOW / DEFER / SUPPRESS by a pure function of the
+    interaction history; 'no experience' is an intentional decision. Read-only,
+    non-persisting, no LLM in the path."""
+    if req.scenario not in SCENARIOS:
+        raise _reject("unknown_scenario",
+                      f"scenario must be one of {sorted(SCENARIOS)}")
+    result = run_named_scenario(req.scenario)
+    log.info(
+        'trust_budget merchant=%s rid=%s scenario=%s show=%d defer=%d suppress=%d',
+        merchant_id, _rid(request), req.scenario, result["summary"]["show"],
+        result["summary"]["defer"], result["summary"]["suppress"],
+    )
+    return {"merchant_id": merchant_id, "scenarios": sorted(SCENARIOS), **result}
