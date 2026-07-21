@@ -19,6 +19,19 @@ def _risk_for_rule_change(before: dict, after: dict) -> str | None:
                 return "eligibility_widened"
         except (TypeError, ValueError):
             return None
+    # a membership list changed without changing the op: growing an `in` list, or
+    # SHRINKING an exclude/include list, both admit more sessions -> widening.
+    if before.get("op") == after.get("op") and before.get("op") in {"in", "include_is_not_in", "exclude_is_in"}:
+        try:
+            bset, aset = set(before["value"]), set(after["value"])
+        except TypeError:
+            return None
+        if before["op"] == "in":
+            if aset > bset:  # more values now match -> more eligible
+                return "eligibility_widened"
+        elif aset < bset:  # include_is_not_in / exclude_is_in: shorter list -> fewer excluded
+            return "eligibility_widened"
+        return None
     return None
 
 

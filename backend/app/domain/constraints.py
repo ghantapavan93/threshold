@@ -8,10 +8,11 @@ counterfactual: revert just that operator and see if the proposed OFFER disappea
 """
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 
 from .evaluator import Decision, _present, evaluate
-from .policy import PROHIBITED_CATEGORIES, Policy
+from .policy import PROHIBITED_CATEGORIES, Policy, Rule
 
 GROUNDING = {
     "latency_budget": 'Rokt publishes "sub-200ms latency"; <rokt-thank-you fallback-timeout> defaults to 5000ms.',
@@ -51,7 +52,7 @@ def evaluate_constraints(
     base_dec: dict[str, Decision],
     prop_dec: dict[str, Decision],
     diff: dict,
-) -> tuple[list[ConstraintResult], set[str]]:
+) -> tuple[list[ConstraintResult], dict[str, str]]:
     results: list[ConstraintResult] = []
 
     # latency_budget
@@ -137,46 +138,61 @@ def evaluate_constraints(
     else:
         results.append(ConstraintResult("plausibility", "PASS", "Policy values within plausible ranges."))
 
-    # missing_attribute_semantics (the star) — counterfactual isolation
-    violation_ids: set[str] = set()
-    flip_rule_ids = [
-        c["path"].split(".")[1]
-        for c in diff["changes"]
-        if c.get("risk") == "missing_attribute_flip" and c["path"].endswith(".op")
-    ]
-    attr_for_detail = None
-    for rid in flip_rule_ids:
-        prule = proposed.rule_by_id(rid)
-        brule = base.rule_by_id(rid)
-        if not prule or not brule:
-            continue
-        attr = prule.attribute
-        attr_for_detail = attr
-        # revert ONLY this operator; if the proposed OFFER vanishes for a
-        # missing-attribute session, the flip is the necessary cause.
-        reverted = proposed.model_copy(deep=True)
-        for r in reverted.eligibility_rules:
-            if r.id == rid:
-                r.op = brule.op
-        by_id = {s["session_id"]: s for s in sessions}
-        for sid, pdec in prop_dec.items():
-            s = by_id[sid]
-            if _present(s["attributes"], attr):
-                continue  # only missing-attribute sessions are affected
-            if pdec.decision == "offer" and base_dec[sid].decision == "no_offer":
-                if evaluate(s["attributes"], reverted).decision == "no_offer":
-                    violation_ids.add(sid)
+    # NOTE on eligibility widening: a VISIBLE widening (a lowered age gate, a
+    # grown membership list) is tagged in the diff (risk="eligibility_widened")
+    # and is BY DESIGN a holdout question, not a block — ELIGIBLE_FOR_HOLDOUT
+    # exists precisely to test a deliberate widening under a controlled control
+    # group. What the gate BLOCKS is a SILENT/STRUCTURAL widening the operator
+    # didn't intend — the missing-attribute flip below. The diff surfaces the
+    # visible widening; the verdict does not rubber-stamp it away, it routes it to
+    # the holdout.
 
-    if violation_ids:
+    # missing_attribute_semantics (the star) — ATTRIBUTE-LEVEL, id-independent.
+    # A rule "guards" an attribute against MISSING iff its op excludes when the
+    # value is absent — every op except exclude_is_in. The trap is any attribute
+    # the base guarded but the proposed no longer does: missing-attribute sessions
+    # flip EXCLUDED -> ELIGIBLE. Detecting it at the attribute level catches the
+    # flip however it is spelled — an in-place op change, a RENAMED rule, or a
+    # remove+add — not just a same-id op tag, which a rename would evade. Each
+    # flagged session is confirmed causally: re-guard that attribute against
+    # missing and, if the proposed OFFER vanishes, the missing-value handling is
+    # the necessary cause.
+    def _guards_missing(pol: Policy, attr: str) -> bool:
+        return any(r.attribute == attr and r.op != "exclude_is_in"
+                   for r in pol.eligibility_rules)
+
+    attrs = ({r.attribute for r in base.eligibility_rules}
+             | {r.attribute for r in proposed.eligibility_rules})
+    widened_attrs = sorted(a for a in attrs
+                           if _guards_missing(base, a) and not _guards_missing(proposed, a))
+
+    by_id = {s["session_id"]: s for s in sessions}
+    violations: dict[str, str] = {}  # session_id -> the widened attribute
+    for attr in widened_attrs:
+        # An include_is_not_in rule with an empty list excludes exactly the
+        # sessions whose value is absent, and is a no-op where it is present.
+        guarded = proposed.model_copy(deep=True)
+        guarded.eligibility_rules.append(
+            Rule(id="__missing_guard__", attribute=attr, op="include_is_not_in", value=[]))
+        for sid, pdec in prop_dec.items():
+            s = by_id.get(sid)
+            if s is None or _present(s["attributes"], attr):
+                continue  # only missing-attribute sessions
+            if pdec.decision == "offer" and base_dec[sid].decision == "no_offer":
+                if evaluate(s["attributes"], guarded).decision == "no_offer":
+                    violations.setdefault(sid, attr)
+
+    if violations:
+        by_attr = Counter(violations.values())
+        detail = "; ".join(f"missing-'{a}': {n}" for a, n in sorted(by_attr.items()))
         results.append(ConstraintResult(
             "missing_attribute_semantics", "FAIL",
-            f"Rule op change flips missing-'{attr_for_detail}' sessions from EXCLUDED to ELIGIBLE: "
-            f"{len(violation_ids)} sessions silently widened."))
-    elif flip_rule_ids:
+            f"Change flips missing-attribute sessions from EXCLUDED to ELIGIBLE ({detail} sessions silently widened)."))
+    elif widened_attrs:
         results.append(ConstraintResult("missing_attribute_semantics", "WARN",
-                                        "Operator change alters missing-value behavior, but no replayed session was affected."))
+                                        f"Missing-value guard removed on {', '.join(widened_attrs)}, but no replayed session was affected."))
     else:
         results.append(ConstraintResult("missing_attribute_semantics", "PASS",
-                                        "No missing-value semantics change."))
+                                        "No missing-value semantics widening."))
 
-    return results, violation_ids
+    return results, violations

@@ -436,7 +436,7 @@ def test_flip_with_no_missing_sessions_warns_not_fails():
                                          diff_policies(base, prop))
     by = {c.key: c for c in results}
     assert by["missing_attribute_semantics"].result == "WARN"  # NOT FAIL
-    assert viol == set()
+    assert viol == {}
 
 
 def test_flip_with_missing_sessions_fails():
@@ -462,7 +462,7 @@ def test_no_operator_change_is_clean_pass():
                                          diff_policies(base, base))
     by = {c.key: c for c in results}
     assert by["missing_attribute_semantics"].result == "PASS"
-    assert viol == set()
+    assert viol == {}
 
 
 # =========================================================================== #

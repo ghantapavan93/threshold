@@ -134,7 +134,7 @@ def test_constraints_all_pass_for_safe():
     sessions = generate_sessions(42, 200)
     bd, pd = _decisions(base, prop, sessions)
     results, viol = evaluate_constraints(base, prop, sessions, bd, pd, diff_policies(base, prop))
-    assert viol == set()
+    assert viol == {}
     assert all(c.result == "PASS" for c in results)
 
 

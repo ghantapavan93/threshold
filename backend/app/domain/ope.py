@@ -117,6 +117,24 @@ def offpolicy_estimate(
             "ci95": None, "se": None, "min_ess": ess_floor,
             "note": _HOLDOUT_NOTE,
         }
+    if not all(math.isfinite(x) for x in (*rewards, *target_p, *logging_p)):
+        return {
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "reason": "a reward or propensity is not finite (NaN/inf) — no meaningful estimate",
+            "n": n, "ess": 0.0, "estimate": None, "method": None,
+            "ci95": None, "se": None, "min_ess": ess_floor,
+            "note": _HOLDOUT_NOTE,
+        }
+    # A reward model of the wrong length is a caller error — refuse rather than
+    # silently drop to SNIPS and hand back a differently-computed number.
+    if reward_hat is not None and len(reward_hat) != n:
+        return {
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "reason": f"reward_hat has {len(reward_hat)} entries but there are {n} decisions — length must match",
+            "n": n, "ess": 0.0, "estimate": None, "method": None,
+            "ci95": None, "se": None, "min_ess": ess_floor,
+            "note": _HOLDOUT_NOTE,
+        }
 
     w = _weights(target_p, logging_p)
     if clip is not None:

@@ -109,7 +109,10 @@ def evaluate(attrs: dict, policy: Policy) -> Decision:
     for rule in policy.eligibility_rules:
         try:
             passed = eval_rule(rule, attrs)
-        except InvalidComparison:
+        except (InvalidComparison, ValueError):
+            # InvalidComparison (bad type for the op) OR an unknown operator on a
+            # hand-built Rule that bypassed the Literal validator — both fail the
+            # rule CLOSED so `evaluate` stays total; the exception never escapes.
             return Decision("no_offer", tuple(matched), failed_rule=rule.id,
                             fallback_reason="invalid_comparison")
         if passed:

@@ -48,6 +48,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     proof: "backend/tests/test_invariants.py::test_law_conservative_eligibility_requires_presence · test_law_missing_fails_closed",
   },
   {
+    tag: "CORE",
+    q: "Can't I just evade the trap? Rename the flipped rule, or remove it and add a new one.",
+    a: "You could have — that was a real fail-open, found while bug-hunting. The trap detector used to key on the diff seeing the SAME rule id change operator in place; rename the rule (or remove+add with a new id) and the identical silent widening sailed through as ELIGIBLE_FOR_HOLDOUT. It's now detected at the ATTRIBUTE level, independent of rule ids: for any attribute the base guarded against missing values but the proposal no longer does, each affected session is confirmed by re-guarding that attribute and checking the offer vanishes. Rename, remove, or flip in place — all three now BLOCK.",
+    proof: "backend/tests/test_bughunt_regressions.py::test_rename_evasion_is_caught · test_remove_guard_evasion_is_caught",
+  },
+  {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",
@@ -69,6 +75,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     q: "Holdout rigor — sample-ratio mismatch, power, peeking, interference?",
     a: "That's the causal read, and it isn't ours to claim — it's the external Would-Have-Seen holdout (Haus-style). Threshold's job is upstream: prove the change is structurally safe before it reaches the holdout, and flag premature calls. We flag thin support and refuse to estimate; the causal statistics stay with the holdout.",
     proof: "backend/tests/test_ope.py::test_refuses_on_skewed_weights (the refusal we DO own)",
+  },
+  {
+    tag: "ENFORCED",
+    q: "What if I feed the value estimator garbage — a propensity above 1, a NaN, a wrong-length reward model?",
+    a: "It refuses, it doesn't guess. Another bug-hunt find: the estimator used to accept impossible propensities (target 1.5, negatives, logging > 1) and return a confident number. Now anything outside a valid probability range, any non-finite reward or propensity, and a reward model whose length doesn't match the data all return INSUFFICIENT_EVIDENCE with the reason — alongside the existing effective-sample-size floor. A pre-holdout estimate you can't trust is worse than none.",
+    proof: "backend/tests/test_ope.py::test_refuses_impossible_propensities · test_bughunt_regressions.py::test_ope_refuses_nonfinite_and_bad_reward_hat_length",
   },
 ];
 

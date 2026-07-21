@@ -47,7 +47,7 @@ def run_replay(
     prop_dec = {s["session_id"]: evaluate(s["attributes"], proposed) for s in sessions}
 
     diff = diff_policies(base, proposed)
-    constraint_results, violation_ids = evaluate_constraints(
+    constraint_results, violations = evaluate_constraints(
         base, proposed, sessions, base_dec, prop_dec, diff)
     audit.append("CONSTRAINTS_EVALUATED", {"results": [c.as_dict() for c in constraint_results]})
 
@@ -56,7 +56,7 @@ def run_replay(
     for s in sessions:
         sid = s["session_id"]
         b, p = base_dec[sid], prop_dec[sid]
-        is_violation = sid in violation_ids
+        is_violation = sid in violations
         ck = _change_kind(b.decision, p.decision, is_violation)
         counts[ck] += 1
         changed = b.decision != p.decision or is_violation
@@ -67,7 +67,8 @@ def run_replay(
             "proposed": p.as_dict(),
             "changed": changed,
             "change_kind": ck,
-            "violation": ({"key": "missing_attribute_semantics", "attribute": "customer.cc_bin"}
+            # the ACTUAL attribute that flipped for this session, not a hardcode
+            "violation": ({"key": "missing_attribute_semantics", "attribute": violations[sid]}
                           if is_violation else None),
             "attributes_snapshot": s["attributes"],
         })
