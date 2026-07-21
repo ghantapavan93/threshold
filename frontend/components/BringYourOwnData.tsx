@@ -19,15 +19,20 @@ import { Section } from "./ui/primitives";
 const SNAPSHOT = Date.parse("2026-12-01T00:00:00Z"); // the feature snapshot we replay "as of"
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
-const SAMPLE = `session_id,occurred_at,cc_bin,amount_minor,currency,identity_ts,consent
-s-1001,2026-07-01T10:00:00Z,411111,1299,USD,2026-06-28T00:00:00Z,granted
-s-1002,2026-07-01T10:05:00Z,,899,USD,2026-06-30T00:00:00Z,granted
-s-1003,2026-07-01T10:06:00Z,510510,12.99,USD,2026-06-30T00:00:00Z,granted
-s-1004,2026-07-01T10:07:00Z,411111,500,,2026-06-30T00:00:00Z,granted
-s-1005,2026-07-01T10:08:00Z,411111,1500,USD,2025-01-01T00:00:00Z,granted
-s-1006,2026-07-01T10:09:00Z,411111,700,USD,2026-06-30T00:00:00Z,revoked
-s-1001,2026-07-01T10:10:00Z,411111,700,USD,2026-06-30T00:00:00Z,granted
-s-1007,2027-03-01T00:00:00Z,411111,700,USD,2026-06-30T00:00:00Z,granted`;
+const SAMPLE = `session_id,occurred_at,referral_source,cc_bin,amount_minor,currency,identity_ts,consent
+s-1001,2026-07-01T10:00:00Z,checkout,411111,1299,USD,2026-06-28T00:00:00Z,granted
+s-1002,2026-07-01T10:05:00Z,checkout,510510,899,USD,2026-06-30T00:00:00Z,granted
+s-1003,2026-07-01T10:06:00Z,checkout,411111,1500,USD,2026-06-30T00:00:00Z,granted
+s-1004,2026-07-01T10:07:00Z,ai_referred,,700,USD,2026-06-30T00:00:00Z,granted
+s-1005,2026-07-01T10:08:00Z,ai_referred,,500,USD,2026-06-30T00:00:00Z,granted
+s-1006,2026-07-01T10:09:00Z,ai_referred,411111,650,USD,2026-06-30T00:00:00Z,granted
+s-1007,2026-07-01T10:10:00Z,ai_referred,,900,USD,2026-06-30T00:00:00Z,granted
+s-1008,2026-07-01T10:11:00Z,agent,,1200,USD,2026-06-30T00:00:00Z,granted
+s-1009,2026-07-01T10:12:00Z,checkout,411111,12.99,USD,2026-06-30T00:00:00Z,granted
+s-1010,2026-07-01T10:13:00Z,checkout,411111,1500,USD,2025-01-01T00:00:00Z,granted
+s-1011,2026-07-01T10:14:00Z,agent,411111,700,USD,2026-06-30T00:00:00Z,revoked
+s-1001,2026-07-01T10:15:00Z,checkout,411111,700,USD,2026-06-30T00:00:00Z,granted
+s-1012,2027-03-01T00:00:00Z,ai_referred,411111,700,USD,2026-06-30T00:00:00Z,granted`;
 
 type Verdict = {
   id: string;
@@ -107,10 +112,30 @@ export function BringYourOwnData() {
   const result = useMemo(() => {
     if (!ran) return null;
     const { rows, error } = parse(text);
-    if (error) return { error, verdicts: [] as Verdict[] };
+    if (error) return { error, verdicts: [] as Verdict[], rows: [] as Record<string, string>[] };
     const seen = new Set<string>();
-    return { error: null, verdicts: rows.map((r) => classify(r, seen)) };
+    return { error: null, verdicts: rows.map((r) => classify(r, seen)), rows };
   }, [text, ran]);
+
+  // Cohort view: the segment-aware read. AI-referred sessions land on product
+  // pages pre-checkout, so the missing-attribute widening concentrates there —
+  // a change that looks safe in aggregate can quietly widen the AI cohort.
+  const cohorts = useMemo(() => {
+    const v = result?.verdicts ?? [];
+    const rows = result?.rows ?? [];
+    if (!v.length || v.length !== rows.length) return [];
+    const by = new Map<string, { total: number; widened: number }>();
+    v.forEach((verd, i) => {
+      const src = (rows[i]?.referral_source || "unknown").trim();
+      const g = by.get(src) ?? { total: 0, widened: 0 };
+      g.total += 1;
+      if (verd.label === "Missing attribute") g.widened += 1;
+      by.set(src, g);
+    });
+    return [...by.entries()]
+      .map(([source, g]) => ({ source, ...g, rate: g.total ? g.widened / g.total : 0 }))
+      .sort((a, b) => b.rate - a.rate);
+  }, [result]);
 
   const counts = useMemo(() => {
     const v = result?.verdicts ?? [];
@@ -198,6 +223,38 @@ export function BringYourOwnData() {
           )}
         </div>
       </div>
+
+      {/* cohort view — the segment a mean hides, grounded in Rokt's AI-referred data */}
+      {result && !result.error && cohorts.length ? (
+        <div className="mt-5 rounded-2xl border border-offer-blue/30 bg-offer-blue/[0.05] p-4 sm:p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-offer-blue">By traffic source · the segment a mean hides</p>
+            <span className="font-mono text-[10px] text-muted">Rokt, public: &ldquo;half of AI-referred sessions begin on product pages&rdquo;</span>
+          </div>
+          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-muted">
+            AI-referred and agent traffic arrives pre-checkout, so the missing-attribute widening concentrates there. The
+            same change can read <span className="text-text">safe in aggregate</span> and still quietly widen the
+            AI-referred segment — so the gate scores each cohort, not just the mean.
+          </p>
+          <div className="mt-4 space-y-2.5">
+            {cohorts.map((c) => {
+              const tone = c.rate >= 0.5 ? CRIMSON : c.rate > 0 ? AMBER : TEAL;
+              return (
+                <div key={c.source}>
+                  <div className="flex items-center justify-between font-mono text-[11px]">
+                    <span className="text-text">{c.source}</span>
+                    <span style={{ color: tone }}>{Math.round(c.rate * 100)}% widening-exposed · {c.widened}/{c.total}</span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full border border-border/60">
+                    <span className="block h-full transition-[width] duration-500" style={{ width: `${Math.max(c.rate * 100, 2)}%`, backgroundColor: tone }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 font-mono text-[11px] text-offer-blue">→ this is BC-7 Agent-Mediation — the cohort a policy change reaches through an AI.</p>
+        </div>
+      ) : null}
 
       {/* the contract + honest limits + future */}
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
