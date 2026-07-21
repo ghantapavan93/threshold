@@ -16,6 +16,7 @@ import { ConversionIntegrity } from "@/components/ConversionIntegrity";
 import { FanoutOutbox } from "@/components/FanoutOutbox";
 import { ReleaseVerdict } from "@/components/ReleaseVerdict";
 import { EvidenceSection } from "@/components/EvidenceSection";
+import { BringYourOwnData } from "@/components/BringYourOwnData";
 import { Reveal } from "@/components/visual/Reveal";
 
 /**
@@ -106,6 +107,9 @@ export default function Page() {
             </Reveal>
             <Reveal>
               <EvidenceSection />
+            </Reveal>
+            <Reveal>
+              <BringYourOwnData />
             </Reveal>
           </main>
           <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
