@@ -400,6 +400,58 @@ export const TrustBudgetResultSchema = z.object({
 });
 export type TrustBudgetResult = z.infer<typeof TrustBudgetResultSchema>;
 
+// ---- Agentic Transaction Passport ------------------------------------------
+export const PassportStatusSchema = z.enum(["ADMITTED", "STRIPPED", "REJECTED"]);
+export type PassportStatus = z.infer<typeof PassportStatusSchema>;
+
+export const PassportFieldSchema = z.object({
+  key: z.string(),
+  value: z.union([z.string(), z.number(), z.boolean()]),
+  customer_confirmed: z.boolean(),
+});
+
+export const PassportLedgerRowSchema = z.object({
+  key: z.string(),
+  status: PassportStatusSchema,
+  reason: z.string(),
+});
+export type PassportLedgerRow = z.infer<typeof PassportLedgerRowSchema>;
+
+export const PassportResultSchema = z.object({
+  merchant_id: z.string().optional(),
+  scenarios: z.array(z.string()),
+  scenario: z.string(),
+  label: z.string(),
+  blurb: z.string(),
+  now: z.number(),
+  consent: z.record(z.string(), z.boolean()),
+  passport: z.object({
+    agent_id: z.string(),
+    issued_at: z.number(),
+    expires_at: z.number(),
+    fields: z.array(PassportFieldSchema),
+    signature: z.string(),
+  }),
+  outcome: z.object({
+    passport_valid: z.boolean(),
+    reason: z.string().nullable(),
+    admitted: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+    ledger: z.array(PassportLedgerRowSchema),
+    claimed_keys: z.array(z.string()),
+    expires_in: z.number(),
+    agent_id: z.string(),
+  }),
+  summary: z.object({
+    claimed: z.number(),
+    admitted: z.number(),
+    stripped: z.number(),
+    rejected: z.number(),
+  }),
+  law: z.string(),
+  note: z.string(),
+});
+export type PassportResult = z.infer<typeof PassportResultSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({

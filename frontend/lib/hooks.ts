@@ -22,6 +22,7 @@ import type {
   OpeEstimate,
   ForgeResult,
   TrustBudgetResult,
+  PassportResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -261,6 +262,15 @@ export function useTrustBudget(
   return useMutation<TrustBudgetResult, ApiError, { scenario: string }>({
     mutationKey: ["trust-budget", merchantId],
     mutationFn: (body) => api.trustBudget(merchantId, body),
+  });
+}
+
+export function usePassport(
+  merchantId: string = MERCHANT_ID,
+): UseMutationResult<PassportResult, ApiError, { scenario: string }> {
+  return useMutation<PassportResult, ApiError, { scenario: string }>({
+    mutationKey: ["passport", merchantId],
+    mutationFn: (body) => api.passport(merchantId, body),
   });
 }
 

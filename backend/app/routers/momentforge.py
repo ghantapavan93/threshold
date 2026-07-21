@@ -38,6 +38,7 @@ from ..domain import failclosed
 from ..domain.counterexample import forge
 from ..domain.ope import offpolicy_estimate
 from ..domain.trust_budget import SCENARIOS, run_named_scenario
+from ..domain.passport import scenarios as passport_scenarios, run_named_scenario as run_passport_scenario
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
@@ -639,3 +640,31 @@ def trust_budget(
         result["summary"]["defer"], result["summary"]["suppress"],
     )
     return {"merchant_id": merchant_id, "scenarios": sorted(SCENARIOS), **result}
+
+
+class PassportRequest(BaseModel):
+    """Run a named Agentic Transaction Passport scenario through the anti-corruption layer."""
+    scenario: str = "prompt_injection"
+
+
+@router.post("/passport")
+def passport(
+    merchant_id: str,
+    req: PassportRequest,
+    request: Request,
+) -> dict:
+    """Agentic Transaction Passport — an untrusted, agent-authored packet of intent
+    passes through a deterministic anti-corruption layer: a field reaches the
+    transaction only if it is supported, valid, customer-confirmed, in-window, and
+    (if sensitive) consented. Read-only, non-persisting, no LLM in the path."""
+    secret = settings.audit_secret
+    if req.scenario not in passport_scenarios(secret):
+        raise _reject("unknown_scenario",
+                      f"scenario must be one of {sorted(passport_scenarios(secret))}")
+    result = run_passport_scenario(req.scenario, secret)
+    log.info(
+        'passport merchant=%s rid=%s scenario=%s valid=%s admitted=%d stripped=%d rejected=%d',
+        merchant_id, _rid(request), req.scenario, result["outcome"]["passport_valid"],
+        result["summary"]["admitted"], result["summary"]["stripped"], result["summary"]["rejected"],
+    )
+    return {"merchant_id": merchant_id, "scenarios": sorted(passport_scenarios(secret)), **result}

@@ -5,6 +5,7 @@ import {
   OpeEstimateSchema,
   ForgeResultSchema,
   TrustBudgetResultSchema,
+  PassportResultSchema,
   CancellationResponseSchema,
   ConversionResponseSchema,
   ErrorEnvelopeSchema,
@@ -28,6 +29,7 @@ import type {
   OpeEstimate,
   ForgeResult,
   TrustBudgetResult,
+  PassportResult,
   CancellationResponse,
   ConversionResponse,
   Health,
@@ -488,6 +490,18 @@ export const api = {
     return requestData(
       `${base(merchantId)}/trust-budget`,
       TrustBudgetResultSchema,
+      { method: "POST", body, signal },
+    );
+  },
+
+  passport(
+    merchantId: string,
+    body: { scenario: string },
+    signal?: AbortSignal,
+  ): Promise<PassportResult> {
+    return requestData(
+      `${base(merchantId)}/passport`,
+      PassportResultSchema,
       { method: "POST", body, signal },
     );
   },

@@ -20,6 +20,7 @@ import { BringYourOwnData } from "@/components/BringYourOwnData";
 import { OffPolicyEstimate } from "@/components/OffPolicyEstimate";
 import { CounterexampleForge } from "@/components/CounterexampleForge";
 import { TrustBudget } from "@/components/TrustBudget";
+import { PassportGate } from "@/components/PassportGate";
 import { HardQuestions } from "@/components/HardQuestions";
 import { Reveal } from "@/components/visual/Reveal";
 
@@ -123,6 +124,9 @@ export default function Page() {
             </Reveal>
             <Reveal>
               <TrustBudget />
+            </Reveal>
+            <Reveal>
+              <PassportGate />
             </Reveal>
             <Reveal>
               <HardQuestions />

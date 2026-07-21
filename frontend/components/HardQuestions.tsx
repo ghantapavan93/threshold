@@ -72,6 +72,12 @@ const QA: { q: string; a: string; tag: Tag; proof?: string }[] = [
     proof: "backend/tests/test_trust_budget.py::test_law_more_frustration_never_increases_showiness · test_law_total_and_budget_conserved · test_recovery_after_a_gap_shows_again",
   },
   {
+    tag: "ENFORCED",
+    q: "An AI agent will soon hand your transaction a bag of “intent.” How do you use it without letting the agent corrupt the transaction or inject instructions?",
+    a: "Treat the agent as untrusted and put an anti-corruption layer between it and the transaction. The agent’s packet — a short-lived Passport of claimed intent (party size, spend ceiling, a time constraint) — passes through a pure, deterministic ACL, and a field reaches the transaction ONLY if it is supported (in the context schema), valid (typed validator), customer-confirmed (explicit, not agent-asserted), in-window (unexpired), and — if sensitive — consented. Everything else is stripped or rejected, fail-closed. A prompt injection is just an unsupported key: an agent that slips in apply_discount_pct or internal_priority gets those stripped, because the ACL can only ever admit a SUBSET of the schema — it can never invent or inflate context. Tamper any field after signing and the HMAC provenance fails, so the whole passport is rejected. The laws are tested: admitted ⊆ claimed, every admitted field was confirmed and valid, expired/tampered passports admit nothing, and no unsupported key can ever be admitted. The agent proposes; the deterministic gate disposes — no LLM in the transaction path.",
+    proof: "backend/tests/test_passport.py::test_law_unsupported_keys_never_admit · test_law_admitted_is_subset_of_claimed · test_tampered_passport_is_rejected_wholesale",
+  },
+  {
     tag: "PRECISE",
     q: "Exactly-once delivery?",
     a: "No — exactly-once is impossible in a distributed system (two generals). We do effectively-once: at-least-once delivery from the transactional outbox plus idempotent dedup on (conversiontype, confirmationref). The verdict and its outbox rows commit atomically, then publish independently.",
