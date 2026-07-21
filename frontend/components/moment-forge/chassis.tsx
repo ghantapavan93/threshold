@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useTheme } from "@/app/providers";
 import { ClipReveal, MaskText } from "@/components/builder/anim";
+import { MomentGlyph } from "@/components/moment-forge/MomentGlyph";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Moment Forge — editorial chassis (the "monograph" grammar): nav, blueprint
@@ -195,6 +196,7 @@ export function Plate({
               segments={[{ text: title }]}
             />
           </div>
+          <MomentGlyph figure={figure} />
         </div>
         <div className="p-5 sm:p-6">{children}</div>
         <figcaption className="border-t border-border/70 px-5 py-3 font-mono text-[11px] leading-relaxed text-muted sm:px-6">
