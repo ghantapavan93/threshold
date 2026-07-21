@@ -7,10 +7,16 @@ reordering. By committing the prior record's hash into each record, removing or
 moving a record breaks the link to the next one, so a truncated or reshuffled
 log fails verification too.
 
-It is still explicitly NOT tamper-PROOF: a holder of the key (or a full app
-compromise) can forge a fresh, internally-valid chain, and it does not prove
-semantic truth — only that the stored sequence was not altered, truncated, or
-reordered after write. See docs/THREAT_MODEL.md.
+It is still explicitly NOT tamper-PROOF on two axes, and we name both rather than
+imply coverage:
+  1. A holder of the key (or a full app compromise) can forge a fresh,
+     internally-valid chain.
+  2. SUFFIX TRUNCATION — dropping the tail — leaves a valid shorter chain, so a
+     plain chain cannot detect it on its own. Detecting truncation needs an
+     external anchor: a separately-signed head hash + record count. (Interior
+     deletion and reordering ARE detected, because they break a link or the
+     seq/position match — see tests/test_invariants.py.)
+See docs/THREAT_MODEL.md.
 """
 from __future__ import annotations
 

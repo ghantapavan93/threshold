@@ -25,12 +25,17 @@ const QA: { q: string; a: string; tag: Tag }[] = [
   {
     tag: "ENFORCED",
     q: "“Same input, bit-identical output” — really?",
-    a: "The decision path has no wall-clock, no RNG, no network, no LLM (evaluator.py). Iteration is sorted; the single synthetic input is seeded and labelled. Replay determinism is pinned by the test suite — run V17→V18 twice, the verdict and the summary are identical.",
+    a: "The decision path has no wall-clock, no RNG, no network, no LLM (evaluator.py). Iteration is sorted; the single synthetic input is seeded and labelled. This isn't asserted on a few examples — it's a PROPERTY checked over generated inputs with Hypothesis: for any attributes and any policy, evaluate returns the same Decision twice and never raises.",
   },
   {
     tag: "ENFORCED",
     q: "Independent per-record HMACs miss deletion and reordering.",
-    a: "Correct — which is why the log is hash-chained: each record's HMAC commits the prior record's. Delete or reorder a record and the chain breaks, not just a single edit. It is still not tamper-PROOF — a key-holder can forge a fresh, valid chain — and we say exactly that.",
+    a: "Correct — which is why the log is hash-chained: each record's HMAC commits the prior record's. Reorder or delete an interior record and the chain breaks — both are checked as properties over generated event sequences, not single examples. It is still not tamper-PROOF: a key-holder can forge a fresh chain, and — see the next card — suffix truncation is its own limit.",
+  },
+  {
+    tag: "HONEST LIMIT",
+    q: "Then just truncate it — drop the last few records.",
+    a: "That's the one thing a plain hash chain can't see: editing, reordering, and interior deletion all break a link, but dropping the SUFFIX leaves a valid shorter chain. Detecting truncation needs an external anchor — a separately-signed head hash and record count. We assert this gap in a test rather than let the chain imply it's covered. It's the honest next step.",
   },
   {
     tag: "CORE",
