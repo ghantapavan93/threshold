@@ -13,8 +13,19 @@ import copy
 from hypothesis import given, settings, strategies as st
 
 from app.domain.audit import AuditTrail, verify
-from app.domain.evaluator import Decision, eval_rule, evaluate
+from app.domain.evaluator import Decision, InvalidComparison, eval_rule, evaluate
 from app.domain.policy import FrequencyCap, Offer, Policy, Rule
+
+
+def _passes(rule: Rule, attrs: dict) -> bool:
+    """Does a session pass this rule, using the SAME fail-closed semantics as
+    evaluate()? eval_rule is not total — a gte/lte on a bad type raises
+    InvalidComparison, which evaluate() treats as the rule failing. Eligibility
+    means the rule passes without raising."""
+    try:
+        return bool(eval_rule(rule, attrs))
+    except InvalidComparison:
+        return False
 
 SECRET = "invariant-secret"
 KEYS = ["cc_bin", "amount", "country", "tier", "x"]
@@ -73,6 +84,21 @@ def test_law_deterministic(attrs, policy):
     assert evaluate(attrs, policy) == evaluate(copy.deepcopy(attrs), policy)
 
 
+# LAW 2b — POINT-IN-TIME / MINIMALITY. The decision reads ONLY the attributes the
+# policy references. Adding attributes the policy never names — the stand-in for a
+# field that didn't exist at event-time, or "future" data — can't change the
+# decision. This is what makes replay off a point-in-time snapshot valid: no
+# future/extra information can leak into a past decision.
+extra_keys = st.text(alphabet="abcdefghijklmnopqrstuvwxyz_", min_size=4, max_size=10).map(lambda s: "extra_" + s)
+
+
+@given(attrs=attrs_strategy, policy=policy_strategy, extra=st.dictionaries(extra_keys, attr_values, max_size=4))
+def test_law_reads_only_referenced_attributes(attrs, policy, extra):
+    # extra keys are prefixed "extra_" and never appear in KEYS, so no generated
+    # rule references them. Adding them must be a no-op on the decision.
+    assert evaluate(attrs, policy) == evaluate({**attrs, **extra}, policy)
+
+
 # LAW 3 — MISSING FAILS CLOSED under the conservative operator. A session missing
 # the attribute is NEVER eligible under include_is_not_in: absent data can't widen.
 @given(key=st.sampled_from(KEYS), lst=list_values, attrs=attrs_strategy)
@@ -93,6 +119,31 @@ def test_law_operator_flip_widens_missing(key, lst):
     dangerous = Rule(id="r", attribute=key, op="exclude_is_in", value=lst)
     assert eval_rule(conservative, absent) is False  # excluded
     assert eval_rule(dangerous, absent) is True  # WIDENED — now eligible
+
+
+# A rule using any operator EXCEPT the one dangerous flip (exclude_is_in). Every
+# one of these fails closed on a missing attribute.
+@st.composite
+def conservative_rule(draw):
+    key = draw(st.sampled_from(KEYS))
+    if draw(st.booleans()):
+        op = draw(st.sampled_from(["equals", "not_equals", "gte", "lte"]))
+        return Rule(id="r", attribute=key, op=op, value=draw(st.one_of(st.integers(-100, 100), st.text(max_size=4))))
+    op = draw(st.sampled_from(["in", "include_is_not_in"]))  # NOT exclude_is_in
+    return Rule(id="r", attribute=key, op=op, value=draw(list_values))
+
+
+# LAW 4b — DATA-LOSS-CANNOT-WIDEN, generalized. Under EVERY operator except
+# exclude_is_in, eligibility REQUIRES the attribute present: if a rule passes, then
+# removing its attribute makes it fail. So losing data can only narrow, never
+# widen — the whole safety property, and exactly what the operator flip (LAW 4)
+# violates. Non-vacuous: we only assert it on rules that actually passed.
+@given(rule=conservative_rule(), attrs=attrs_strategy)
+def test_law_conservative_eligibility_requires_presence(rule, attrs):
+    if _passes(rule, attrs):  # the session is eligible under this rule
+        without = dict(attrs)
+        without.pop(rule.attribute, None)
+        assert _passes(rule, without) is False  # remove the data -> excluded
 
 
 # LAW 5 — AUDIT CHAIN catches content edits, reordering, and INTERIOR deletion.

@@ -20,7 +20,7 @@ const QA: { q: string; a: string; tag: Tag }[] = [
   {
     tag: "CORE",
     q: "Replay is off-policy — the sessions were logged under V17. Doesn't that invalidate testing V18?",
-    a: "It would, if we claimed lift. We don't. Replay proves STRUCTURAL safety — does the change widen eligibility or break a hard constraint — a property of the policy function on fixed inputs, so it holds regardless of how behavior might shift. Behavioral lift is a different question, and only the Would-Have-Seen holdout answers it. A positive verdict here is eligibility for that holdout, never “it will win.”",
+    a: "It would, if we claimed lift. We don't. Replay proves STRUCTURAL safety — does the change widen eligibility or break a hard constraint — a property of the policy function on fixed inputs, so it holds regardless of how behavior might shift. And “on fixed inputs” is itself a proven law: a property test shows the decision reads only the attributes the policy references, so replaying a point-in-time snapshot can't leak future or extra data into a past decision. Behavioral lift is a different question, and only the Would-Have-Seen holdout answers it — a positive verdict here is eligibility for that holdout, never “it will win.”",
   },
   {
     tag: "ENFORCED",
@@ -40,7 +40,7 @@ const QA: { q: string; a: string; tag: Tag }[] = [
   {
     tag: "CORE",
     q: "A “missing attribute” might just mean the field postdates the event.",
-    a: "Yes — conflating “didn't exist yet” with “genuinely absent” would fabricate a widening signal. We replay as-of a point-in-time snapshot and read only the fields the schema had then; a field introduced later is not a widening. Keeping those two apart is the whole reason the missing-attribute trap is subtle.",
+    a: "Yes — conflating “didn't exist yet” with “genuinely absent” would fabricate a widening signal. We replay as-of a point-in-time snapshot and read only the fields the schema had then; a field introduced later is not a widening. And the safety direction is a proven law: under every operator but the one dangerous flip, eligibility REQUIRES the attribute present — so losing data can only narrow, never widen. The trap (exclude_is_in) is precisely the operator that violates it.",
   },
   {
     tag: "PRECISE",
