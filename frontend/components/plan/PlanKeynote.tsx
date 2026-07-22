@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { Magnetic } from "@/components/visual/Magnetic";
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "@/app/providers";
 import { FilmGrain } from "@/components/moment-forge/garnish";
@@ -493,9 +494,11 @@ export function PlanKeynote() {
               I&apos;d rather be corrected than flattered.
             </Body>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/" className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50" style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}>
-                <span aria-hidden>▶</span> Operate Threshold
-              </Link>
+              <Magnetic strength={0.35}>
+                <Link href="/" className="press inline-flex min-h-[48px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50" style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}>
+                  <span aria-hidden>▶</span> Operate Threshold
+                </Link>
+              </Magnetic>
               <Link href="/builder" className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal">
                 Watch the Builder keynote
               </Link>

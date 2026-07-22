@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Magnetic } from "@/components/visual/Magnetic";
 import { useTheme } from "@/app/providers";
 import {
   ClipReveal,
@@ -350,13 +351,15 @@ function ClosingAsk() {
             got wrong. I want to be a long-term Builder, not collect a company name.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-            >
-              <span aria-hidden>▶</span> Open the working console
-            </Link>
+            <Magnetic strength={0.35}>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+              >
+                <span aria-hidden>▶</span> Open the working console
+              </Link>
+            </Magnetic>
             <Link
               href="/vision"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"

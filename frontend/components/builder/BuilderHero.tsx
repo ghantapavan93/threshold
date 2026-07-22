@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Eyebrow, MaskText, prefersReducedMotion, useIsoLayoutEffect } from "./anim";
 import { SceneMedia } from "@/components/visual/SceneMedia";
+import { Magnetic } from "@/components/visual/Magnetic";
 
 /* ────────────────────────────────────────────────────────────────────────────
    Hero scene.
@@ -127,13 +128,15 @@ export function BuilderHero() {
         </p>
 
         <div ref={ctaRef} className="mt-9 flex flex-wrap items-center gap-3">
-          <a
-            href="#what-ill-do"
-            className="press inline-flex min-h-[44px] items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:min-h-0"
-            style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-          >
-            See how I&apos;d own it <span aria-hidden>→</span>
-          </a>
+          <Magnetic strength={0.35}>
+            <a
+              href="#what-ill-do"
+              className="press inline-flex min-h-[44px] items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:min-h-0"
+              style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+            >
+              See how I&apos;d own it <span aria-hidden>→</span>
+            </a>
+          </Magnetic>
           <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"

@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
 import { Reveal } from "@/components/visual/Reveal";
 import { ScrollLitText } from "@/components/visual/ScrollLitText";
+import { Magnetic } from "@/components/visual/Magnetic";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -233,13 +234,15 @@ function Hero() {
         </p>
 
         <div data-hero-fade className="mt-9 flex flex-wrap items-center gap-3">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-          >
-            Enter the working console <span aria-hidden>→</span>
-          </Link>
+          <Magnetic strength={0.35}>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+              style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+            >
+              Enter the working console <span aria-hidden>→</span>
+            </Link>
+          </Magnetic>
           <a
             href="#roadmap"
             className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
@@ -950,13 +953,15 @@ function ClosingCta() {
             single customer.
           </p>
           <div className="mt-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-            >
-              <span aria-hidden>▶</span> Enter the console
-            </Link>
+            <Magnetic strength={0.35}>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold shadow-glow-teal press focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+              >
+                <span aria-hidden>▶</span> Enter the console
+              </Link>
+            </Magnetic>
           </div>
         </div>
       </Parallax>
