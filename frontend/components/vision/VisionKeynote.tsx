@@ -12,6 +12,9 @@ import { EnterMachine } from "@/components/scenes/EnterMachine";
 import { FailureBattle } from "@/components/scenes/FailureBattle";
 import { MissionControl } from "@/components/scenes/MissionControl";
 import { ScaleChamber } from "@/components/scenes/ScaleChamber";
+import { EvidenceForge } from "@/components/scenes/EvidenceForge";
+import { WarRoom } from "@/components/scenes/WarRoom";
+import { BuilderReceipt } from "@/components/scenes/BuilderReceipt";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -1095,6 +1098,60 @@ function InteractiveScenes() {
       <Reveal delay={0.05}>
         <div className="mt-8">
           <ScaleChamber />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["AI proposed. Evidence decided."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          The AI story as a transformation, not a list of tools. Proposals flow in; deterministic
+          evidence rejects, refines, or verifies each one. Open a row to see what an early AI claim
+          became once it had to survive — orchestration, not autocomplete.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <EvidenceForge />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["3 a.m. War Room."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          One simulated incident. Work the questions an on-call engineer would — is the customer safe,
+          policy or infra, stop exposure, will recovery duplicate — then write the after-action report.
+          It shows how the thinking holds under uncertainty.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <WarRoom />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Your receipt."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          Not a skills section — a receipt of the proof this session just created, each line mapped to
+          what the role actually needs. Every figure is the demonstrated V17 → V18 run, and it states
+          plainly what is proven versus what still needs a live holdout.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <BuilderReceipt />
         </div>
       </Reveal>
     </section>
