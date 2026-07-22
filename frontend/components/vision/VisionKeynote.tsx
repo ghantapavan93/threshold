@@ -9,6 +9,9 @@ import { ScrollLitText } from "@/components/visual/ScrollLitText";
 import { Magnetic } from "@/components/visual/Magnetic";
 import { PolicyMultiverse } from "@/components/scenes/PolicyMultiverse";
 import { EnterMachine } from "@/components/scenes/EnterMachine";
+import { FailureBattle } from "@/components/scenes/FailureBattle";
+import { MissionControl } from "@/components/scenes/MissionControl";
+import { ScaleChamber } from "@/components/scenes/ScaleChamber";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -1038,6 +1041,60 @@ function InteractiveScenes() {
       <Reveal delay={0.05}>
         <div className="mt-8">
           <EnterMachine />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Attack it."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          Break the optional experience without breaking the transaction. Fire a failure at the offer
+          path and watch the fault stop at the boundary — the placement falls to No Offer Rendered while
+          the checkout completes, fail-closed by construction.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <FailureBattle />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Operate it at 2 a.m."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          One correlated view of a caught session — trace, policy, outcome, the constraint responsible,
+          outbox, retries, evidence — no hunting across panels. Switch conditions: Degraded grows the
+          queue while checkout stays protected; Recovering drains the backlog with zero duplicate state.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <MissionControl />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Now scale it."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          Turn the traffic dial and the architecture evolves — worker, outbox, partitioned replay,
+          regional failover. Every tier is labelled MEASURED, MODELED, or HYPOTHESIS, because the
+          credible signal isn&apos;t a huge number; it&apos;s knowing exactly where evidence ends.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <ScaleChamber />
         </div>
       </Reveal>
     </section>
