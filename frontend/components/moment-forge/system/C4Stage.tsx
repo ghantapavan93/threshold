@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { prefersReducedMotion } from "@/components/builder/anim";
 import { ShippedDesignedTag, NodeCard, ZoomTrail, Legend } from "./atoms";
 import { DeterminismBoundaryCard } from "./DeterminismBoundary";
@@ -49,6 +49,8 @@ function EdgeLayer({ edges, nodes, level }: { edges: ArchEdge[]; nodes: ArchNode
         return (
           <g key={i}>
             <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={color} strokeWidth={e.thick ? 3 : 1.5} strokeDasharray={dashed ? "8 6" : undefined} strokeLinecap="round" opacity={0.7} />
+            {/* a call travels the edge between components */}
+            <circle r={2.6} fill={color} className="dg-dot dg-slow" style={{ offsetPath: `path('M${a.x} ${a.y} L${b.x} ${b.y}')` } as CSSProperties} />
           </g>
         );
       })}

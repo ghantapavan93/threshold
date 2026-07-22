@@ -4,7 +4,7 @@
    under reduced motion). Keyed by the plate's figure number; returns null for any
    figure without a glyph. */
 
-import type { ReactElement } from "react";
+import type { CSSProperties, ReactElement } from "react";
 
 const CRIMSON = "var(--c-crimson)";
 const TEAL = "var(--c-teal)";
@@ -14,6 +14,8 @@ const OFFER = "var(--c-offer-blue)";
 
 const mono = { fontFamily: "var(--font-mono, monospace)", fontSize: 6.5 } as const;
 const cls = "h-16 w-full";
+// a mote that rides a route (offset-path in the SVG user coordinate system)
+const ride = (d: string): CSSProperties => ({ offsetPath: `path('${d}')` } as CSSProperties);
 
 /** 02 — several bounded contexts, one moment. */
 function MapGlyph() {
@@ -26,12 +28,13 @@ function MapGlyph() {
   ];
   return (
     <svg viewBox="0 0 150 44" className={cls} aria-hidden fill="none">
-      <line x1={20} y1={14} x2={70} y2={12} stroke={MUTED} strokeOpacity={0.4} />
-      <line x1={70} y1={12} x2={120} y2={16} stroke={MUTED} strokeOpacity={0.4} />
-      <line x1={46} y1={20} x2={96} y2={20} stroke={MUTED} strokeOpacity={0.4} />
+      <line className="dg-flow" x1={20} y1={14} x2={70} y2={12} stroke={MUTED} strokeOpacity={0.5} />
+      <line className="dg-flow" x1={70} y1={12} x2={120} y2={16} stroke={MUTED} strokeOpacity={0.5} />
+      <line className="dg-flow" x1={46} y1={20} x2={96} y2={20} stroke={MUTED} strokeOpacity={0.5} />
       {boxes.map((b, i) => (
-        <rect key={i} className={i === 4 ? "sg-pulse" : undefined} x={b.x} y={b.y} width={22} height={11} rx={2} fill={b.c} fillOpacity={0.14} stroke={b.c} strokeOpacity={0.7} />
+        <rect key={i} className={`dg-seq-${(i % 3) + 1}`} x={b.x} y={b.y} width={22} height={11} rx={2} fill={b.c} fillOpacity={0.14} stroke={b.c} strokeOpacity={0.7} />
       ))}
+      <circle className="dg-dot dg-slow" r={2} fill={TEAL} style={ride("M20 14 L70 12 L120 16")} />
       <text x={8} y={41} fill={MUTED} style={mono}>many models, one moment</text>
     </svg>
   );
@@ -57,7 +60,8 @@ function TranslateGlyph() {
       <text x={8} y={20} fill={MUTED} style={{ ...mono, fontSize: 8 }}>raw</text>
       <line x1={30} y1={17} x2={62} y2={17} stroke={MUTED} strokeOpacity={0.5} className="sg-dash" strokeDasharray="3 3" />
       <rect className="sg-pulse" x={64} y={6} width={8} height={24} rx={2} fill={TEAL} fillOpacity={0.85} />
-      <line x1={74} y1={17} x2={104} y2={17} stroke={TEAL} strokeOpacity={0.6} />
+      <line className="dg-flow" x1={74} y1={17} x2={104} y2={17} stroke={TEAL} strokeOpacity={0.6} />
+      <circle className="dg-dot" r={2} fill={TEAL} style={ride("M30 17 H104")} />
       <text x={106} y={20} fill={TEAL} style={{ ...mono, fontSize: 8 }}>clean</text>
       <text x={8} y={40} fill={MUTED} style={mono}>translated at the seam</text>
     </svg>
@@ -68,9 +72,11 @@ function TranslateGlyph() {
 function ReconcileGlyph() {
   return (
     <svg viewBox="0 0 150 44" className={cls} aria-hidden fill="none">
-      <line x1={8} y1={10} x2={70} y2={18} stroke={OFFER} strokeOpacity={0.6} strokeWidth={1.4} />
-      <line x1={8} y1={26} x2={70} y2={18} stroke={AMBER} strokeOpacity={0.6} strokeWidth={1.4} />
-      <line x1={70} y1={18} x2={104} y2={18} stroke={TEAL} strokeWidth={1.6} />
+      <line className="dg-flow" x1={8} y1={10} x2={70} y2={18} stroke={OFFER} strokeOpacity={0.6} strokeWidth={1.4} />
+      <line className="dg-flow" x1={8} y1={26} x2={70} y2={18} stroke={AMBER} strokeOpacity={0.6} strokeWidth={1.4} />
+      <line className="dg-flow" x1={70} y1={18} x2={104} y2={18} stroke={TEAL} strokeWidth={1.6} />
+      <circle className="dg-dot" r={1.8} fill={OFFER} style={ride("M8 10 L70 18 L104 18")} />
+      <circle className="dg-dot dg-delay" r={1.8} fill={AMBER} style={ride("M8 26 L70 18 L104 18")} />
       <g className="sg-pulse">
         <circle cx={116} cy={18} r={8} stroke={TEAL} strokeWidth={1.6} />
         <path d="M111 18 l3.5 3.5 l6 -7" stroke={TEAL} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
@@ -103,6 +109,7 @@ function CompileGlyph() {
       <text x={12} y={20} fill={MUTED} style={{ ...mono, fontSize: 7 }}>V18</text>
       <path d="M42 17 h16 l-4 -3 m4 3 l-4 3" stroke={OFFER} strokeOpacity={0.7} />
       <rect className="sg-pulse" x={64} y={9} width={34} height={16} rx={3} fill={CRIMSON} fillOpacity={0.12} stroke={CRIMSON} strokeOpacity={0.7} />
+      <circle className="dg-dot" r={2} fill={OFFER} style={ride("M38 17 H64")} />
       <text x={68} y={20} fill={CRIMSON} style={{ ...mono, fontSize: 7 }}>Δmeaning</text>
       <text x={8} y={40} fill={MUTED} style={mono}>change → meaning</text>
     </svg>

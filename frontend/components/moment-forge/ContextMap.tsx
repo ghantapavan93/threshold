@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { CONTEXTS, EDGES, PATTERNS, TACTICAL, type BC, type Edge } from "./content";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -61,6 +61,10 @@ function EdgeLine({
         strokeDasharray={p.dash || undefined}
         strokeLinecap="round"
       />
+      {/* a message flows along the relationship */}
+      {state !== "dimmed" && (
+        <circle r={2.4} fill={p.accent} className="dg-dot dg-slow" style={{ offsetPath: `path('M${a.x} ${a.y} L${b.x} ${b.y}')` } as CSSProperties} />
+      )}
       {/* midpoint glyph chip */}
       <g transform={`translate(${mx} ${my})`}>
         <circle r="11" fill="var(--c-base)" stroke={p.accent} strokeWidth="1" />

@@ -37,9 +37,9 @@ function Frame({ p }: { p: Phase }) {
   ];
   return (
     <svg viewBox="0 0 150 84" className="h-auto w-full" aria-hidden>
-      {/* edges */}
-      <line x1={nodes[0]!.x} y1={nodes[0]!.y} x2={nodes[1]!.x} y2={nodes[1]!.y} stroke="var(--c-border-strong)" strokeWidth="1" />
-      <line x1={nodes[0]!.x} y1={nodes[0]!.y} x2={nodes[2]!.x} y2={nodes[2]!.y} stroke="var(--c-border-strong)" strokeWidth="1" />
+      {/* edges — the fault propagates along them from the epicentre */}
+      <line className="dg-flow" x1={nodes[0]!.x} y1={nodes[0]!.y} x2={nodes[1]!.x} y2={nodes[1]!.y} stroke="var(--c-border-strong)" strokeWidth="1" />
+      <line className="dg-flow" x1={nodes[0]!.x} y1={nodes[0]!.y} x2={nodes[2]!.x} y2={nodes[2]!.y} stroke="var(--c-border-strong)" strokeWidth="1" />
       {/* containment seam */}
       <line
         x1="98"
