@@ -9,6 +9,7 @@ import type { Injection } from "@/lib/schemas";
 import { useConsole } from "./console-context";
 import { useWalkthrough } from "./walkthrough";
 import { Magnetic } from "./visual/Magnetic";
+import { CountUp } from "./visual/CountUp";
 import { Parallax } from "./visual/Parallax";
 import { TransactionMomentMotif } from "./visual/illustrations";
 
@@ -268,16 +269,16 @@ export function Hero() {
           className="mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3"
         >
           {[
-            { figure: "33,000+", label: "clients" },
-            { figure: "10B+", label: "transactions / year" },
-            { figure: "17", label: "countries" },
+            { to: 33000, suffix: "+", label: "clients" },
+            { to: 10, suffix: "B+", label: "transactions / year" },
+            { to: 17, suffix: "", label: "countries" },
           ].map((s) => (
             <div
               key={s.label}
               className="glass rounded-xl px-4 py-3"
             >
               <p className="font-mono text-xl font-semibold text-text sm:text-2xl">
-                {s.figure}
+                <CountUp to={s.to} suffix={s.suffix} immediate />
               </p>
               <p className="mt-0.5 text-xs text-muted">{s.label}</p>
             </div>
