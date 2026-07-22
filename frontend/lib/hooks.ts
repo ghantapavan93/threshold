@@ -59,7 +59,17 @@ export function useHealth(): UseQueryResult<Health, ApiError> {
     queryKey: ["health"],
     queryFn: ({ signal }) => api.health(signal),
     refetchInterval: 15_000,
-    retry: retryPolicy,
+    // A free-tier host (Render) can cold-start for ~50s after idling. Be patient
+    // before declaring the backend down, so a sleeping instance waking up shows as
+    // "checking", never a false "offline". 4xx/validation still fail fast.
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError) {
+        if (error.kind === "validation") return false;
+        if (error.status !== null && error.status >= 400 && error.status < 500) return false;
+      }
+      return failureCount < 8;
+    },
+    retryDelay: (attempt) => Math.min(7000, 1000 * 2 ** attempt),
   });
 }
 

@@ -1,7 +1,5 @@
 "use client";
 
-import { API_BASE } from "@/lib/api";
-import { useHealth } from "@/lib/hooks";
 import { RECORDED_DESCRIPTION } from "@/lib/replay-fixture";
 import { ConsoleProvider, useConsole } from "@/components/console-context";
 import { WalkthroughProvider } from "@/components/walkthrough";
@@ -31,11 +29,12 @@ import { Reveal } from "@/components/visual/Reveal";
  * captured engine payload.
  */
 function BackendBanner() {
-  const health = useHealth();
   const { recorded } = useConsole();
-  // Show once we're certainly on recorded data (the fallback fired), or as an
-  // early warning the moment the health probe reports the API is down.
-  if (!recorded && !health.isError) return null;
+  // Only surface a banner once a run has ACTUALLY fallen back to recorded data —
+  // honest provenance, in context. Live/offline status is the header chip's job, so
+  // a backend that's merely cold-starting (Render can nap after idle) never trips an
+  // alarming top banner; it just reads "checking" until it wakes.
+  if (!recorded) return null;
   return (
     <div
       role="status"
@@ -44,21 +43,10 @@ function BackendBanner() {
       <span aria-hidden className="mr-2 font-bold">
         ◆
       </span>
-      The Threshold API isn&apos;t reachable at{" "}
-      <span className="font-mono">{API_BASE}</span>.{" "}
-      {recorded ? (
-        <>
-          Showing a <strong className="font-semibold">recorded</strong> run (
-          {RECORDED_DESCRIPTION}) — not live. Start the backend on :8000 for a
-          live replay.
-        </>
-      ) : (
-        <>
-          A run here will replay a <strong className="font-semibold">recorded</strong>{" "}
-          capture ({RECORDED_DESCRIPTION}). Start the backend on :8000 for a live
-          replay.
-        </>
-      )}
+      Showing a <strong className="font-semibold">recorded</strong> run ({RECORDED_DESCRIPTION}) — the live
+      backend wasn&apos;t reachable just now (it may be waking from idle). Every value below is a real captured
+      engine payload; press Play again once the header shows{" "}
+      <span className="font-mono">LIVE</span>.
     </div>
   );
 }
