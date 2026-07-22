@@ -8,6 +8,7 @@ import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
 import type { Injection } from "@/lib/schemas";
 import { useConsole } from "./console-context";
 import { useWalkthrough } from "./walkthrough";
+import { Magnetic } from "./visual/Magnetic";
 import { Parallax } from "./visual/Parallax";
 import { TransactionMomentMotif } from "./visual/illustrations";
 
@@ -208,15 +209,17 @@ export function Hero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
           className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center"
         >
-          <button
-            type="button"
-            onClick={playStory}
-            disabled={busy}
-            className="press inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-60"
-            style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
-          >
-            <span aria-hidden>▶</span> {busy ? "Walking you through it…" : "Play — walk me through it"}
-          </button>
+          <Magnetic strength={0.4}>
+            <button
+              type="button"
+              onClick={playStory}
+              disabled={busy}
+              className="press inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-60"
+              style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
+            >
+              <span aria-hidden>▶</span> {busy ? "Walking you through it…" : "Play — walk me through it"}
+            </button>
+          </Magnetic>
 
           {phase === "blocked" ? (
             <button

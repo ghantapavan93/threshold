@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { LivingBackground } from "@/components/visual/LivingBackground";
 import { SmoothScroll } from "@/components/visual/SmoothScroll";
+import { CursorGlow } from "@/components/visual/CursorGlow";
 
 /**
  * Self-hosted, offline-safe fonts. next/font downloads and inlines these at
@@ -55,6 +56,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <LivingBackground />
+        <CursorGlow />
         <SmoothScroll />
         <Providers>{children}</Providers>
       </body>
