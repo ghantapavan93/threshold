@@ -7,6 +7,8 @@ import { useTheme } from "@/app/providers";
 import { Reveal } from "@/components/visual/Reveal";
 import { ScrollLitText } from "@/components/visual/ScrollLitText";
 import { Magnetic } from "@/components/visual/Magnetic";
+import { PolicyMultiverse } from "@/components/scenes/PolicyMultiverse";
+import { EnterMachine } from "@/components/scenes/EnterMachine";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -995,6 +997,53 @@ function Frontier() {
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────
+// ── Two playable scenes: the same edit in two worlds, then the trace through the
+//    whole system. Interactive, deterministic, honest numbers. ─────────────────
+function InteractiveScenes() {
+  return (
+    <section aria-labelledby="scenes-title" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <Reveal>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal">See it, don&apos;t read it</p>
+        <MaskedLines
+          as="h2"
+          id="scenes-title"
+          className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["One operator flips.", "Two worlds diverge."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          The whole risk in one gesture: drag the divider and watch the same 200 sessions decide
+          differently. On the V18 side, 21 missing-attribute sessions the flip silently widens turn
+          crimson — click one for the deterministic reason.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <PolicyMultiverse />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Enter the machine."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          Follow one transaction through every layer and watch them stay aligned to the same moment.
+          Scrub the timeline; each component lights as the transaction reaches it, and the four lenses
+          answer — for that exact step — what the customer saw, what rule decided, what ran, and what
+          proves it.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <EnterMachine />
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
 export function VisionKeynote() {
   return (
     <div className="relative min-h-screen text-text">
@@ -1006,6 +1055,7 @@ export function VisionKeynote() {
           <ConnectedStory />
           <Direction />
           <CoreInvariant />
+          <InteractiveScenes />
           <Roadmap />
           <IntegrationDiagram />
           <Compounds />
