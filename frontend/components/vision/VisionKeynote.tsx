@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useState, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
@@ -17,6 +18,11 @@ import { WarRoom } from "@/components/scenes/WarRoom";
 import { BuilderReceipt } from "@/components/scenes/BuilderReceipt";
 import { GovernanceVault } from "@/components/scenes/GovernanceVault";
 import { PathChooser } from "@/components/scenes/PathChooser";
+// Matter.js physics is client-only; keep it out of the server bundle and initial paint.
+const SilentWidening = dynamic(
+  () => import("@/components/scenes/SilentWidening").then((m) => m.SilentWidening),
+  { ssr: false },
+);
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -1027,6 +1033,25 @@ function InteractiveScenes() {
       <Reveal delay={0.05}>
         <div className="mt-8">
           <PolicyMultiverse />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Watch them cross."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          The same split, as physics. A sample of the replay drops into two bins either side of the
+          eligibility boundary. Flip to V18 and the missing-attribute band physically crosses into
+          eligible — silent structural widening you can watch happen. The physics only shows the
+          result; the classification is the deterministic engine&apos;s.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <SilentWidening />
         </div>
       </Reveal>
 
