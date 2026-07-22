@@ -99,7 +99,7 @@ export function CounterexampleForge() {
   return (
     <Section
       id="counterexample-forge"
-      index={13}
+      index={12}
       title="Counterexample Forge"
       subtitle="A proposer enumerates adversarial fixtures — each probing one invariant — and the real deterministic engine judges every one. The proposer suggests what to try; only the engine rules on safety. AI proposes, evidence decides, and no model sits in the critical path."
       actions={

@@ -51,7 +51,7 @@ export function OffPolicyEstimate() {
   return (
     <Section
       id="ope"
-      index={12}
+      index={11}
       title="Pre-holdout value estimate"
       subtitle="Before an online test, can you estimate a change's value from logged data? Yes — when the old policy's action probabilities were logged. This runs a real SNIPS / doubly-robust estimator with an effective-sample-size gate that refuses when support is thin. It narrows what to test; it never replaces the holdout."
     >

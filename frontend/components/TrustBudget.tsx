@@ -110,7 +110,7 @@ export function TrustBudget() {
   return (
     <Section
       id="trust-budget"
-      index={14}
+      index={13}
       title="Trust Budget"
       subtitle="A single offer can look relevant yet turn irritating after repeated exposures and rejections. Trust Budget treats attention as scarce: it depletes with exposure, depletes faster with rejection, recovers over time, and gates every optional experience — SHOW, DEFER, or SUPPRESS — with a deterministic decision."
     >

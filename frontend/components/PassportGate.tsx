@@ -75,7 +75,7 @@ export function PassportGate() {
   return (
     <Section
       id="passport"
-      index={15}
+      index={14}
       title="Agentic Transaction Passport"
       subtitle="An AI shopping agent hands the transaction a short-lived packet of claimed intent — party size, spend ceiling, a time constraint. The agent is untrusted. An anti-corruption layer admits a field only if it is supported, valid, customer-confirmed, in-window, and consented — a customer-approved subset of intent, never more."
     >
