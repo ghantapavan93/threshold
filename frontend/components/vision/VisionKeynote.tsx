@@ -15,6 +15,8 @@ import { ScaleChamber } from "@/components/scenes/ScaleChamber";
 import { EvidenceForge } from "@/components/scenes/EvidenceForge";
 import { WarRoom } from "@/components/scenes/WarRoom";
 import { BuilderReceipt } from "@/components/scenes/BuilderReceipt";
+import { GovernanceVault } from "@/components/scenes/GovernanceVault";
+import { PathChooser } from "@/components/scenes/PathChooser";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -1141,6 +1143,24 @@ function InteractiveScenes() {
         <MaskedLines
           as="h2"
           className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Who may change it."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          A policy version earns trust through a fixed, signed lifecycle — draft to reviewed, approved,
+          signed, shadow, cohort, rollback. Every step is chained, actor-attributed, tenant-scoped, and
+          survives a key rotation. Click a step for its signed record; the guarantees are enforced in code.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <GovernanceVault />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
           lines={["Your receipt."]}
         />
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
@@ -1166,6 +1186,7 @@ export function VisionKeynote() {
         <VisionNav />
         <main id="main">
           <Hero />
+          <PathChooser />
           <ConnectedStory />
           <Direction />
           <CoreInvariant />

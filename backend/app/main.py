@@ -23,6 +23,7 @@ from .routers import (
     audit,
     cancellations,
     conversions,
+    governance,
     health,
     momentforge,
     policies,
@@ -109,5 +110,5 @@ async def validation_exc_handler(request: Request, exc: RequestValidationError):
 
 for r in (health.router, policies.router, replay.router, conversions.router,
           cancellations.router, audit.router, scenarios.router, momentforge.router,
-          recovery.router):
+          recovery.router, governance.router):
     app.include_router(r)
