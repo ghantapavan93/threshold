@@ -39,6 +39,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from .audit import canonical
+from .money import Money, MoneyError, supported_currencies
 
 # ── The supported transaction-context schema ──────────────────────────────────
 # The ONLY keys that may ever reach the transaction. Anything else is stripped.
@@ -72,6 +73,14 @@ SUPPORTED: dict[str, FieldSpec] = {
     "location_preference": FieldSpec(_short_str(40), describe="a short location hint"),
     "dietary_requirement": FieldSpec(_short_str(40), sensitive=True,
                                      describe="a dietary need — sensitive, needs consent"),
+    # Currency-aware spend ceiling: the agent may claim a MAJOR-unit amount plus a
+    # currency; the ACL converts it via ISO 4217 (money.py), enforcing the exponent.
+    "spend_currency": FieldSpec(
+        lambda v: isinstance(v, str) and v.strip().upper() in supported_currencies(),
+        describe="ISO 4217 currency for the spend ceiling"),
+    "max_additional_spend": FieldSpec(
+        _short_str(20),
+        describe="spend ceiling in MAJOR units (e.g. '50.00'); converted per ISO 4217"),
 }
 
 
@@ -148,11 +157,15 @@ def admit(passport: Passport, now: int, consent: dict[str, bool], secret: str) -
     ledger: list[dict] = []
     claimed_keys = [f.key for f in passport.fields]
 
-    def result(admitted: dict, passport_valid: bool, reason: str | None) -> dict:
+    def result(admitted: dict, passport_valid: bool, reason: str | None,
+               derived_spend: dict | None = None) -> dict:
         return {
             "passport_valid": passport_valid,
             "reason": reason,
             "admitted": admitted,
+            # A DERIVED value (not a claimed key, so kept out of `admitted` to preserve
+            # admitted ⊆ claimed): the currency-converted spend ceiling, when present.
+            "derived_spend": derived_spend,
             "ledger": ledger,
             "claimed_keys": claimed_keys,
             "expires_in": passport.expires_at - now,
@@ -200,7 +213,35 @@ def admit(passport: Passport, now: int, consent: dict[str, bool], secret: str) -
         admitted[f.key] = f.value
         ledger.append({"key": f.key, "status": ADMITTED, "reason": "supported, valid, customer-confirmed, in-window"})
 
-    return result(admitted, True, None)
+    # 4) Currency-aware spend — ISO 4217 exponent enforcement at the seam. When the
+    # agent claims a MAJOR-unit spend ceiling, convert it to minor units for its
+    # currency, REFUSING more precision than that currency allows (¥5000.50 or
+    # $12.345). A spend without a currency is meaningless and is rejected.
+    def _relabel(key: str, status: str, reason: str) -> None:
+        for row in ledger:
+            if row["key"] == key:
+                row["status"], row["reason"] = status, reason
+                return
+
+    derived_spend: dict | None = None
+    if "max_additional_spend" in admitted:
+        currency = admitted.get("spend_currency")
+        if currency is None:
+            admitted.pop("max_additional_spend")
+            _relabel("max_additional_spend", REJECTED,
+                     "a spend amount without a currency is meaningless — provide spend_currency")
+        else:
+            try:
+                money = Money.from_major(admitted["max_additional_spend"], currency)
+                derived_spend = money.as_dict()  # kept OUT of admitted (not a claimed key)
+                _relabel("max_additional_spend", ADMITTED,
+                         f"confirmed intent; converts to {money.format()} — {money.minor} minor "
+                         f"units ({money.currency}, exponent {money.exponent})")
+            except MoneyError as exc:
+                admitted.pop("max_additional_spend")
+                _relabel("max_additional_spend", REJECTED, f"currency check failed: {exc}")
+
+    return result(admitted, True, None, derived_spend)
 
 
 # ── Curated scenarios — each teaches one ACL behaviour ─────────────────────────
@@ -298,6 +339,30 @@ def scenarios(secret: str) -> dict[str, dict]:
         "blurb": "party_size 500 and a fractional spend fail their validators (the Unit Wall: minor units are integers) — rejected. The valid field passes.",
         "now": _NOW, "consent": {},
         "passport": build_signed("shopping-agent-7", _NOW - 60, _NOW + 300, bad_range, secret),
+    }
+
+    jpy = [
+        PassportField("party_size", 2, True),
+        PassportField("max_additional_spend", "5000", True),  # major units — whole yen
+        PassportField("spend_currency", "JPY", True),
+    ]
+    out["foreign_currency"] = {
+        "label": "Foreign currency (JPY)",
+        "blurb": "The agent claims a ¥5000 ceiling. JPY has no minor unit (ISO 4217 exp 0), so the ACL converts '5000' → 5000 minor and admits it.",
+        "now": _NOW, "consent": {},
+        "passport": build_signed("shopping-agent-7", _NOW - 60, _NOW + 300, jpy, secret),
+    }
+
+    bad_precision = [
+        PassportField("party_size", 2, True),
+        PassportField("max_additional_spend", "5000.50", True),  # yen has no sub-unit
+        PassportField("spend_currency", "JPY", True),
+    ]
+    out["currency_precision"] = {
+        "label": "Impossible precision",
+        "blurb": "The agent claims ¥5000.50 — but JPY has no minor unit. The ACL refuses the amount instead of silently mis-scaling it.",
+        "now": _NOW, "consent": {},
+        "passport": build_signed("shopping-agent-7", _NOW - 60, _NOW + 300, bad_precision, secret),
     }
 
     return out

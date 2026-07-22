@@ -436,6 +436,17 @@ export const PassportResultSchema = z.object({
     passport_valid: z.boolean(),
     reason: z.string().nullable(),
     admitted: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+    // A derived (not claimed) value: the ISO 4217 currency-converted spend ceiling.
+    derived_spend: z
+      .object({
+        minor: z.number(),
+        currency: z.string(),
+        exponent: z.number(),
+        major: z.string(),
+        display: z.string(),
+      })
+      .nullable()
+      .optional(),
     ledger: z.array(PassportLedgerRowSchema),
     claimed_keys: z.array(z.string()),
     expires_in: z.number(),

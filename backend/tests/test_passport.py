@@ -71,6 +71,33 @@ def test_sensitive_field_needs_consent():
     assert "dietary_requirement" in with_["outcome"]["admitted"]
 
 
+def test_foreign_currency_converts_via_iso_4217():
+    # ¥5000: JPY has no minor unit (exp 0), so '5000' major → 5000 minor.
+    r = run_named_scenario("foreign_currency", SECRET)
+    o = r["outcome"]
+    assert o["admitted"].get("max_additional_spend") == "5000"  # the confirmed claim
+    assert o["derived_spend"] == {
+        "minor": 5000, "currency": "JPY", "exponent": 0, "major": "5000", "display": "5000 JPY"}
+
+
+def test_currency_precision_is_refused_not_mis_scaled():
+    # ¥5000.50 is impossible — JPY has no sub-unit. The ACL rejects it, no derived spend.
+    r = run_named_scenario("currency_precision", SECRET)
+    o = r["outcome"]
+    assert "max_additional_spend" not in o["admitted"]
+    assert o["derived_spend"] is None
+    row = [x for x in o["ledger"] if x["key"] == "max_additional_spend"]
+    assert row and row[0]["status"] == "REJECTED"
+
+
+def test_spend_amount_without_currency_is_rejected():
+    fields = [PassportField("max_additional_spend", "50.00", True)]  # no currency
+    r = admit(build_signed("agent", NOW - 60, NOW + 300, fields, SECRET), NOW, {}, SECRET)
+    assert "max_additional_spend_minor" not in r["admitted"]
+    row = [x for x in r["ledger"] if x["key"] == "max_additional_spend"]
+    assert row and row[0]["status"] == "REJECTED"
+
+
 def test_out_of_range_values_rejected():
     r = run_named_scenario("out_of_range", SECRET)
     admitted = r["outcome"]["admitted"]

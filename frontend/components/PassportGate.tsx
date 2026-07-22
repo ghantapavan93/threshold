@@ -176,6 +176,12 @@ export function PassportGate() {
                   ))}
                 </ul>
               )}
+              {o.derived_spend ? (
+                <p className="mt-2 border-t border-border/60 pt-2 font-mono text-[11px] text-muted">
+                  spend ceiling → <span className="text-teal">{o.derived_spend.display}</span>{" "}
+                  ({o.derived_spend.minor} minor · {o.derived_spend.currency} exp {o.derived_spend.exponent}, ISO 4217)
+                </p>
+              ) : null}
             </Card>
           </div>
 
