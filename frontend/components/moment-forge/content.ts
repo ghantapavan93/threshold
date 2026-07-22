@@ -307,33 +307,13 @@ export const COLLISIONS: Collision[] = [
   },
 ];
 
-// ── Laws of the Moment (invariants) ──────────────────────────────────────────
-export type Law = {
-  n: string;
-  title: string;
-  body: string;
-  motif: "failclosed" | "shield" | "widening" | "moment";
-};
-
-export const LAWS: Law[] = [
-  { n: "01", title: "Checkout independence / fail-closed", body: "Checkout has zero synchronous dependency on the offer path; any offer-side failure resolves to No Offer Rendered. An offer is never produced on a failure path.", motif: "failclosed" },
-  { n: "02", title: "Holdout is the only causal mechanism", body: "A positive change-safety verdict is eligibility for a controlled online holdout — never “safe to launch.” Replay filters known harms; it does not establish causal safety.", motif: "moment" },
-  { n: "03", title: "Deterministic evaluation", body: "For a given (event-time snapshot, policy) the decision is a pure function — no I/O, randomness, or wall-clock — so replay is bit-for-bit reproducible.", motif: "shield" },
-  { n: "04", title: "No future-information leakage", body: "Replay evaluates only the event-time snapshot captured on the session; it never joins a later or current profile.", motif: "shield" },
-  { n: "05", title: "Immutable policy versions", body: "A published version's document never changes; every decision references exactly one version.", motif: "shield" },
-  { n: "06", title: "Effectively-once financial state", body: "Conversions (and, extended, reward earn/redeem) dedupe on conversiontype:confirmationref; a repeated delivery updates state exactly once — over at-least-once delivery.", motif: "shield" },
-  { n: "07", title: "Single enforcement point for hard constraints", body: "Eligibility, consent, brand-safety, frequency, latency, holdout and the missing-attribute check live in one deterministic validator; a FAIL blocks release.", motif: "widening" },
-  { n: "08", title: "Missing-attribute safety", body: "An operator change that flips missing-value behaviour is isolated by counterfactual and blocks release when any replayed missing-attribute session is silently widened.", motif: "widening" },
-  { n: "09", title: "Append-only, tamper-evident audit", body: "Every run appends HMAC-carrying records; verification localizes post-write modification — integrity, not truth.", motif: "shield" },
-  { n: "10", title: "Idempotent jobs", body: "A repeated Idempotency-Key returns the same job; it is never re-run.", motif: "shield" },
-  { n: "11", title: "Tenant scoping", body: "All queries scoped by merchant_id; one merchant's data is never returned for another.", motif: "shield" },
-  { n: "12", title: "WHS exclusion is global and permanent", body: "Once a shopper is a Would-Have-Seen member, they are excluded from all future opportunities across all surfaces — append-only, exactly-once, fail-closed.", motif: "moment" },
-  { n: "13", title: "Suppression is a decision, not an absence", body: "Every No Offer Rendered records why. A deliberate “show nothing” is a first-class, audited core output — distinct from an integration failure.", motif: "failclosed" },
-  { n: "14", title: "Plausibility guard", body: "A value that parses but is implausible (an age typed as “2”) is caught by a deterministic plausibility check before it can silently reshape eligibility — a fat-finger is not a valid policy.", motif: "widening" },
-];
+// ── Laws of the Moment ───────────────────────────────────────────────────────
+// The law statements + proofs now live in the backend prover (app/domain/laws.py)
+// and render live via GET /laws in <LawsBoard>. Only the scenario mapping stays
+// here — it tells the board which laws can be re-run in the Simulator.
 
 /** Laws with a real seeded scenario are executable — clicking runs it live in the
- *  Simulator. Keyed by law number. Laws not listed here stay static (no fake run). */
+ *  Simulator. Keyed by law number. Laws not listed here have no single scenario. */
 export const LAW_SCENARIOS: Record<string, "trap" | "safe" | "fatfinger" | "consent" | "immutable"> = {
   "02": "safe", // Holdout is the only causal mechanism → clean change is eligible
   "05": "immutable", // Immutable policy versions → US→CA needs reapproval
@@ -446,84 +426,3 @@ export const TACTICAL: Record<string, Tactical> = {
     constraints: [],
   },
 };
-
-// ── Future bounded-context hypotheses (doc 28) ───────────────────────────────
-export type Hypothesis = {
-  name: string;
-  premise: string;
-  reframe?: string;
-  signal: string;
-  risk: string;
-};
-
-export const FUTURE_FEATURED: Hypothesis[] = [
-  {
-    name: "Attention Yield",
-    premise: "Monetize restraint — treat a shopper's finite attention as inventory to yield-manage, where suppressing a low-value offer to protect a high-value moment is a priced, measurable product.",
-    reframe: "Suppression is inventory — the decision not to show is a priced, yield-managed product.",
-    signal: "Rokt: “Suppression becomes as valuable as exposure … unlocking incremental revenue,” and names restraint a 2026 advantage.",
-    risk: "Forgone short-term revenue against an uncertain long-term gain; the LTV proof horizon is long and the holdout may stay underpowered for quarters.",
-  },
-  {
-    name: "Agent Consideration Surface",
-    premise: "Win the cart before checkout — decision which incremental offer a merchant surfaces into an agent's comparison step, where the cart is actually decided.",
-    reframe: "The agent's comparison step, not just its checkout, is a Rokt surface.",
-    signal: "OpenAI pivoted ACP from checkout to discovery (Walmart / Target / Sephora / Best Buy …); Rokt's Decisioning Layer is defined independently of where the experience renders.",
-    risk: "A land-grab against the agent platforms' own discovery layers; consideration-stage economics are even less proven than checkout.",
-  },
-  {
-    name: "Agent Offer Exchange",
-    premise: "Become the incrementality-proven offer-decision API that shopping agents call at cart assembly — the decisioning layer the agent rails don't have.",
-    reframe: "Rokt is positioned to be the decision layer agent rails don't have — protocol-agnostic, incrementality-proven.",
-    signal: "UCP checkout is live at Nike / Sephora / Target / Walmart; Adyen Agentic brokers across UCP / ACP / AP2.",
-    risk: "Agent-checkout economics are unproven (ACP's Instant Checkout died in ~5 months). Target the stable abstraction — a signed-mandate + offer-decision contract — not one wire format.",
-  },
-];
-
-export const FUTURE_COMPACT: Hypothesis[] = [
-  {
-    name: "Future-Value Decisioning",
-    premise: "Optimize the moment for predicted incremental lifetime value, not the next click — using only consented first-party and contextual signals.",
-    signal: "Rokt: the Transaction Moment “generates some of the most predictive signals for future value.”",
-    risk: "LTV attribution is long-horizon and noisy; consent-scoping legitimately shrinks the usable signal.",
-  },
-  {
-    name: "Consented Intent Cooperative",
-    premise: "A consent-governed cooperative where merchants contribute first-party transaction signal into a shared, privacy-preserving intent graph — a data-network moat.",
-    signal: "Rokt's Performance Engine explicitly targets “eroding match rates.”",
-    risk: "Competitively sensitive merchants may refuse to contribute; cold-start and privacy scrutiny are real.",
-  },
-  {
-    name: "Assurance & Settlement",
-    premise: "Turn verified incremental lift into a portable credential and an outcome-based pricing rail — settle contracts on certified lift, not impressions.",
-    signal: "Rokt is publicly standardizing on incrementality (Incrementality Performance Standard, Haus experiments).",
-    risk: "Outcome-based pricing shifts revenue risk onto Rokt; a single disputed certificate is reputationally expensive.",
-  },
-  {
-    name: "Unified Moment OS",
-    premise: "One decisioning brain across checkout + rewards + onsite media + post-purchase, sold to the converging commerce-media team.",
-    signal: "Rokt's own 2026 trend: commerce and media teams converge to run the moment holistically.",
-    risk: "Enormous org and serving-architecture complexity; as much a political bet as a technical one.",
-  },
-  {
-    name: "Reward Economy",
-    premise: "A two-sided in-purchase rewards marketplace where brands fund acquisition currency the Brain places at checkout.",
-    signal: "Shopper Rewards / Gift-with-Purchase already issue rewards at checkout; Rokt forecasts loyalty shifting in-purchase.",
-    risk: "Two-sided cold-start and reward arbitrage/gaming; competes with merchants' own loyalty programs.",
-  },
-];
-
-// ── Implementation-evidence cross-links (§9) ─────────────────────────────────
-export type Evidence = { subject: string; where: string; kind: "SHIPPED" | "DESIGNED" };
-export const EVIDENCE: Evidence[] = [
-  { subject: "Missing-attribute inversion (Law 08)", where: "Console — Constraint Heatmap · constraints.py counterfactual", kind: "SHIPPED" },
-  { subject: "Fail-closed / No Offer Rendered (Law 01, 13)", where: "Console — Fail-Closed Proof · failclosed.py", kind: "SHIPPED" },
-  { subject: "Deterministic verdict (Law 02, 03)", where: "Console — Release Verdict · verdict.py", kind: "SHIPPED" },
-  { subject: "Tamper-evident audit (Law 09)", where: "Console — Evidence Drawer · audit.py (HMAC)", kind: "SHIPPED" },
-  { subject: "Effectively-once state (Law 06)", where: "Console — Conversion Integrity · conversions.py", kind: "SHIPPED" },
-  { subject: "Transactional outbox / domain events (§5)", where: "Console — Fan-out & Outbox · outbox.py", kind: "SHIPPED" },
-  { subject: "Semantic Change Compiler (§8)", where: "This page, Fig. 04 — POST /semantic-compile", kind: "SHIPPED" },
-  { subject: "Domain Evolution Simulator", where: "This page, Fig. 07 — POST /simulations", kind: "SHIPPED" },
-  { subject: "Scale-out (async / outbox / Kafka)", where: "Builder — Optimize & scale · Vision roadmap B", kind: "DESIGNED" },
-  { subject: "Agent-mediation contexts (BC-7, future)", where: "Builder — Seams · this page, Fig. 08", kind: "DESIGNED" },
-];
