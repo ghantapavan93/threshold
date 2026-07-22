@@ -42,14 +42,14 @@ export function BuilderReceipt() {
           <span className="font-semibold uppercase tracking-[0.18em] text-text">Builder session</span>
           <span className="text-muted">THRESHOLD</span>
         </div>
-        <dl className="mt-3 space-y-1.5">
+        {/* An aligned two-column grid: labels size to the widest one, values take
+            the rest and wrap right-aligned. It cannot overlap at any width or zoom
+            (the old dotted-leader row let long values collide with the label). */}
+        <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
           {LINES.map((l) => (
-            <div key={l.k} className="flex items-baseline justify-between gap-3">
-              <dt className="shrink-0 text-muted">{l.k}</dt>
-              <span aria-hidden className="min-w-0 flex-1 translate-y-[-2px] overflow-hidden text-muted/40">
-                ······························
-              </span>
-              <dd className="shrink-0 text-right" style={{ color: l.tone ?? "var(--c-text)" }}>{l.v}</dd>
+            <div key={l.k} className="contents">
+              <dt className="whitespace-nowrap text-muted">{l.k}</dt>
+              <dd className="min-w-0 break-words text-right" style={{ color: l.tone ?? "var(--c-text)" }}>{l.v}</dd>
             </div>
           ))}
         </dl>
