@@ -1,0 +1,25 @@
+{
+  "measured_on": "single process, single thread, local",
+  "decision_path": {
+    "samples": 40000,
+    "p50_us": 2.2,
+    "p90_us": 2.4,
+    "p99_us": 4.0,
+    "p999_us": 10.1,
+    "mean_us": 1.835,
+    "throughput_decisions_per_s": 544890
+  },
+  "full_replay": [
+    {
+      "sessions": 200,
+      "wall_ms": 3.41,
+      "per_session_us": 17.07
+    },
+    {
+      "sessions": 2000,
+      "wall_ms": 25.76,
+      "per_session_us": 12.88
+    }
+  ],
+  "note": "MEASURED. Regional/global figures in the Scale Chamber remain MODELED/HYPOTHESIS."
+}

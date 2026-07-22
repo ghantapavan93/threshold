@@ -27,7 +27,7 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
-  { label: "Local", truth: "MEASURED", adds: "One service · one database", p99: "1.9 ms / decision", throughput: "200 sessions, deterministic", recovery: "n/a — single node" },
+  { label: "Local", truth: "MEASURED", adds: "One service · one database", p99: "4.0 µs p99 · 2.2 µs p50", throughput: "≈545k decisions/s · 1 core", recovery: "n/a — single node" },
   { label: "Team", truth: "MODELED", adds: "+ background worker + transactional outbox", p99: "~5 ms", throughput: "~1k decisions/s", recovery: "worker restart, bounded backoff" },
   { label: "Regional", truth: "MODELED", adds: "+ partitioned replay workers + queue control", p99: "~12 ms p99", throughput: "~50k decisions/s", recovery: "partition rebalance, no dup state" },
   { label: "Global", truth: "HYPOTHESIS", adds: "+ region ownership + failover + backpressure", p99: "~20 ms p99 (projected)", throughput: "10B+/yr envelope (Rokt public)", recovery: "region failover, async evidence" },
@@ -98,9 +98,10 @@ export function ScaleChamber() {
       </div>
 
       <p className="mt-4 text-[11px] leading-relaxed text-muted">
-        Only <span style={{ color: "var(--c-teal)" }}>Local</span> is measured — a single-node
-        deterministic replay. Everything above is architecture and projection, labelled honestly. The
-        credible signal isn&apos;t a big number; it&apos;s knowing precisely where the evidence stops.
+        Only <span style={{ color: "var(--c-teal)" }}>Local</span> is measured — a real load test of the
+        deterministic decision path (<code>scripts/scale_lab.py</code>: 40k timed calls, single core).
+        Everything above is architecture and projection, labelled honestly. The credible signal isn&apos;t a
+        big number; it&apos;s knowing precisely where the evidence stops.
       </p>
     </div>
   );

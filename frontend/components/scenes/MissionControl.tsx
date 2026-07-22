@@ -32,7 +32,7 @@ const RECORD: { k: string; v: string; tone?: string }[] = [
   { k: "trace", v: "4b9f…a1c2" },
   { k: "policy version", v: "V17 → V18" },
   { k: "customer result", v: "No Offer Rendered", tone: "var(--c-teal)" },
-  { k: "decision", v: "1.9 ms · deterministic" },
+  { k: "decision", v: "≈2 µs · deterministic" },
   { k: "constraint", v: "missing-attribute-semantics", tone: "var(--c-crimson)" },
   { k: "outbox", v: "3 staged · 3 published" },
   { k: "retries", v: "1 (backoff, then ack)" },
@@ -71,7 +71,7 @@ export function MissionControl() {
         <div className="rounded-2xl border border-border bg-base/50 p-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">Operational signal</p>
           <dl className="mt-3 space-y-2 font-mono text-xs">
-            <Row k="decision p99" v={m.p99} />
+            <Row k="offer-path p99" v={m.p99} />
             <Row k="outbox queue" v={m.queue} tone={cond === "degraded" ? "var(--c-amber)" : cond === "recovering" ? "var(--c-offer-blue)" : "var(--c-teal)"} />
             <Row k="error budget" v={m.errBudget} />
             <Row k="checkout" v={m.checkout} tone="var(--c-teal)" />
