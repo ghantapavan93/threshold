@@ -118,6 +118,34 @@ h3 {
   letter-spacing: -0.02em;
   text-wrap: balance; /* even line lengths on headings (impeccable) */
 }
+
+/* Global film grain — a fixed fractal-noise layer at low opacity. The single most
+   effective "this wasn't AI-generated" tell; every premium reference ships it.
+   Static, pointer-transparent, mix-blend-overlay so it sits IN the image rather
+   than as a scrim on top. Lighter on the light theme so it never muddies. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='thr-grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23thr-grain)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"] body::after {
+  opacity: 0.028;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) body::after {
+    opacity: 0.028;
+  }
+}
+
+/* Selection uses the brand accent — a small, premium detail. */
+::selection {
+  background: color-mix(in srgb, var(--c-teal) 30%, transparent);
+}
 h1 {
   letter-spacing: -0.03em;
 }
@@ -203,8 +231,13 @@ p {
   --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.014));
   --glass-border: rgba(255, 255, 255, 0.09);
   --glass-hover-border: rgba(34, 230, 200, 0.5);
-  --glass-shadow: 0 26px 74px -34px rgba(0, 0, 0, 0.72);
+  /* Depth shadows are blue-tinted (base ink), never flat black — reads as depth, not dirt. */
+  --glass-shadow: 0 26px 74px -34px rgba(4, 8, 22, 0.74);
   --glass-sheen: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 24px 60px -26px rgba(3, 8, 22, 0.55);
+  --shadow-lift: 0 40px 90px -34px rgba(3, 8, 22, 0.68);
+  /* the signature card-hover bloom: teal + offer-blue dual glow (the "iris") */
+  --glow-iris: 0 24px 70px -28px rgba(34, 230, 200, 0.42), 0 0 38px -14px rgba(91, 140, 255, 0.5);
 
   /* Motion tokens (Emil): strong exponential ease-out for UI; built-in easings
      are too weak. Entrances/press use --ease-out-*; on-screen morphs use inout. */
@@ -219,6 +252,9 @@ p {
   --glass-hover-border: rgba(6, 127, 109, 0.5);
   --glass-shadow: 0 24px 60px -36px rgba(16, 24, 40, 0.34);
   --glass-sheen: rgba(16, 24, 40, 0.05);
+  --shadow-soft: 0 24px 60px -26px rgba(16, 24, 40, 0.2);
+  --shadow-lift: 0 40px 90px -34px rgba(16, 24, 40, 0.32);
+  --glow-iris: 0 24px 60px -30px rgba(6, 127, 109, 0.3), 0 0 34px -16px rgba(47, 95, 208, 0.4);
 }
 
 @media (prefers-color-scheme: light) {
@@ -426,12 +462,13 @@ p {
   to { --thr-angle: 360deg; }
 }
 
-/* Frosted glass surface — the console's default panel. */
+/* Frosted glass surface — the console's default panel. The saturate() boost makes
+   the color BEHIND the glass pop, the detail flat/AI glass always misses. */
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
 }
 
 /* Holographic card — frosted, gradient edge, hover lift + sheen sweep. */
@@ -440,8 +477,8 @@ p {
   isolation: isolate;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   overflow: hidden;
   transition:
     transform 0.24s var(--ease-out-expo),
@@ -465,7 +502,7 @@ p {
   .holo-card:hover {
     transform: translateY(-3px);
     border-color: var(--glass-hover-border);
-    box-shadow: var(--glass-shadow), 0 0 32px -16px rgba(34, 230, 200, 0.5);
+    box-shadow: var(--glass-shadow), var(--glow-iris);
   }
   .holo-card:hover::after {
     transform: translateX(130%);

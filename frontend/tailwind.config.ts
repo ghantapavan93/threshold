@@ -69,7 +69,7 @@ const config: Config = {
         tightest: "-0.03em",
       },
       boxShadow: {
-        panel: "0 1px 0 0 var(--c-border) inset, 0 8px 24px -12px rgba(0,0,0,0.6)",
+        panel: "0 1px 0 0 var(--c-border) inset, 0 10px 28px -14px rgba(4,8,22,0.62)",
         focus: "0 0 0 2px var(--c-base), 0 0 0 4px var(--c-teal)",
         "glow-teal":
           "0 0 0 1px rgba(34,230,200,0.28), 0 26px 64px -30px rgba(34,230,200,0.5), 0 0 42px -18px rgba(34,230,200,0.55)",
