@@ -3,7 +3,7 @@
    slow ambient loops (the sg-* classes in globals.css, collapsed under reduced
    motion). */
 
-import type { ReactElement } from "react";
+import type { CSSProperties, ReactElement } from "react";
 
 const CRIMSON = "var(--c-crimson)";
 const TEAL = "var(--c-teal)";
@@ -13,6 +13,8 @@ const OFFER = "var(--c-offer-blue)";
 
 const mono = { fontFamily: "var(--font-mono, monospace)" } as const;
 const box = "w-32 shrink-0 sm:w-44";
+// a mote that rides a route (offset-path in the SVG user coordinate system)
+const ride = (d: string): CSSProperties => ({ offsetPath: `path('${d}')` } as CSSProperties);
 
 // ── findings ────────────────────────────────────────────────────────────────
 
@@ -25,6 +27,8 @@ function LinterGlyph() {
       <rect className="sg-pulse" x={31} y={10} width={30} height={14} rx={3} fill={CRIMSON} fillOpacity={0.14} stroke={CRIMSON} strokeOpacity={0.7} />
       <text x={35} y={21} fill={CRIMSON} style={{ ...mono, fontSize: 9 }}>Sarah</text>
       <text x={66} y={21} fill={MUTED} style={{ ...mono, fontSize: 9 }}>, WIN…</text>
+      {/* a scan head sweeps the draft and settles on the risky token */}
+      <circle className="dg-dot" r={2} fill={AMBER} style={ride("M11 17 H120")} />
       <text x={4} y={40} fill={AMBER} style={{ ...mono, fontSize: 7 }}>flagged before submit</text>
     </svg>
   );
@@ -41,8 +45,9 @@ function IntegrationGlyph() {
     <svg viewBox="0 0 150 44" className="h-11 w-full" aria-hidden fill="none">
       {rows.map((r, i) => (
         <g key={i}>
-          <line x1={8} y1={r.y} x2={108} y2={r.y} stroke={r.c} strokeOpacity={r.ok ? 0.5 : 0.8} strokeWidth={1.4} strokeDasharray={r.ok ? undefined : "3 3"} className={r.ok ? undefined : "sg-dash"} />
+          <line x1={8} y1={r.y} x2={108} y2={r.y} stroke={r.c} strokeOpacity={r.ok ? 0.5 : 0.8} strokeWidth={1.4} strokeDasharray="3 3" className={r.ok ? "dg-flow" : "sg-dash"} />
           <circle cx={8} cy={r.y} r={2.4} fill={r.c} fillOpacity={r.ok ? 0.7 : 0.95} />
+          {r.ok ? <circle className="dg-dot" r={1.8} fill={r.c} style={ride(`M8 ${r.y} H108`)} /> : null}
         </g>
       ))}
       <rect x={112} y={8} width={6} height={24} rx={3} fill={OFFER} fillOpacity={0.8} />
@@ -61,6 +66,8 @@ function ExperimentGlyph() {
       <line x1={8} y1={9} x2={140} y2={9} stroke={TEAL} strokeOpacity={0.4} strokeDasharray="3 3" />
       <text x={116} y={7} fill={TEAL} style={{ ...mono, fontSize: 6 }}>95%</text>
       <path d="M8 30 C 40 30, 70 26, 100 14 S 132 10, 140 10" stroke={OFFER} strokeWidth={1.6} />
+      {/* the estimate climbs the curve toward the 95% gate */}
+      <circle className="dg-dot dg-slow" r={2.6} fill={OFFER} style={ride("M8 30 C 40 30, 70 26, 100 14 S 132 10, 140 10")} />
       <circle className="sg-pulse" cx={52} cy={28} r={4} stroke={CRIMSON} strokeWidth={1.5} />
       <text x={44} y={40} fill={CRIMSON} style={{ ...mono, fontSize: 6 }}>peeked</text>
       <circle cx={140} cy={10} r={3} fill={TEAL} />
@@ -89,6 +96,8 @@ function AudienceGlyph() {
           </g>
         );
       })}
+      {/* the format checker scans down the file */}
+      <circle className="dg-dot dg-slow" r={1.8} fill={AMBER} style={ride("M62 9 V33")} />
       <text x={30} y={41} fill={AMBER} style={{ ...mono, fontSize: 7 }}>silent format reject</text>
     </svg>
   );
@@ -104,6 +113,7 @@ function Month30Glyph() {
       <text x={46} y={24} fill={TEAL} style={{ ...mono, fontSize: 8 }}>PR</text>
       <line x1={92} y1={8} x2={92} y2={34} stroke={AMBER} strokeWidth={1.4} />
       <path className="sg-pulse" d="M92 9 h16 l-4 5 l4 5 h-16 z" fill={AMBER} fillOpacity={0.85} />
+      <circle className="dg-dot" r={2} fill={TEAL} style={ride("M40 21 H92")} />
       <text x={28} y={41} fill={MUTED} style={{ ...mono, fontSize: 7 }}>one safe change, behind a flag</text>
     </svg>
   );
@@ -117,7 +127,7 @@ function Month60Glyph() {
       <line x1={82} y1={20} x2={142} y2={20} stroke={TEAL} strokeWidth={2} strokeOpacity={0.8} />
       <circle className="sg-pulse" cx={75} cy={20} r={8} fill={TEAL} fillOpacity={0.12} stroke={TEAL} strokeWidth={1.6} />
       <circle cx={75} cy={20} r={2.4} fill={TEAL} />
-      <circle className="sg-flow" cy={20} r={3} fill={TEAL} />
+      <circle className="dg-dot" r={3} fill={TEAL} style={ride("M8 20 H142")} />
       <text x={40} y={40} fill={MUTED} style={{ ...mono, fontSize: 7 }}>own one seam, end to end</text>
     </svg>
   );
@@ -129,6 +139,7 @@ function Month90Glyph() {
     <svg viewBox="0 0 150 44" className="h-11 w-full" aria-hidden fill="none">
       <line x1={8} y1={13} x2={110} y2={13} stroke={TEAL} strokeWidth={1.6} strokeOpacity={0.85} />
       {[24, 48, 72, 96].map((x) => <circle key={x} cx={x} cy={13} r={2.4} fill={TEAL} />)}
+      <circle className="dg-dot" r={2.2} fill={TEAL} style={ride("M8 13 H110")} />
       <line x1={8} y1={28} x2={110} y2={28} stroke={MUTED} strokeWidth={1.6} strokeOpacity={0.5} strokeDasharray="4 4" />
       {[24, 48, 72, 96].map((x) => <circle key={x} cx={x} cy={28} r={2.4} fill={MUTED} fillOpacity={0.5} />)}
       <text x={116} y={15} fill={TEAL} style={{ ...mono, fontSize: 6 }}>treat</text>
