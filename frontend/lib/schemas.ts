@@ -463,6 +463,33 @@ export const PassportResultSchema = z.object({
 });
 export type PassportResult = z.infer<typeof PassportResultSchema>;
 
+// ---- Laws of the Moment (live proof board) ---------------------------------
+export const LawResultSchema = z.object({
+  n: z.string(),
+  title: z.string(),
+  statement: z.string(),
+  mode: z.enum(["live", "platform"]),
+  status: z.enum(["PROVEN", "FALSIFIED", "TESTED"]),
+  cases: z.number(),
+  detail: z.string(),
+});
+export type LawResult = z.infer<typeof LawResultSchema>;
+
+export const LawsBoardSchema = z.object({
+  merchant_id: z.string().optional(),
+  laws: z.array(LawResultSchema),
+  summary: z.object({
+    total: z.number(),
+    live: z.number(),
+    proven: z.number(),
+    falsified: z.number(),
+    cases_checked: z.number(),
+    all_proven: z.boolean(),
+  }),
+  note: z.string(),
+});
+export type LawsBoard = z.infer<typeof LawsBoardSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({

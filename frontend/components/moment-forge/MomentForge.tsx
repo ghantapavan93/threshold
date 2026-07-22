@@ -24,7 +24,7 @@ import { ReconciliationLane } from "./ReconciliationLane";
 import { UnitWall } from "./UnitWall";
 import { CompilerConsole } from "./CompilerConsole";
 import { FractureScene } from "./FractureScene";
-import { LawGallery, EvidenceIndex } from "./laws-future";
+import { LawsBoard } from "./LawsBoard";
 import { RippleSim } from "./RippleSim";
 import { Horizon } from "./horizon/Horizon";
 import type { ForgeScenario } from "./fixtures";
@@ -486,10 +486,10 @@ export function MomentForge() {
             <MaskText
               as="h2"
               className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-              segments={[{ text: "Laws of the Moment — " }, { text: "the invariants the model must never violate.", className: "gradient-text" }]}
+              segments={[{ text: "Laws of the Moment — " }, { text: "proven live, not asserted.", className: "gradient-text" }]}
             />
             <div className="mt-8">
-              <LawGallery onRun={runLaw} />
+              <LawsBoard onRun={runLaw} />
             </div>
           </Section>
 
@@ -537,19 +537,6 @@ export function MomentForge() {
 
           {/* ── 8 · The Horizon — cinematic future hypotheses (replaces the gallery) ── */}
           <Horizon />
-
-          {/* ── 9 · Implementation-evidence cross-links ─────────────────────── */}
-          <Section id="sec-evidence" label="Implementation-evidence cross-links">
-            <Eyebrow>Fig. 09 · the proof it&apos;s not just theory</Eyebrow>
-            <MaskText
-              as="h2"
-              className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
-              segments={[{ text: "This model is " }, { text: "executable.", className: "gradient-text" }]}
-            />
-            <div className="mt-8">
-              <EvidenceIndex />
-            </div>
-          </Section>
         </main>
 
         <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">

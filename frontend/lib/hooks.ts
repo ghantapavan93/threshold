@@ -21,6 +21,7 @@ import type {
   AuditVerify,
   OpeEstimate,
   ForgeResult,
+  LawsBoard,
   TrustBudgetResult,
   PassportResult,
   CancellationResponse,
@@ -68,6 +69,17 @@ export function usePolicies(
     queryKey: ["policies", merchantId],
     queryFn: ({ signal }) => api.listPolicies(merchantId, signal),
     retry: retryPolicy,
+  });
+}
+
+export function useLaws(
+  merchantId: string = MERCHANT_ID,
+): UseQueryResult<LawsBoard, ApiError> {
+  return useQuery<LawsBoard, ApiError>({
+    queryKey: ["laws", merchantId],
+    queryFn: ({ signal }) => api.laws(merchantId, signal),
+    retry: retryPolicy,
+    staleTime: Infinity, // the board is deterministic; no need to refetch
   });
 }
 

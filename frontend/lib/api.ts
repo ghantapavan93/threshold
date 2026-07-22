@@ -4,6 +4,7 @@ import {
   AuditVerifySchema,
   OpeEstimateSchema,
   ForgeResultSchema,
+  LawsBoardSchema,
   TrustBudgetResultSchema,
   PassportResultSchema,
   CancellationResponseSchema,
@@ -28,6 +29,7 @@ import type {
   AuditVerify,
   OpeEstimate,
   ForgeResult,
+  LawsBoard,
   TrustBudgetResult,
   PassportResult,
   CancellationResponse,
@@ -258,6 +260,10 @@ export const api = {
 
   listScenarios(merchantId: string, signal?: AbortSignal): Promise<Scenario[]> {
     return requestData(`${base(merchantId)}/scenarios`, ScenarioListSchema, { signal });
+  },
+
+  laws(merchantId: string, signal?: AbortSignal): Promise<LawsBoard> {
+    return requestData(`${base(merchantId)}/laws`, LawsBoardSchema, { signal });
   },
 
   getPolicy(

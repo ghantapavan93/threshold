@@ -39,6 +39,7 @@ from ..domain.counterexample import forge
 from ..domain.ope import offpolicy_estimate
 from ..domain.trust_budget import SCENARIOS, run_named_scenario
 from ..domain.passport import scenarios as passport_scenarios, run_named_scenario as run_passport_scenario
+from ..domain.laws import run_laws
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
@@ -668,3 +669,17 @@ def passport(
         result["summary"]["admitted"], result["summary"]["stripped"], result["summary"]["rejected"],
     )
     return {"merchant_id": merchant_id, "scenarios": sorted(passport_scenarios(secret)), **result}
+
+
+@router.get("/laws")
+def laws(merchant_id: str, request: Request) -> dict:
+    """Laws of the Moment — proven at runtime. Each invariant is CHECKED live over a
+    deterministic battery (six seed policies × 200 sessions), not asserted in prose;
+    a falsified law would return its counterexample. Read-only, engine-wide."""
+    result = run_laws()
+    log.info(
+        'laws merchant=%s rid=%s live=%d proven=%d falsified=%d cases=%d',
+        merchant_id, _rid(request), result["summary"]["live"], result["summary"]["proven"],
+        result["summary"]["falsified"], result["summary"]["cases_checked"],
+    )
+    return {"merchant_id": merchant_id, **result}
