@@ -40,6 +40,7 @@ from ..domain.ope import offpolicy_estimate
 from ..domain.trust_budget import SCENARIOS, run_named_scenario
 from ..domain.passport import scenarios as passport_scenarios, run_named_scenario as run_passport_scenario
 from ..domain.laws import run_laws
+from ..domain.redemption import run_redemption_world
 from ..domain.contexts import CONTEXT_IDS, build_semantic_delta, context_for_attribute
 from ..domain.diff import diff_policies
 from ..domain.policy import Policy
@@ -669,6 +670,22 @@ def passport(
         result["summary"]["admitted"], result["summary"]["stripped"], result["summary"]["rejected"],
     )
     return {"merchant_id": merchant_id, "scenarios": sorted(passport_scenarios(secret)), **result}
+
+
+@router.get("/redemption-audit")
+def redemption_audit(merchant_id: str, request: Request) -> dict:
+    """The third reward aggregate — proves the 'reward' collision's redeemable meaning
+    that reconciliation.py left as named-not-proven. A seeded lifecycle replay shows
+    issued ≠ redeemable and rejects every illegal redemption (expired, double, clawed
+    back, never issued). Read-only, deterministic."""
+    result = run_redemption_world()
+    log.info(
+        'redemption_audit merchant=%s rid=%s issued=%d redeemable=%d rejected=%d holds=%s',
+        merchant_id, _rid(request), result["issued_ne_redeemable"]["issued_ever"],
+        result["issued_ne_redeemable"]["redeemable_at_cut"], result["summary"]["redeems_rejected"],
+        result["proof"]["holds"],
+    )
+    return {"merchant_id": merchant_id, **result}
 
 
 @router.get("/laws")

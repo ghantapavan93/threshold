@@ -22,6 +22,7 @@ import type {
   OpeEstimate,
   ForgeResult,
   LawsBoard,
+  RedemptionAudit,
   TrustBudgetResult,
   PassportResult,
   CancellationResponse,
@@ -80,6 +81,17 @@ export function useLaws(
     queryFn: ({ signal }) => api.laws(merchantId, signal),
     retry: retryPolicy,
     staleTime: Infinity, // the board is deterministic; no need to refetch
+  });
+}
+
+export function useRedemptionAudit(
+  merchantId: string = MERCHANT_ID,
+): UseQueryResult<RedemptionAudit, ApiError> {
+  return useQuery<RedemptionAudit, ApiError>({
+    queryKey: ["redemption-audit", merchantId],
+    queryFn: ({ signal }) => api.redemptionAudit(merchantId, signal),
+    retry: retryPolicy,
+    staleTime: Infinity,
   });
 }
 

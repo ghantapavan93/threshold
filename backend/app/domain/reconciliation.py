@@ -84,13 +84,13 @@ _SYNTHETIC_LABEL = (
 class RewardStatus(str, Enum):
     """Whole-value for Case B (the §2.2 fix): the lifecycle stage is stamped in the
     type, so "reward" can never hide WHICH of the three states you hold. The TYPE
-    names the full lifecycle; the reconciler PROVES only earned ⇒ issued —
-    REDEEMABLE's expiry/clawback rules would need a third aggregate this module
-    refuses to fake, so no invariant over it is claimed."""
+    names the full lifecycle; this reconciler PROVES earned ⇒ issued. REDEEMABLE's
+    expiry/clawback rules are the third aggregate — now built and proven in
+    redemption.py (issued ≠ redeemable), no longer a claim this module makes."""
 
     EARNED = "earned"          # the shopper qualified — a fact in BC-4 Loyalty
     ISSUED = "issued"          # the reward is materialized — a booked liability in Fulfilment
-    REDEEMABLE = "redeemable"  # currently usable (not expired / clawed back) — named, not proven
+    REDEEMABLE = "redeemable"  # currently usable (not expired / clawed back) — proven in redemption.py
 
 
 class Strategy(str, Enum):

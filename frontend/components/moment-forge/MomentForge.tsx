@@ -19,6 +19,7 @@ import { SceneMedia } from "@/components/visual/SceneMedia";
 import { FilmGrain } from "./garnish";
 import { ContextMap } from "./ContextMap";
 import { LanguageLens } from "./LanguageLens";
+import { RewardLedger } from "./RewardLedger";
 import { TranslationMap } from "./TranslationMap";
 import { ReconciliationLane } from "./ReconciliationLane";
 import { UnitWall } from "./UnitWall";
@@ -283,6 +284,18 @@ export function MomentForge() {
               caption="Same word, different model — drag it across a boundary and watch its meaning mutate at the seam."
             >
               <LanguageLens />
+            </Plate>
+          </Section>
+
+          {/* ── 3·R · Reward collision, PROVEN [LIVE] — the third aggregate ───── */}
+          <Section id="sec-reward" label="Reward — earned vs issued vs redeemable, proven">
+            <Plate
+              figure="03·R"
+              title="issued ≠ redeemable"
+              tone="teal"
+              caption="The reconciler used to leave REDEEMABLE 'named, not proven.' Here the third aggregate runs live: a seeded lifecycle replay shows issued isn't redeemable, and every illegal redemption is refused."
+            >
+              <RewardLedger />
             </Plate>
           </Section>
 

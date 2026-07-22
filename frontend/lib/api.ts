@@ -5,6 +5,7 @@ import {
   OpeEstimateSchema,
   ForgeResultSchema,
   LawsBoardSchema,
+  RedemptionAuditSchema,
   TrustBudgetResultSchema,
   PassportResultSchema,
   CancellationResponseSchema,
@@ -30,6 +31,7 @@ import type {
   OpeEstimate,
   ForgeResult,
   LawsBoard,
+  RedemptionAudit,
   TrustBudgetResult,
   PassportResult,
   CancellationResponse,
@@ -264,6 +266,10 @@ export const api = {
 
   laws(merchantId: string, signal?: AbortSignal): Promise<LawsBoard> {
     return requestData(`${base(merchantId)}/laws`, LawsBoardSchema, { signal });
+  },
+
+  redemptionAudit(merchantId: string, signal?: AbortSignal): Promise<RedemptionAudit> {
+    return requestData(`${base(merchantId)}/redemption-audit`, RedemptionAuditSchema, { signal });
   },
 
   getPolicy(

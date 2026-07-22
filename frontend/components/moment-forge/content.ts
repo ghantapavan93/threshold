@@ -303,7 +303,7 @@ export const COLLISIONS: Collision[] = [
       },
     ],
     failure:
-      "Treat the three as one field and partial failures make them silently diverge: earned-but-never-issued (an orphan → churn), or issued twice from one earn (double liability). “earned == issued == redeemable” is only true if a reconciliation replay proves it.",
+      "Treat the three as one field and partial failures make them silently diverge: earned-but-never-issued (an orphan → churn), or issued twice from one earn (double liability), or an expired/clawed-back reward spent as if still a right. “earned == issued == redeemable” only holds if a replay proves it — and the live figure below does: issued ≠ redeemable, every illegal redemption refused.",
   },
 ];
 

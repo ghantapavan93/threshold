@@ -490,6 +490,46 @@ export const LawsBoardSchema = z.object({
 });
 export type LawsBoard = z.infer<typeof LawsBoardSchema>;
 
+// ---- Redemption audit (the reward collision, proven) -----------------------
+export const RedemptionAttemptSchema = z.object({
+  reward_id: z.string(),
+  action: z.string(),
+  at: z.number(),
+  accepted: z.boolean(),
+  reason: z.string(),
+});
+export type RedemptionAttempt = z.infer<typeof RedemptionAttemptSchema>;
+
+export const RedemptionAuditSchema = z.object({
+  merchant_id: z.string().optional(),
+  by_state: z.record(z.string(), z.number()),
+  attempts: z.array(RedemptionAttemptSchema),
+  summary: z.object({
+    rewards: z.number(),
+    issued_ever: z.number(),
+    redeemable_now: z.number(),
+    redeemed: z.number(),
+    redeem_attempts: z.number(),
+    redeems_accepted: z.number(),
+    redeems_rejected: z.number(),
+  }),
+  issued_ne_redeemable: z.object({
+    issued_ever: z.number(),
+    redeemable_at_cut: z.number(),
+    gap: z.number(),
+    claim_would_be_wrong: z.boolean(),
+  }),
+  proof: z.object({
+    no_double_redeem: z.boolean(),
+    every_accepted_redeem_is_terminal: z.boolean(),
+    no_illegal_redeem_succeeded: z.boolean(),
+    holds: z.boolean(),
+  }),
+  law: z.string(),
+  note: z.string(),
+});
+export type RedemptionAudit = z.infer<typeof RedemptionAuditSchema>;
+
 // ---- Error envelope --------------------------------------------------------
 export const ErrorEnvelopeSchema = z.object({
   error: z.object({
