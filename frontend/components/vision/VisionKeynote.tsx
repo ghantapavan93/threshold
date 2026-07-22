@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useTheme } from "@/app/providers";
 import { Reveal } from "@/components/visual/Reveal";
+import { ScrollLitText } from "@/components/visual/ScrollLitText";
 import { MilestoneGlyph } from "@/components/vision/MilestoneGlyph";
 import { Parallax } from "@/components/visual/Parallax";
 import { SceneMedia } from "@/components/visual/SceneMedia";
@@ -332,13 +333,13 @@ function Direction() {
         ]}
       />
       <Reveal delay={0.05}>
-        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+        <ScrollLitText className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
           The implication for Threshold is the whole thesis: as decisioning gets faster and more
           data-driven, the <strong className="text-text">blast radius of a bad policy change
           grows</strong>. A silent missing-attribute widening at 10B+ transactions is expensive and
           hard to see — so a deterministic pre-flight gets <em>more</em> valuable, not less, as the
           platform speeds up.
-        </p>
+        </ScrollLitText>
       </Reveal>
 
       <div className="mt-10 grid gap-4 md:grid-cols-3">
