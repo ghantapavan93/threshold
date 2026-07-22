@@ -354,6 +354,35 @@ p {
 @keyframes sg-flow { 0% { transform: translateX(8px); opacity: 0; } 15% { opacity: 1; } 70%, 100% { transform: translateX(84px); opacity: 0; } }
 @keyframes sg-dash { to { stroke-dashoffset: -14; } }
 
+/* ── Living diagrams ─────────────────────────────────────────────────────────
+   Turn a static schematic into a loop of motion that shows its process: a
+   particle travels the diagram's exact route (offset-path is set per element via
+   inline style), connector lines flow, and nodes pulse in sequence. All pure CSS
+   — it plays continuously like short video, and the app-wide reduced-motion net
+   below freezes every one of these to a single frame. */
+.dg-dot {
+  offset-distance: 0%;
+  animation: dg-travel 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.dg-dot.dg-slow { animation-duration: 3.4s; }
+.dg-dot.dg-delay { animation-delay: 1.3s; }
+@keyframes dg-travel {
+  0% { offset-distance: 0%; opacity: 0; }
+  8% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+/* flowing connector — marching dashes along a stroked path */
+.dg-flow {
+  stroke-dasharray: 4 5;
+  animation: dg-flow 0.85s linear infinite;
+}
+@keyframes dg-flow { to { stroke-dashoffset: -18; } }
+/* sequenced node pulses — three beats stepping through a chain */
+.dg-seq-1 { animation: sg-pulse 1.9s ease-in-out infinite; }
+.dg-seq-2 { animation: sg-pulse 1.9s ease-in-out infinite; animation-delay: 0.32s; }
+.dg-seq-3 { animation: sg-pulse 1.9s ease-in-out infinite; animation-delay: 0.64s; }
+
 /* When the ambient spotlight lands on a scenario card (.scn-live), its glyph
    quickens noticeably — so the "which card is live now" reads instantly as the
    spotlight steps through the library. Still off under reduced motion. */
