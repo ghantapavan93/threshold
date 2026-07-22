@@ -1,7 +1,22 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
+
+// The 3D centerpiece is client-only and lazily loaded — three.js never touches
+// the server bundle or the initial paint. Gated at the call site to WebGL-capable
+// desktops with motion allowed; everywhere else the static SVG motif stands in.
+const Hero3D = dynamic(() => import("./visual/Hero3D"), { ssr: false });
+
+function supportsWebGL(): boolean {
+  try {
+    const c = document.createElement("canvas");
+    return !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl")));
+  } catch {
+    return false;
+  }
+}
 import { ApiError } from "@/lib/api";
 import { useReplayJob } from "@/lib/hooks";
 import { loadRecordedJob, RECORDED_REQUEST_ID } from "@/lib/replay-fixture";
@@ -33,6 +48,10 @@ export function Hero() {
   const [caption, setCaption] = useState<string>("");
   const active = proposedVersion === SAFE ? SAFE : DANGEROUS;
   const reduced = useReducedMotion();
+  const [use3D, setUse3D] = useState(false);
+  useEffect(() => {
+    setUse3D(!reduced && supportsWebGL() && window.matchMedia("(min-width: 1024px)").matches);
+  }, [reduced]);
 
   const runVersion = useCallback(
     async (proposed: string) => {
@@ -154,12 +173,20 @@ export function Hero() {
               "radial-gradient(circle at 45% 40%, rgba(34,230,200,0.26), transparent 60%), radial-gradient(circle at 75% 70%, rgba(91,140,255,0.2), transparent 60%)",
           }}
         />
-        <Parallax speed={8} className="relative">
-          <TransactionMomentMotif
-            className="w-full"
-            phase={phase === "running" ? "running" : phase === "blocked" ? "blocked" : "idle"}
-          />
-        </Parallax>
+        {use3D ? (
+          // The living gate — a real 3D transaction pulse streaming through the
+          // threshold. Replaces the static motif on capable desktops.
+          <div className="relative h-[26rem] w-full">
+            <Hero3D />
+          </div>
+        ) : (
+          <Parallax speed={8} className="relative">
+            <TransactionMomentMotif
+              className="w-full"
+              phase={phase === "running" ? "running" : phase === "blocked" ? "blocked" : "idle"}
+            />
+          </Parallax>
+        )}
       </div>
 
       {/* The one loud light — a saturated glow that lives behind the headline so
