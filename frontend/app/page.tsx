@@ -141,7 +141,7 @@ export default function Page() {
             </Reveal>
           </main>
           <footer className="border-t border-border/70 px-4 py-8 pb-28 text-center text-xs text-muted sm:px-6">
-            THRESHOLD · Policy Change Safety Gate — a safety tool, not a launch
+            <span className="text-shimmer font-semibold">THRESHOLD</span> · Policy Change Safety Gate — a safety tool, not a launch
             approval. A positive verdict is only eligibility for a controlled
             online holdout.
           </footer>

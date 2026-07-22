@@ -144,7 +144,7 @@ export function Header() {
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold tracking-tight sm:text-base">
-                THRESHOLD
+                <span className="text-shimmer">THRESHOLD</span>
                 <span className="hidden text-muted sm:inline">
                   {" "}
                   · Policy Change Safety Gate

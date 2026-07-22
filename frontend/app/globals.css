@@ -420,6 +420,61 @@ p {
   to { background-position: 220% center; }
 }
 
+/* Glitter sheen — solid text with a bright band that sweeps across it, like
+   light catching brushed metal. Distinct from .gradient-text (which cycles the
+   whole fill through colour): this keeps the text its own colour and just runs a
+   highlight over it. Pure CSS, so it stays alive even in a throttled tab, and the
+   reduced-motion net below freezes it on a fully-legible frame. For wordmarks. */
+.text-shimmer {
+  color: var(--c-text);
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .text-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--c-text) 32%,
+      color-mix(in srgb, var(--c-teal) 88%, white) 48%,
+      color-mix(in srgb, var(--c-offer-blue) 70%, white) 52%,
+      var(--c-text) 68%
+    );
+    background-size: 240% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: thr-shimmer 6.5s linear infinite;
+  }
+}
+@keyframes thr-shimmer {
+  to { background-position: -240% center; }
+}
+
+/* Hero bloom — the single loud light. One saturated radial glow that lives
+   behind the headline so the eye has a place to be pulled, breathing slowly so
+   the fold is never fully static. Decorative; always pointer-events:none. */
+.hero-bloom {
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side,
+    rgba(34, 230, 200, 0.42),
+    rgba(91, 140, 255, 0.24) 42%,
+    transparent 72%
+  );
+  filter: blur(6px);
+  animation: hero-bloom-breathe 9s ease-in-out infinite;
+}
+:root[data-theme="light"] .hero-bloom {
+  background: radial-gradient(
+    closest-side,
+    rgba(6, 127, 109, 0.18),
+    rgba(47, 95, 208, 0.12) 46%,
+    transparent 74%
+  );
+}
+@keyframes hero-bloom-breathe {
+  0%, 100% { opacity: 0.72; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
 /* 1px iridescent gradient edge via mask — sits on any rounded element. */
 .thr-edge {
   position: relative;

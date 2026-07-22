@@ -10,6 +10,7 @@ import { useConsole } from "./console-context";
 import { useWalkthrough } from "./walkthrough";
 import { Magnetic } from "./visual/Magnetic";
 import { CountUp } from "./visual/CountUp";
+import { CharReveal } from "./visual/text";
 import { Parallax } from "./visual/Parallax";
 import { TransactionMomentMotif } from "./visual/illustrations";
 
@@ -161,6 +162,13 @@ export function Hero() {
         </Parallax>
       </div>
 
+      {/* The one loud light — a saturated glow that lives behind the headline so
+          the eye has a focal point, breathing slowly so the fold never sits dead. */}
+      <div
+        aria-hidden
+        className="hero-bloom absolute -left-16 top-24 -z-10 h-[26rem] w-[40rem] max-w-full"
+      />
+
       <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 10 }}
@@ -172,13 +180,9 @@ export function Hero() {
           Rokt · Proof of Work · Deterministic core · No AI in the critical path
         </motion.p>
 
-        <motion.h1
-          initial={reduced ? false : { opacity: 0, y: 16, filter: "blur(14px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-          className="max-w-4xl text-4xl font-bold leading-[1.02] tracking-tightest text-text sm:text-5xl lg:text-[3.6rem]"
-        >
-          Prove a checkout-policy change is safe{" "}
+        <h1 className="max-w-4xl text-4xl font-bold leading-[1.02] tracking-tightest text-text sm:text-5xl lg:text-[3.6rem]">
+          {/* first clause rises in letter by letter, on mount (above the fold) */}
+          <CharReveal text="Prove a checkout-policy change is safe " immediate delay={0.05} />
           {/* the payoff clause resolves out of the blur a beat later */}
           <motion.span
             initial={reduced ? false : { opacity: 0, filter: "blur(14px)" }}
@@ -188,7 +192,7 @@ export function Hero() {
           >
             before a single customer sees it.
           </motion.span>
-        </motion.h1>
+        </h1>
 
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 16, filter: "blur(8px)" }}
