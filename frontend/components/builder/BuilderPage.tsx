@@ -65,7 +65,7 @@ function BuilderNav() {
               href="/"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
-              Console
+              Live Product
             </Link>
             <Link
               href="/builder"

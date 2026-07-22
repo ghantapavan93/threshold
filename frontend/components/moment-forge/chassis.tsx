@@ -76,9 +76,9 @@ export function MomentNav({ volume = "I" }: { volume?: "I" | "II" }) {
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <nav aria-label="Primary" className="flex flex-wrap items-center justify-end gap-1">
-            <Link href="/" className={NAV_LINK}>Console</Link>
-            <Link href="/vision" className={NAV_LINK}>Vision</Link>
-            <Link href="/builder" className={NAV_LINK}>Builder</Link>
+            <Link href="/" className={NAV_LINK}>Live Product</Link>
+            <Link href="/vision" className={NAV_LINK}>Future Vision</Link>
+            <Link href="/builder" className={NAV_LINK}>Builder Story</Link>
             <Link href="/plan" className={NAV_LINK}>The Role in Motion</Link>
             <span
               aria-current="page"

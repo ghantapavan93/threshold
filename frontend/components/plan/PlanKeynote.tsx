@@ -133,8 +133,8 @@ function Nav() {
           <p className="text-sm font-semibold tracking-tight">THRESHOLD <span className="text-muted">· The Role in Motion</span></p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Link href="/" className={link}>Console</Link>
-          <Link href="/builder" className={link}>Builder</Link>
+          <Link href="/" className={link}>Live Product</Link>
+          <Link href="/builder" className={link}>Builder Story</Link>
           <Link href="/moment-forge" className={link}>Moment Forge</Link>
           <ThemeToggle />
         </div>

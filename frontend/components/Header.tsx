@@ -169,19 +169,19 @@ export function Header() {
             aria-current="page"
             className={navLink + " border-teal/40 bg-teal/10 text-teal"}
           >
-            Console
+            Live Product
           </span>
           <Link
             href="/vision"
             className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
           >
-            Vision
+            Future Vision
           </Link>
           <Link
             href="/builder"
             className={navLink + " border-transparent text-muted hover:border-border hover:text-text"}
           >
-            Builder
+            Builder Story
           </Link>
           <Link
             href="/plan"

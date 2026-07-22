@@ -92,7 +92,7 @@ function VisionNav() {
           </div>
           <div>
             <p className="text-sm font-semibold tracking-tight sm:text-base">
-              THRESHOLD <span className="text-muted">· Vision</span>
+              THRESHOLD <span className="text-muted">· Future Vision</span>
             </p>
             <p className="text-xs text-muted">The mechanism, scaled</p>
           </div>
@@ -103,19 +103,19 @@ function VisionNav() {
               href="/"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
-              Console
+              Live Product
             </Link>
             <span
               aria-current="page"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-teal/40 bg-teal/10 px-3 py-1 text-xs font-semibold text-teal sm:min-h-0"
             >
-              Vision
+              Future Vision
             </span>
             <Link
               href="/builder"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
-              Builder
+              Builder Story
             </Link>
             <Link
               href="/plan"

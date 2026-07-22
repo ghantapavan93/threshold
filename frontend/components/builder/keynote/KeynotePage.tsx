@@ -52,7 +52,7 @@ function KeynoteNav() {
           </p>
         </div>
         <div className="flex items-center gap-1.5">
-          <Link href="/" className={link}>Console</Link>
+          <Link href="/" className={link}>Live Product</Link>
           <Link href="/builder/case" className={link}>Role case</Link>
           <Link href="/plan" className={link}>The Role in Motion</Link>
           <Link href="/moment-forge" className={link}>Moment Forge</Link>
