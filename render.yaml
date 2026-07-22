@@ -1,0 +1,29 @@
+# Render Blueprint — one-click deploy of the Threshold backend.
+# Render → New → Blueprint → pick this repo. It reads this file and pre-fills the
+# service. Two secrets are left blank on purpose (sync: false) — set them in the
+# dashboard after the first deploy: DATABASE_URL (your Neon pooled string) and
+# CORS_ORIGINS (your Vercel URL). The database itself is Neon, not Render, so no
+# database block here.
+services:
+  - type: web
+    name: threshold-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free # bump to "starter" to stop the free tier sleeping (no cold starts)
+    region: virginia # same coast as the Neon US-East database
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL # Neon pooled string, as postgresql+psycopg://…
+        sync: false
+      - key: CORS_ORIGINS # e.g. https://your-app.vercel.app
+        sync: false
+      - key: THRESHOLD_AUDIT_SECRET # generated once, kept secret
+        generateValue: true
+      - key: SEED_ON_STARTUP
+        value: "1"
+      - key: OUTBOX_WORKER
+        value: "1"
+      - key: OUTBOX_INTERVAL_S
+        value: "3"
