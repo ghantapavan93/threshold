@@ -12,6 +12,11 @@ const BLUE = "var(--c-offer-blue)";
 const MUTED = "var(--c-muted)";
 const BORDER = "var(--c-border-strong)";
 
+// a mote that rides a route (offset-path in the SVG user coordinate system).
+// The .dg-dot animation lives in globals.css and is frozen under reduced motion.
+const ride = (d: string): import("react").CSSProperties =>
+  ({ offsetPath: `path('${d}')` } as import("react").CSSProperties);
+
 /** Hero motif — the Transaction Moment as a decision gate. Sessions stream in
  *  from the left; the gate lets safe ones through (teal) and stops the silently
  *  dangerous one (crimson). */
@@ -190,10 +195,12 @@ export function FailClosedLaneMotif({ className }: { className?: string }) {
             No Offer Rendered
           </text>
         </g>
+        {/* the request travels the decision lane, then falls closed into the box */}
+        <circle className="dg-dot dg-slow" r="3.5" fill={CRIMSON} style={ride("M12 38 H208 Q230 38 230 64 L230 70")} />
       </g>
-      {/* checkout lane */}
+      {/* checkout lane — keeps flowing green, unaffected */}
       <g>
-        <line x1="12" y1="112" x2="308" y2="112" stroke={TEAL} strokeOpacity="0.75" strokeWidth="2" />
+        <line className="dg-flow" x1="12" y1="112" x2="308" y2="112" stroke={TEAL} strokeOpacity="0.75" strokeWidth="2" />
         {[40, 110, 180, 250].map((x) => (
           <circle key={x} cx={x} cy="112" r="5" fill={TEAL} />
         ))}
@@ -205,6 +212,7 @@ export function FailClosedLaneMotif({ className }: { className?: string }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+        <circle className="dg-dot" r="4" fill={TEAL} style={ride("M12 112 H304")} />
       </g>
     </svg>
   );
