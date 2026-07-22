@@ -25,9 +25,15 @@ class Settings:
     )
     # HMAC key for the tamper-evident audit trail. Override in any real deploy.
     audit_secret: str = os.environ.get("THRESHOLD_AUDIT_SECRET", "dev-threshold-secret")
-    cors_origins: list[str] = os.environ.get(
-        "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
-    ).split(",")
+    cors_origins: list[str] = [
+        o.strip().rstrip("/")
+        for o in os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+        if o.strip()
+    ]
+    # Any Vercel deploy (production alias + preview URLs) is allowed by default, so
+    # the browser wiring doesn't depend on getting one exact origin string right.
+    # Override or widen via CORS_ORIGIN_REGEX.
+    cors_origin_regex: str = os.environ.get("CORS_ORIGIN_REGEX", r"https://.*\.vercel\.app")
     seed_on_startup: bool = os.environ.get("SEED_ON_STARTUP", "1") == "1"
     # Background transactional-outbox drain worker.
     outbox_worker: bool = os.environ.get("OUTBOX_WORKER", "1") == "1"
