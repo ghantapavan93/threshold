@@ -83,7 +83,7 @@ function BuilderNav() {
               href="/plan"
               className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-border hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal sm:min-h-0"
             >
-              Audit &amp; Plan
+              The Role in Motion
             </Link>
             <Link
               href="/moment-forge"

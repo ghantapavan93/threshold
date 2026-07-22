@@ -130,7 +130,7 @@ function Nav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2.5">
           <div className="thr-edge flex h-8 w-8 items-center justify-center rounded-lg bg-teal/10 font-mono text-teal">▚</div>
-          <p className="text-sm font-semibold tracking-tight">THRESHOLD <span className="text-muted">· Audit &amp; 90-day plan</span></p>
+          <p className="text-sm font-semibold tracking-tight">THRESHOLD <span className="text-muted">· The Role in Motion</span></p>
         </div>
         <div className="flex items-center gap-1.5">
           <Link href="/" className={link}>Console</Link>
@@ -508,7 +508,7 @@ export function PlanKeynote() {
       </main>
 
       <footer className="border-t border-border/70 px-4 py-8 text-center text-xs text-muted sm:px-6">
-        THRESHOLD · Audit &amp; 90-day plan — findings grounded in Rokt&apos;s public docs (research/rokt/05), framed
+        THRESHOLD · The Role in Motion — findings grounded in Rokt&apos;s public docs (research/rokt/05), framed
         as governed workflow-arounds, not claims about Rokt&apos;s product. Written from the outside; humbly missing
         internal context.
       </footer>
