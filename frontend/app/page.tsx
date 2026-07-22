@@ -7,7 +7,7 @@ import { ConsoleProvider, useConsole } from "@/components/console-context";
 import { WalkthroughProvider } from "@/components/walkthrough";
 import { PipelineRail } from "@/components/PipelineRail";
 import { StageSpotlight } from "@/components/StageSpotlight";
-import { Intro } from "@/components/Intro";
+import { ColdOpen } from "@/components/ColdOpen";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ScenarioLibrary } from "@/components/ScenarioLibrary";
@@ -67,7 +67,7 @@ export default function Page() {
   return (
     <ConsoleProvider initialBase="V17" initialProposed="V18">
      <WalkthroughProvider>
-      <Intro />
+      <ColdOpen />
       <div className="relative min-h-screen text-text">
         <div className="aurora-threshold" aria-hidden />
         <div className="relative z-10">
