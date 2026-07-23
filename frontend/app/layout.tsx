@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { LivingBackground } from "@/components/visual/LivingBackground";
@@ -25,6 +25,13 @@ const sans = Inter({
   display: "swap",
 });
 
+// Machine-evidence face — IDs, hashes, policy clauses, verdict reasons, test paths.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Threshold · Policy Change Safety Gate",
   description:
@@ -46,7 +53,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${display.variable} ${sans.variable}`}
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
       <body>
         <a

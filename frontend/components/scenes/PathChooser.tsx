@@ -18,8 +18,8 @@ function go(id: string) {
 export function PathChooser() {
   return (
     <section aria-label="Choose a path" className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-muted">Two ways in</p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em] text-muted">Three ways in</p>
+      <div className="grid gap-3 sm:grid-cols-3">
         <button
           type="button"
           onClick={() => go("story-title")}
@@ -36,12 +36,26 @@ export function PathChooser() {
 
         <button
           type="button"
+          onClick={() => go("break-it")}
+          className="press group rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-crimson/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
+        >
+          <p className="text-sm font-semibold text-text">Break the transaction</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            Attack the optional experience — inject a failure and watch checkout survive the fault.
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--c-crimson)" }}>
+            for the skeptic <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => go("scenes-title")}
           className="press group rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-teal/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
         >
           <p className="text-sm font-semibold text-text">Inspect the system</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
-            The playable proofs: the policy split, the trace, failure, observability, scale, governance.
+            The playable proofs: the policy split, the trace, observability, scale, governance.
           </p>
           <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--c-offer-blue)" }}>
             for the engineer <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>

@@ -54,6 +54,7 @@ const config: Config = {
           "sans-serif",
         ],
         mono: [
+          "var(--font-mono)",
           "ui-monospace",
           "Cascadia Code",
           "Menlo",

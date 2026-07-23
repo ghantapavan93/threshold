@@ -1077,7 +1077,8 @@ function InteractiveScenes() {
       <Reveal>
         <MaskedLines
           as="h2"
-          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          id="break-it"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl scroll-mt-24"
           lines={["Attack it."]}
         />
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
