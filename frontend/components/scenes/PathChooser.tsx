@@ -23,7 +23,7 @@ export function PathChooser() {
         <button
           type="button"
           onClick={() => go("story-title")}
-          className="press group lift rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-teal/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+          className="press group lift spotlight rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-teal/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
         >
           <p className="text-sm font-semibold text-text">Experience the story</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
@@ -37,7 +37,7 @@ export function PathChooser() {
         <button
           type="button"
           onClick={() => go("break-it")}
-          className="press group lift rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-crimson/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
+          className="press group lift spotlight rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-crimson/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
         >
           <p className="text-sm font-semibold text-text">Break the transaction</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
@@ -51,7 +51,7 @@ export function PathChooser() {
         <button
           type="button"
           onClick={() => go("scenes-title")}
-          className="press group lift rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-teal/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+          className="press group lift spotlight rounded-2xl border border-border bg-surface/50 p-5 text-left transition-colors hover:border-teal/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
         >
           <p className="text-sm font-semibold text-text">Inspect the system</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">

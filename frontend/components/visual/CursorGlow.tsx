@@ -27,6 +27,13 @@ export function CursorGlow() {
     const onMove = (e: PointerEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
+      // drive the per-card spotlight: the card under the cursor tracks the pointer
+      const card = (e.target as HTMLElement | null)?.closest?.(".holo-card, .spotlight") as HTMLElement | null;
+      if (card) {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);

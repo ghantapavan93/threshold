@@ -117,6 +117,41 @@ button,
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Cursor-follow spotlight inside cards — a soft teal highlight tracks the pointer
+   within a .holo-card / .spotlight, the Linear/Vercel premium cue (CursorGlow sets
+   --mx/--my). Fine-pointer only, and only on hover, so touch and reduced-motion
+   never show a stuck glow. Sits behind card content via z-index 0. */
+.spotlight {
+  position: relative;
+}
+/* keep spotlight-card content above the glow (holo-card children already sit at z-2) */
+.spotlight > * {
+  position: relative;
+  z-index: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .holo-card::before,
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      240px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--c-teal) 14%, transparent),
+      transparent 62%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .holo-card:hover::before,
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
 /* Tactile hover-lift for interactive cards — a small rise + soft shadow, only on
    fine-pointer/hover devices so a touch tap never leaves a card hovering. */
 .lift {
