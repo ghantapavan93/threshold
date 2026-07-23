@@ -17,6 +17,8 @@ import { EvidenceForge } from "@/components/scenes/EvidenceForge";
 import { WarRoom } from "@/components/scenes/WarRoom";
 import { BuilderReceipt } from "@/components/scenes/BuilderReceipt";
 import { DecisionNotebook } from "@/components/scenes/DecisionNotebook";
+import { FutureHypotheses } from "@/components/scenes/FutureHypotheses";
+import { StatementBand } from "@/components/scenes/StatementBand";
 import { GovernanceVault } from "@/components/scenes/GovernanceVault";
 import { PathChooser } from "@/components/scenes/PathChooser";
 // Matter.js physics is client-only; keep it out of the server bundle and initial paint.
@@ -1184,6 +1186,30 @@ function InteractiveScenes() {
         </div>
       </Reveal>
 
+      <StatementBand
+        lines={[
+          { text: "The checkout survives.", tone: "var(--c-teal)" },
+          { text: "Evidence remains." },
+        ]}
+      />
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-4 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["Where it could go next."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          Independent hypotheses grounded in Rokt&apos;s public direction — every one labelled HYPOTHESIS,
+          none a claim about Rokt&apos;s internal roadmap or an implemented capability.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <FutureHypotheses />
+        </div>
+      </Reveal>
+
       <Reveal>
         <MaskedLines
           as="h2"
@@ -1235,6 +1261,12 @@ export function VisionKeynote() {
           <ConnectedStory />
           <Direction />
           <CoreInvariant />
+          <StatementBand
+            lines={[
+              { text: "One change." },
+              { text: "Two semantic realities.", tone: "var(--c-crimson)" },
+            ]}
+          />
           <InteractiveScenes />
           <Roadmap />
           <IntegrationDiagram />

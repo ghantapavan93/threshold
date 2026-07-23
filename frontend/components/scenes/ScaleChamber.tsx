@@ -23,19 +23,22 @@ type Tier = {
   adds: string; // what appears in the architecture at this tier
   p99: string;
   throughput: string;
+  backlog: string;
+  errorBudget: string;
   recovery: string;
 };
 
 const TIERS: Tier[] = [
-  { label: "Local", truth: "MEASURED", adds: "One service · one database", p99: "4.0 µs p99 · 2.2 µs p50", throughput: "≈545k decisions/s · 1 core", recovery: "n/a — single node" },
-  { label: "Team", truth: "MODELED", adds: "+ background worker + transactional outbox", p99: "~5 ms", throughput: "~1k decisions/s", recovery: "worker restart, bounded backoff" },
-  { label: "Regional", truth: "MODELED", adds: "+ partitioned replay workers + queue control", p99: "~12 ms p99", throughput: "~50k decisions/s", recovery: "partition rebalance, no dup state" },
-  { label: "Global", truth: "HYPOTHESIS", adds: "+ region ownership + failover + backpressure", p99: "~20 ms p99 (projected)", throughput: "10B+/yr envelope (Rokt public)", recovery: "region failover, async evidence" },
+  { label: "Local", truth: "MEASURED", adds: "One service · one database", p99: "4.0 µs p99 · 2.2 µs p50", throughput: "≈545k decisions/s · 1 core", backlog: "0 · synchronous", errorBudget: "n/a", recovery: "n/a — single node" },
+  { label: "Team", truth: "MODELED", adds: "+ background worker + transactional outbox", p99: "~5 ms", throughput: "~1k decisions/s", backlog: "drains < 1s", errorBudget: "99.9% target", recovery: "worker restart, bounded backoff" },
+  { label: "Regional", truth: "MODELED", adds: "+ partitioned replay workers + queue control", p99: "~12 ms p99", throughput: "~50k decisions/s", backlog: "bounded per partition", errorBudget: "99.95% target", recovery: "partition rebalance, no dup state" },
+  { label: "Global", truth: "HYPOTHESIS", adds: "+ region ownership + failover + backpressure", p99: "~20 ms p99 (projected)", throughput: "10B+/yr envelope (Rokt public)", backlog: "shed via backpressure", errorBudget: "99.99% target", recovery: "region failover, async evidence" },
+  { label: "Network", truth: "HYPOTHESIS", adds: "+ multi-region evidence pipeline + async reconciliation", p99: "SLO-bounded (projected)", throughput: "transaction-network scale", backlog: "per-region shed + replay", errorBudget: "error-budget-gated releases", recovery: "regional isolation, self-healing" },
 ];
 
-const COMPONENTS = ["API", "Policy core", "Replay", "Persistence", "Outbox", "Worker", "Partitions", "Failover"];
+const COMPONENTS = ["API", "Policy core", "Replay", "Persistence", "Outbox", "Worker", "Partitions", "Failover", "Regions", "Backpressure"];
 // how many of the components above are lit at each tier
-const LIT_AT = [5, 6, 7, 8];
+const LIT_AT = [5, 6, 7, 9, 10];
 
 export function ScaleChamber() {
   const [t, setT] = useState(0);
@@ -91,9 +94,11 @@ export function ScaleChamber() {
       <p className="mt-2 text-xs text-muted">{tier.adds}</p>
 
       {/* readouts, each carrying the tier's truth label */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid gap-3 grid-cols-2 sm:grid-cols-3">
         <Stat label="decision p99" value={tier.p99} truth={tier.truth} />
         <Stat label="throughput" value={tier.throughput} truth={tier.truth} />
+        <Stat label="backlog" value={tier.backlog} truth={tier.truth} />
+        <Stat label="error budget" value={tier.errorBudget} truth={tier.truth} />
         <Stat label="recovery" value={tier.recovery} truth={tier.truth} />
       </div>
 
