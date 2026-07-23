@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from .. import outbox
 from ..config import settings
 from ..db import get_db
+from ..domain import failclosed
 from ..domain.replay import run_replay
 from ..models import OutboxEventRow, ReplayJobRow
 from ..observability import get_tracer
@@ -24,6 +25,19 @@ def create_replay_job(
     db: Session = Depends(get_db),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ) -> dict:
+    # Reject out-of-contract injection kinds at the boundary (422). An unknown kind
+    # must NEVER fall through to failclosed.prove as "no injection" — that would
+    # persist a spurious pass/fail verdict depending on the sample session.
+    unknown = [i for i in req.injections if i not in failclosed.VALID_INJECTIONS]
+    if unknown:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"unknown injection kind(s): {', '.join(unknown)}; "
+                f"valid: {', '.join(sorted(failclosed.VALID_INJECTIONS))}"
+            ),
+        )
+
     # Idempotent: same key -> same job (never re-run).
     if idempotency_key:
         existing = (

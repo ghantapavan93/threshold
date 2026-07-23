@@ -27,9 +27,9 @@ def _risk_for_rule_change(before: dict, after: dict) -> str | None:
         except TypeError:
             return None
         if before["op"] == "in":
-            if aset > bset:  # more values now match -> more eligible
+            if aset - bset:  # any newly-matching value -> more eligible (incl. add+remove swaps)
                 return "eligibility_widened"
-        elif aset < bset:  # include_is_not_in / exclude_is_in: shorter list -> fewer excluded
+        elif bset - aset:  # include_is_not_in / exclude_is_in: any value dropped -> fewer excluded
             return "eligibility_widened"
         return None
     return None
