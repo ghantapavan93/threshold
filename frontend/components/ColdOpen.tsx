@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { logAction } from "@/lib/story-log";
 
 /* The playable cold-open — a cinematic layer ABOVE the console, not a game skin.
    The reviewer confirms a real-looking checkout, is told a policy change is
@@ -91,6 +92,7 @@ export function ColdOpen() {
   };
 
   const approve = () => {
+    logAction("approved_without_inspection");
     setStage("fallout");
     // Flip the 21 widened sessions crimson in a staggered wave.
     for (let k = 1; k <= WIDENED.size; k++) {
@@ -196,7 +198,7 @@ export function ColdOpen() {
                     </button>
                     <button
                       type="button"
-                      onClick={dismiss}
+                      onClick={() => { logAction("inspect_first"); dismiss(); }}
                       className="press rounded-lg px-4 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                       style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
                     >
@@ -242,7 +244,7 @@ export function ColdOpen() {
 
                   <button
                     type="button"
-                    onClick={dismiss}
+                    onClick={() => { logAction("rewound"); dismiss(); }}
                     className="press mt-6 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-glow-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                     style={{ backgroundColor: "var(--c-teal)", color: "#04110d" }}
                   >

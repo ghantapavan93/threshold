@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
 import { useReducedMotion } from "framer-motion";
+import { logAction } from "@/lib/story-log";
 
 /* Silent widening, as physics. A representative SAMPLE of the replay drops into two
    bins split by the eligibility boundary: known-value sessions settle the same
@@ -149,7 +150,7 @@ export function SilentWidening() {
               type="button"
               role="radio"
               aria-checked={policy === v}
-              onClick={() => setPolicy(v)}
+              onClick={() => { if (v === "V18") logAction("watched_widening"); setPolicy(v); }}
               className="px-4 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
               style={
                 policy === v

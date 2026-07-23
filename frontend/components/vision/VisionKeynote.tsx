@@ -16,6 +16,7 @@ import { ScaleChamber } from "@/components/scenes/ScaleChamber";
 import { EvidenceForge } from "@/components/scenes/EvidenceForge";
 import { WarRoom } from "@/components/scenes/WarRoom";
 import { BuilderReceipt } from "@/components/scenes/BuilderReceipt";
+import { DecisionNotebook } from "@/components/scenes/DecisionNotebook";
 import { GovernanceVault } from "@/components/scenes/GovernanceVault";
 import { PathChooser } from "@/components/scenes/PathChooser";
 // Matter.js physics is client-only; keep it out of the server bundle and initial paint.
@@ -1180,6 +1181,24 @@ function InteractiveScenes() {
       <Reveal delay={0.05}>
         <div className="mt-8">
           <GovernanceVault />
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <MaskedLines
+          as="h2"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          lines={["The decision notebook."]}
+        />
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
+          The engineering reasoning in the open — problem, invariants, architecture, decision records,
+          rejected alternatives, threat model, the test/proof map, measured results, limitations, and the
+          path to production. Nothing here claims private Rokt knowledge or unproven impact.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="mt-8">
+          <DecisionNotebook />
         </div>
       </Reveal>
 

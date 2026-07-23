@@ -1,5 +1,7 @@
 "use client";
 
+import { useStoryLog, ACTION_LABELS } from "@/lib/story-log";
+
 /* The Builder Evidence Receipt — not a generic "skills" section, but a receipt of
    the session the prototype just walked the reviewer through, with each line
    mapped to what the role actually needs. Far more memorable than claiming
@@ -21,16 +23,8 @@ const LINES: { k: string; v: string; tone?: string }[] = [
   { k: "Release outcome", v: "eligible only after correction + controlled measurement" },
 ];
 
-const MAPS: { skill: string; from: string }[] = [
-  { skill: "Product reasoning", from: "framed a checkout-safety problem, not a feature" },
-  { skill: "Full-stack execution", from: "deterministic engine + live console + 3D scenes" },
-  { skill: "Failure handling", from: "fail-closed, contained, dedupe-on-retry" },
-  { skill: "AI supervision", from: "proposals generated, evidence decided what survived" },
-  { skill: "Observability", from: "one correlated view; Healthy/Degraded/Recovering" },
-  { skill: "Experiment discipline", from: "safety ≠ lift; hands off to a Would-Have-Seen holdout" },
-];
-
 export function BuilderReceipt() {
+  const actions = useStoryLog();
   return (
     <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
       {/* the receipt */}
@@ -58,19 +52,27 @@ export function BuilderReceipt() {
         </p>
       </div>
 
-      {/* what it maps to */}
+      {/* what YOU actually did — recorded live from the story log */}
       <div className="rounded-xl border border-border bg-surface/50 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-teal">What you just watched me do</p>
-        <ul className="mt-3 space-y-2.5">
-          {MAPS.map((m) => (
-            <li key={m.skill} className="text-sm">
-              <span className="font-semibold text-text">{m.skill}</span>
-              <span className="text-muted"> — {m.from}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-[11px] leading-relaxed text-muted">
-          Not a list of skills — a receipt of proof you created by using the product.
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-teal">This session · what you did</p>
+        {actions.length === 0 ? (
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            Nothing logged yet. Approve or inspect the change, open an affected session, inject a failure,
+            trace the machine — and your actual moves appear here, in order.
+          </p>
+        ) : (
+          <ol className="mt-3 space-y-2">
+            {actions.map((a, i) => (
+              <li key={a} className="flex gap-2.5 text-sm">
+                <span className="shrink-0 font-mono text-[11px] text-teal">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-text">{ACTION_LABELS[a]}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+        <p className="mt-4 border-t border-border/60 pt-3 text-[11px] leading-relaxed text-muted">
+          Not a list of skills — a receipt of the proof you created by using the product. It maps to product
+          reasoning, full-stack execution, failure handling, AI supervision, observability, and experiment discipline.
         </p>
       </div>
     </div>

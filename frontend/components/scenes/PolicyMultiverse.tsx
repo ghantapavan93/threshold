@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { logAction } from "@/lib/story-log";
 
 /* The Policy Multiverse — the iconic scene. One field of 200 replayed sessions,
    two policies. Drag the divider and the same sessions decide differently: on the
@@ -80,7 +81,11 @@ export function PolicyMultiverse() {
 
   // A widened cell is clickable only where the V18 side is visible (right of pct).
   const pickCell = (i: number) => {
-    if (WIDENED_SET.has(i) && colPct(i) >= pct) setPicked(i);
+    if (WIDENED_SET.has(i) && colPct(i) >= pct) {
+      logAction("inspected_v17_v18");
+      logAction("opened_affected_session");
+      setPicked(i);
+    }
   };
 
   return (

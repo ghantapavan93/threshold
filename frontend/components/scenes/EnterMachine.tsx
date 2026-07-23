@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { logAction } from "@/lib/story-log";
 
 /* Enter the Machine — follow one transaction through the whole system and watch
    every layer stay aligned to the same moment. Scrub the timeline; each component
@@ -104,7 +105,7 @@ export function EnterMachine() {
             <button
               key={l.key}
               type="button"
-              onClick={() => setLens(l.key)}
+              onClick={() => { logAction("traced_the_machine"); setLens(l.key); }}
               className="rounded-full border px-3 py-1 text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
               style={
                 active

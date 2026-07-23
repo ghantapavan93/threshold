@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { logAction } from "@/lib/story-log";
 
 /* The failure "boss battle" — no points, no health bars, just an adversarial
    challenge: break the optional experience without breaking the transaction. The
@@ -32,7 +33,7 @@ export function FailureBattle() {
           <button
             key={a.key}
             type="button"
-            onClick={() => setAttack(a.key)}
+            onClick={() => { logAction("injected_failure"); setAttack(a.key); }}
             className="press rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-crimson"
             style={
               attack === a.key

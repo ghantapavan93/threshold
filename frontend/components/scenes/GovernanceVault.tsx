@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { logAction } from "@/lib/story-log";
 
 /* The Governance Vault — who is allowed to change customer behaviour, and how we
    prove it. A policy version earns trust through a fixed, signed lifecycle. Each
@@ -69,7 +70,7 @@ export function GovernanceVault() {
               />
               <button
                 type="button"
-                onClick={() => setOpen(isOpen ? null : i)}
+                onClick={() => { logAction("reviewed_governance"); setOpen(isOpen ? null : i); }}
                 aria-expanded={isOpen}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-surface-2/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal"
               >
