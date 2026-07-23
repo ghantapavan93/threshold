@@ -117,6 +117,21 @@ button,
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Tactile hover-lift for interactive cards — a small rise + soft shadow, only on
+   fine-pointer/hover devices so a touch tap never leaves a card hovering. */
+.lift {
+  transition:
+    transform 0.22s var(--ease-out-quart, ease),
+    box-shadow 0.22s var(--ease-out-quart, ease),
+    border-color 0.22s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift, 0 24px 60px -26px rgba(3, 8, 22, 0.6));
+  }
+}
+
 body {
   font-family: theme("fontFamily.sans");
   -webkit-font-smoothing: antialiased;

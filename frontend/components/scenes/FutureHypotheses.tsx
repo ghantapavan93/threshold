@@ -37,7 +37,7 @@ export function FutureHypotheses() {
   return (
     <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2">
       {CARDS.map((c) => (
-        <div key={c.title} className="flex flex-col rounded-2xl border border-border bg-surface/40 p-5">
+        <div key={c.title} className="lift flex flex-col rounded-2xl border border-border bg-surface/40 p-5">
           <div className="mb-2 flex items-center justify-between gap-2">
             <span className="font-mono text-[10px] uppercase tracking-wide" style={{ color: "var(--c-muted)" }}>
               {c.grounding}
