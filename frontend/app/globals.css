@@ -150,6 +150,33 @@ button,
   .spotlight:hover::before {
     opacity: 1;
   }
+  /* Cursor-reactive gradient BORDER — a 1px ring that brightens teal where it's
+     nearest the pointer (mask cuts out the interior, leaving only the edge). Pairs
+     with the fill glow above for a premium double-highlight on the signature cards. */
+  .spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: radial-gradient(
+      170px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--c-teal) 75%, transparent),
+      transparent 55%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .spotlight:hover::after {
+    opacity: 1;
+  }
 }
 
 /* Tactile hover-lift for interactive cards — a small rise + soft shadow, only on
