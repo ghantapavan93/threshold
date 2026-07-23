@@ -1196,7 +1196,7 @@ function InteractiveScenes() {
       <Reveal>
         <MaskedLines
           as="h2"
-          className="mt-4 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
+          className="mt-20 max-w-3xl text-2xl font-semibold tracking-tight sm:text-3xl"
           lines={["Where it could go next."]}
         />
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
