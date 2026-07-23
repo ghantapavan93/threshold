@@ -102,6 +102,21 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  /* anchor jumps (#break-it, #scenes-title, …) clear the sticky header */
+  scroll-padding-top: 5rem;
+  /* Firefox scrollbar — match the thin, tinted webkit one below */
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border-strong) transparent;
+}
+
+/* No grey tap-flash on touch — buttons/links get their own :active states */
+a,
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: theme("fontFamily.sans");
   -webkit-font-smoothing: antialiased;
@@ -193,12 +208,15 @@ p {
 
 /* Thin, unobtrusive scrollbars for the dense console feel. */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--c-border-strong);
-  border-radius: 6px;
+  border-radius: 8px;
+  /* a 2px transparent border + padding-box clip gives a delicate inset thumb */
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
